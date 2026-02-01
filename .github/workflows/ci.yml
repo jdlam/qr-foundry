@@ -54,6 +54,8 @@ jobs:
   build:
     name: Build (${{ matrix.platform }})
     needs: checks
+    # Only run builds on pushes to main, not on PRs
+    if: github.event_name == 'push'
     strategy:
       fail-fast: false
       matrix:
