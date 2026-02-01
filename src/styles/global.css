@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* Theme configuration using Tailwind v4 @theme directive */
+@theme {
+  /* Colors */
+  --color-bg: #0c0c10;
+  --color-surface: #141419;
+  --color-surface-hover: #1c1c24;
+  --color-border: #252530;
+  --color-border-light: #2a2a38;
+  --color-text: #e8e8ed;
+  --color-muted: #8888a0;
+  --color-dim: #555568;
+  --color-accent: #f59e0b;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+
+  /* Fonts */
+  --font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+/* CSS variables for JavaScript access */
+:root {
+  --bg: #0c0c10;
+  --surface: #141419;
+  --surface-hover: #1c1c24;
+  --border: #252530;
+  --border-light: #2a2a38;
+  --text: #e8e8ed;
+  --text-muted: #8888a0;
+  --text-dim: #555568;
+  --accent: #f59e0b;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+/* Base styles */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-light);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Input placeholder */
+::placeholder {
+  color: var(--text-dim);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
