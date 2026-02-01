@@ -213,24 +213,24 @@ describe('formatPhone', () => {
 describe('formatGeo', () => {
   it('formats geo coordinates', () => {
     const result = formatGeo({
-      latitude: 37.7749,
-      longitude: -122.4194,
+      latitude: '37.7749',
+      longitude: '-122.4194',
     });
     expect(result).toBe('geo:37.7749,-122.4194');
   });
 
   it('handles negative coordinates', () => {
     const result = formatGeo({
-      latitude: -33.8688,
-      longitude: 151.2093,
+      latitude: '-33.8688',
+      longitude: '151.2093',
     });
     expect(result).toBe('geo:-33.8688,151.2093');
   });
 
   it('handles zero coordinates', () => {
     const result = formatGeo({
-      latitude: 0,
-      longitude: 0,
+      latitude: '0',
+      longitude: '0',
     });
     expect(result).toBe('geo:0,0');
   });

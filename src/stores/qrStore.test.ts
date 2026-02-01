@@ -173,13 +173,14 @@ describe('qrStore', () => {
         src: 'data:image/png;base64,abc',
         size: 0.2,
         margin: 5,
+        shape: 'square' as const,
       };
       useQrStore.getState().setLogo(logo);
       expect(useQrStore.getState().logo).toEqual(logo);
     });
 
     it('setLogo can clear logo', () => {
-      useQrStore.getState().setLogo({ src: 'test', size: 0.2, margin: 5 });
+      useQrStore.getState().setLogo({ src: 'test', size: 0.2, margin: 5, shape: 'square' as const });
       useQrStore.getState().setLogo(null);
       expect(useQrStore.getState().logo).toBeNull();
     });
@@ -253,7 +254,7 @@ describe('qrStore', () => {
     });
 
     it('includes logo when set', () => {
-      useQrStore.getState().setLogo({ src: 'test', size: 0.2, margin: 5 });
+      useQrStore.getState().setLogo({ src: 'test', size: 0.2, margin: 5, shape: 'square' as const });
       const style = useQrStore.getState().getStyle();
       expect(style.logo).toBeDefined();
     });
@@ -267,7 +268,7 @@ describe('qrStore', () => {
       useQrStore.getState().setDotStyle('square');
       useQrStore.getState().setForeground('#ff0000');
       useQrStore.getState().setUseGradient(true);
-      useQrStore.getState().setLogo({ src: 'test', size: 0.2, margin: 5 });
+      useQrStore.getState().setLogo({ src: 'test', size: 0.2, margin: 5, shape: 'square' as const });
       useQrStore.setState({ validationState: 'pass' });
 
       // Reset
