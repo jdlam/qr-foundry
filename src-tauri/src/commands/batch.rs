@@ -54,6 +54,15 @@ pub struct BatchGenerateResult {
     pub error: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BatchSaveFilesResult {
+    pub success: bool,
+    pub directory: Option<String>,
+    pub files_saved: usize,
+    pub error: Option<String>,
+}
+
 /// Parse a CSV file and return batch items
 #[tauri::command]
 pub async fn batch_parse_csv(file_path: String) -> Result<BatchParseResult, String> {
@@ -323,6 +332,93 @@ pub async fn pick_csv_file(app: tauri::AppHandle) -> Result<Option<String>, Stri
         Some(path) => Ok(Some(path.as_path().unwrap().to_string_lossy().to_string())),
         None => Ok(None),
     }
+}
+
+/// Save batch QR codes as individual files to a directory
+#[tauri::command]
+pub async fn batch_save_files(
+    app: tauri::AppHandle,
+    items: Vec<BatchGenerateItem>,
+    format: String, // "png" or "svg"
+    base_name: String,
+) -> Result<BatchSaveFilesResult, String> {
+    // Show directory picker
+    let dir_path = app.dialog().file().blocking_pick_folder();
+
+    let directory = match dir_path {
+        Some(path) => path.as_path().unwrap().to_path_buf(),
+        None => {
+            return Ok(BatchSaveFilesResult {
+                success: false,
+                directory: None,
+                files_saved: 0,
+                error: Some("Save cancelled by user".to_string()),
+            });
+        }
+    };
+
+    let extension = if format == "svg" { "svg" } else { "png" };
+    let mut files_saved = 0;
+
+    for (index, item) in items.iter().enumerate() {
+        // Generate filename with suffix
+        let filename = if items.len() == 1 {
+            format!("{}.{}", sanitize_filename(&base_name), extension)
+        } else {
+            format!("{}-{}.{}", sanitize_filename(&base_name), index + 1, extension)
+        };
+
+        let file_path = directory.join(&filename);
+
+        // Handle SVG (text) vs PNG (binary)
+        if format == "svg" {
+            // SVG data is passed as plain text or data URL
+            let svg_content = if item.image_data.starts_with("data:") {
+                // Extract content after the comma in data URL
+                item.image_data
+                    .split(',')
+                    .nth(1)
+                    .map(|s| {
+                        // SVG data URLs are typically URL-encoded or base64
+                        if item.image_data.contains("base64") {
+                            String::from_utf8(STANDARD.decode(s).unwrap_or_default())
+                                .unwrap_or_default()
+                        } else {
+                            urlencoding::decode(s).unwrap_or_default().to_string()
+                        }
+                    })
+                    .unwrap_or_default()
+            } else {
+                item.image_data.clone()
+            };
+
+            fs::write(&file_path, svg_content)
+                .map_err(|e| format!("Failed to write {}: {}", filename, e))?;
+        } else {
+            // PNG - decode base64
+            let base64_data = if item.image_data.contains(",") {
+                item.image_data.split(",").nth(1).unwrap_or(&item.image_data)
+            } else {
+                &item.image_data
+            };
+
+            let image_bytes = STANDARD
+                .decode(base64_data)
+                .map_err(|e| format!("Failed to decode image {}: {}", index + 1, e))?;
+
+            fs::write(&file_path, image_bytes)
+                .map_err(|e| format!("Failed to write {}: {}", filename, e))?;
+        }
+
+        files_saved += 1;
+    }
+
+    Ok(BatchSaveFilesResult {
+        success: true,
+        directory: Some(directory.to_string_lossy().to_string()),
+        files_saved,
+        error: None,
+    })
 }
 
 fn detect_qr_type(content: &str) -> String {

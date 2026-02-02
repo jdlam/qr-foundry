@@ -12,7 +12,8 @@ use commands::{
     template_delete, template_get, template_list, template_save, template_set_default,
     template_update,
     // Batch commands
-    batch_generate_zip, batch_parse_csv, batch_parse_csv_content, batch_validate, pick_csv_file,
+    batch_generate_zip, batch_parse_csv, batch_parse_csv_content, batch_save_files, batch_validate,
+    pick_csv_file,
 };
 use db::DbState;
 
@@ -54,6 +55,7 @@ pub fn run() {
             batch_parse_csv_content,
             batch_validate,
             batch_generate_zip,
+            batch_save_files,
             pick_csv_file,
         ])
         .run(tauri::generate_context!())

@@ -37,6 +37,13 @@ interface BatchGenerateResult {
   error: string | null;
 }
 
+interface BatchSaveFilesResult {
+  success: boolean;
+  directory: string | null;
+  filesSaved: number;
+  error: string | null;
+}
+
 export function useBatch() {
   const [items, setItems] = useState<BatchItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,10 +55,12 @@ export function useBatch() {
   );
 
   const parseCsvFile = useCallback(async (filePath: string): Promise<boolean> => {
+    console.log('[useBatch] parseCsvFile called with:', filePath);
     setIsParsing(true);
     setParseError(null);
     try {
       const result = await invoke<BatchParseResult>('batch_parse_csv', { filePath });
+      console.log('[useBatch] parseCsvFile result:', result);
       if (result.success) {
         setItems(result.items);
         return true;
@@ -60,6 +69,7 @@ export function useBatch() {
         return false;
       }
     } catch (error) {
+      console.error('[useBatch] parseCsvFile error:', error);
       setParseError(`Failed to parse CSV: ${error}`);
       return false;
     } finally {
@@ -68,10 +78,12 @@ export function useBatch() {
   }, []);
 
   const parseCsvContent = useCallback(async (content: string): Promise<boolean> => {
+    console.log('[useBatch] parseCsvContent called, content length:', content.length);
     setIsParsing(true);
     setParseError(null);
     try {
       const result = await invoke<BatchParseResult>('batch_parse_csv_content', { content });
+      console.log('[useBatch] parseCsvContent result:', result);
       if (result.success) {
         setItems(result.items);
         return true;
@@ -80,6 +92,7 @@ export function useBatch() {
         return false;
       }
     } catch (error) {
+      console.error('[useBatch] parseCsvContent error:', error);
       setParseError(`Failed to parse CSV: ${error}`);
       return false;
     } finally {
@@ -149,6 +162,30 @@ export function useBatch() {
     []
   );
 
+  const saveFiles = useCallback(
+    async (
+      generatedItems: BatchGenerateItem[],
+      format: 'png' | 'svg',
+      baseName: string = 'qr-code'
+    ): Promise<BatchSaveFilesResult | null> => {
+      setIsGenerating(true);
+      try {
+        const result = await invoke<BatchSaveFilesResult>('batch_save_files', {
+          items: generatedItems,
+          format,
+          baseName,
+        });
+        return result;
+      } catch (error) {
+        console.error('Failed to save files:', error);
+        return null;
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    []
+  );
+
   const clearBatch = useCallback(() => {
     setItems([]);
     setParseError(null);
@@ -167,6 +204,7 @@ export function useBatch() {
     pickCsvFile,
     validateBatch,
     generateZip,
+    saveFiles,
     clearBatch,
   };
 }
