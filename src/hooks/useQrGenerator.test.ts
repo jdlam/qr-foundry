@@ -162,6 +162,7 @@ describe('useQrGenerator', () => {
         src: 'data:image/png;base64,test',
         size: 30,
         margin: 5,
+        shape: 'square',
       });
       useQrStore.getState().setContent('https://example.com');
 

@@ -70,7 +70,8 @@ describe('Preview', () => {
 
       // Check that no inline style is applied (or style doesn't contain checkerboard)
       const style = container?.getAttribute('style');
-      expect(style === null || !style.includes('linear-gradient')).toBe(true);
+      const hasCheckerboard = style ? style.includes('linear-gradient') : false;
+      expect(hasCheckerboard).toBe(false);
     });
   });
 
