@@ -23,7 +23,7 @@ npm run tauri build
 
 ## Project Structure
 
-```
+```text
 qr-foundry/
 ├── src/                    # React frontend
 │   ├── components/         # UI components by feature
@@ -45,22 +45,26 @@ qr-foundry/
 After making changes, validate using this checklist:
 
 ### Core Functionality
+
 - [x] `npm run tauri dev` starts without errors
 - [x] QR code renders in preview when content is entered
 - [x] Changing content updates preview in real-time
 - [x] Style changes (colors, dot style) reflect immediately
 
 ### Export
+
 - [x] PNG download saves valid image file
 - [ ] SVG export produces scalable vector
 - [ ] Clipboard copy works (paste into another app)
 
 ### QR Validation
+
 - [x] "Validate QR" button triggers validation
 - [x] Pass state shows green checkmark
 - [x] Large logo + low EC level triggers warn/fail
 
 ### Input Types
+
 - [x] URL: Scan opens browser
 - [ ] WiFi: Scan prompts WiFi connection
 - [ ] vCard: Scan creates contact
@@ -68,17 +72,20 @@ After making changes, validate using this checklist:
 - [ ] Email: Scan opens mail compose
 
 ### Scanner
+
 - [x] Dropping QR image decodes content
 - [ ] Clipboard paste (Cmd+V) decodes
 - [x] "Re-generate" loads content into Generator
 
 ### History & Templates
+
 - [x] Generated QRs appear in History
 - [ ] Clicking history item loads it
 - [x] Saving template preserves all style settings
 - [x] Loading template applies all styles
 
 ### Batch
+
 - [x] CSV drop parses rows correctly
 - [x] Preview gallery shows QR codes
 - [ ] Arrow keys navigate between previews
@@ -89,12 +96,14 @@ After making changes, validate using this checklist:
 - [x] Individual download works from preview
 
 ### Logo Upload
+
 - [ ] Drag-drop image sets logo
 - [x] Large images auto-resize (max 512px)
 - [x] Transparent borders auto-trimmed
 - [x] Files over 500KB auto-compressed
 
 ### Toasts
+
 - [ ] Success toast on export/copy operations
 - [ ] Success toast on history/template load
 - [ ] Error toast on failures
@@ -102,23 +111,29 @@ After making changes, validate using this checklist:
 ## Common Issues
 
 ### "Command not found" errors
+
 Ensure Rust toolchain is installed:
+
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 ### Tauri dev server won't start
+
 Check that Xcode Command Line Tools are installed (macOS):
+
 ```bash
 xcode-select --install
 ```
 
 ### QR code not rendering
+
 1. Check browser console for errors
 2. Verify qr-code-styling is imported correctly
 3. Ensure canvas element has non-zero dimensions
 
 ### Validation always fails
+
 1. Check that rqrr crate is added to Cargo.toml
 2. Ensure image is rendered at sufficient resolution (min 256px)
 3. Verify the QR content matches exactly (no trailing whitespace)
@@ -130,17 +145,20 @@ xcode-select --install
 ### Test Coverage Guidelines
 
 When modifying code, you MUST:
+
 1. **Update existing tests** if you change behavior of tested code
 2. **Add new tests** for any new functionality
 3. **Run tests before committing** to ensure nothing is broken
 
 ### Run All Tests
+
 ```bash
 # Run frontend and backend tests
 npm run test:all
 ```
 
 ### Frontend Tests (Vitest)
+
 ```bash
 # Run tests once
 npm run test
@@ -153,6 +171,7 @@ npm run test:coverage
 ```
 
 Test files are co-located with source files using `.test.ts` or `.test.tsx` suffix:
+
 - `src/lib/formatters.test.ts` - QR content formatters
 - `src/lib/imageOptimizer.test.ts` - Logo optimization
 - `src/stores/qrStore.test.ts` - QR state store
@@ -164,11 +183,13 @@ Test files are co-located with source files using `.test.ts` or `.test.tsx` suff
 - `src/components/scanner/ScannerView.test.tsx` - Scanner view
 
 ### Backend Tests (Rust)
+
 ```bash
 cd src-tauri && cargo test
 ```
 
 Tests are in `#[cfg(test)]` modules within source files:
+
 - `src/commands/batch.rs` - CSV parsing, filename sanitization
 - `src/commands/validate.rs` - QR type detection
 - `src/commands/export.rs` - Base64 handling
@@ -178,17 +199,20 @@ Tests are in `#[cfg(test)]` modules within source files:
 ### Writing Tests
 
 **Frontend (Vitest + React Testing Library):**
+
 - Use `vi.mock()` for mocking Tauri APIs and external dependencies
 - Use `renderHook()` from `@testing-library/react` for hooks
 - Use `render()` and `screen` for component tests
 - Test user interactions with `fireEvent` or `userEvent`
 
 **Backend (Rust):**
+
 - Use `#[cfg(test)]` module at end of source file
 - Use in-memory SQLite with `Connection::open_in_memory()`
 - Use `r##"..."##` for raw strings containing `#` (like hex colors)
 
 ### Manual Testing
+
 Use the validation checklist above after each change.
 
 ## Feature Flags
@@ -198,6 +222,7 @@ None currently. All features are enabled.
 ## Dependencies
 
 ### Frontend
+
 - `qr-code-styling` - QR code generation with styling
 - `jsqr` - QR code decoding
 - `zustand` - State management
@@ -206,6 +231,7 @@ None currently. All features are enabled.
 - `sonner` - Toast notifications
 
 ### Backend (Rust)
+
 - `tauri` - Desktop app framework
 - `rqrr` - QR code decoding for validation
 - `image` - Image processing

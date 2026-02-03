@@ -1,6 +1,7 @@
 # QR Foundry — Product Specification
 
 ## App Name Ideas
+
 - **QR Foundry** (craftsmanship connotation, memorable)
 - QR Mint
 - QR Press
@@ -22,6 +23,7 @@
 ## 2. Feature Set (All Included)
 
 ### QR Generation
+
 | Feature | Details |
 |---|---|
 | Input types | URL, plain text, WiFi, phone, vCard, email, SMS, geo location, calendar event |
@@ -30,6 +32,7 @@
 | Clipboard support | One-click copy to clipboard |
 
 ### Customization
+
 | Feature | Details |
 |---|---|
 | Brand colors | Foreground/background color picker |
@@ -42,6 +45,7 @@
 | Transparent background | PNG/SVG with alpha channel |
 
 ### Validation
+
 | Feature | Details |
 |---|---|
 | Built-in scan validation | Renders QR to image, decodes it back, confirms content matches — one-click verify |
@@ -51,6 +55,7 @@
 | Batch validation | Validates every code during batch generation, flags failures before export |
 
 ### Export
+
 | Feature | Details |
 |---|---|
 | PNG export | Up to 4096×4096, multiple size presets |
@@ -60,6 +65,7 @@
 | Web asset pack | Full favicon set + manifest.json + HTML meta tags |
 
 ### Power Features
+
 | Feature | Details |
 |---|---|
 | Batch generation | Import CSV → generate multiple codes at once, export as ZIP |
@@ -607,6 +613,7 @@ set_setting(key, value)       → Save setting
 ### 4.2 No Licensing Complexity
 
 Since it's a paid download with no free tier:
+
 - **Mac App Store**: Purchase = full access, handled by Apple
 - **Direct download**: Gumroad license key validated once at first launch
 - **No account required**: No sign-up, no login, no tracking
@@ -638,6 +645,7 @@ Since it's a paid download with no free tier:
 ## 5. Development Phases
 
 ### Phase 1: Core MVP (2-3 weeks) ✅ COMPLETE
+
 - [x] Tauri project scaffold with React + TypeScript
 - [x] Basic QR generation (URL, text, WiFi, phone)
 - [x] Live preview canvas
@@ -646,6 +654,7 @@ Since it's a paid download with no free tier:
 - [x] Clean, native-feeling UI
 
 ### Phase 2: Customization & Export (2-3 weeks) ✅ COMPLETE
+
 - [x] Style customization (colors, dots, eyes)
 - [x] Logo embedding with drag-drop
 - [x] Gradient fills
@@ -656,6 +665,7 @@ Since it's a paid download with no free tier:
 - [x] Transparent backgrounds
 
 ### Phase 3: Power Features (2 weeks) ✅ COMPLETE
+
 - [x] vCard, email, SMS, geo, calendar inputs
 - [x] Batch generation from CSV
 - [x] History (SQLite)
@@ -664,6 +674,7 @@ Since it's a paid download with no free tier:
 - [x] QR validation (scan and verify content matches)
 
 ### Phase 4: Distribution (1-2 weeks)
+
 - [ ] Web asset pack generator
 - [ ] Mac App Store submission (paid app, no IAP needed)
 - [ ] Auto-updater setup
@@ -671,6 +682,7 @@ Since it's a paid download with no free tier:
 - [ ] Gumroad direct download setup for Windows/Linux
 
 ### Phase 5: Marketing (ongoing)
+
 - [ ] Product Hunt launch
 - [ ] Blog posts (3-5 SEO articles)
 - [ ] Free web app version

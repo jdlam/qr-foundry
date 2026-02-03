@@ -55,6 +55,7 @@ The built application will be in `src-tauri/target/release/bundle/`.
 ## Usage
 
 ### Generator Tab
+
 1. Select your content type (URL, WiFi, vCard, etc.)
 2. Enter your content
 3. Customize the style (colors, dots, logo)
@@ -62,6 +63,7 @@ The built application will be in `src-tauri/target/release/bundle/`.
 5. Export as PNG or SVG, or copy to clipboard
 
 ### Batch Generation
+
 1. Prepare a CSV file with columns: `content`, `type`, `label`
 2. Drop the CSV file into the Batch tab
 3. Review the parsed items in the table
@@ -71,6 +73,7 @@ The built application will be in `src-tauri/target/release/bundle/`.
 7. Export as ZIP or download individual codes
 
 ### Templates
+
 1. Configure your preferred style in the Generator
 2. Go to Templates tab and click "Save Current"
 3. Name your template
@@ -86,7 +89,7 @@ The built application will be in `src-tauri/target/release/bundle/`.
 
 ## Project Structure
 
-```
+```text
 qr-foundry/
 ├── src/                    # React frontend
 │   ├── components/         # UI components
