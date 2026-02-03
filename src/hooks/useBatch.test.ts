@@ -357,6 +357,108 @@ describe('useBatch', () => {
     });
   });
 
+  describe('saveFiles', () => {
+    it('saves files successfully', async () => {
+      mockInvoke.mockResolvedValueOnce({
+        success: true,
+        directory: '/Users/test/qr-codes',
+        filesSaved: 2,
+        error: null,
+      });
+
+      const { result } = renderHook(() => useBatch());
+
+      let saveResult: unknown;
+      await act(async () => {
+        saveResult = await result.current.saveFiles(mockGenerateItems, 'png', 'qr-code');
+      });
+
+      expect(mockInvoke).toHaveBeenCalledWith('batch_save_files', {
+        items: mockGenerateItems,
+        format: 'png',
+        baseName: 'qr-code',
+      });
+      expect((saveResult as { success: boolean }).success).toBe(true);
+      expect((saveResult as { filesSaved: number }).filesSaved).toBe(2);
+      expect((saveResult as { directory: string }).directory).toBe('/Users/test/qr-codes');
+    });
+
+    it('saves SVG files', async () => {
+      mockInvoke.mockResolvedValueOnce({
+        success: true,
+        directory: '/Users/test/qr-codes',
+        filesSaved: 2,
+        error: null,
+      });
+
+      const { result } = renderHook(() => useBatch());
+
+      await act(async () => {
+        await result.current.saveFiles(mockGenerateItems, 'svg', 'my-qr');
+      });
+
+      expect(mockInvoke).toHaveBeenCalledWith('batch_save_files', {
+        items: mockGenerateItems,
+        format: 'svg',
+        baseName: 'my-qr',
+      });
+    });
+
+    it('handles cancelled save', async () => {
+      mockInvoke.mockResolvedValueOnce({
+        success: false,
+        directory: null,
+        filesSaved: 0,
+        error: 'Save cancelled by user',
+      });
+
+      const { result } = renderHook(() => useBatch());
+
+      let saveResult: unknown;
+      await act(async () => {
+        saveResult = await result.current.saveFiles(mockGenerateItems, 'png');
+      });
+
+      expect((saveResult as { success: boolean }).success).toBe(false);
+    });
+
+    it('returns null on error', async () => {
+      mockInvoke.mockRejectedValueOnce(new Error('Save failed'));
+
+      const { result } = renderHook(() => useBatch());
+
+      let saveResult: unknown = { something: true };
+      await act(async () => {
+        saveResult = await result.current.saveFiles(mockGenerateItems, 'png');
+      });
+
+      expect(saveResult).toBeNull();
+    });
+
+    it('sets isGenerating during save', async () => {
+      let resolvePromise: (value: unknown) => void;
+      const pendingPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+      mockInvoke.mockReturnValueOnce(pendingPromise as Promise<unknown>);
+
+      const { result } = renderHook(() => useBatch());
+
+      act(() => {
+        result.current.saveFiles(mockGenerateItems, 'png');
+      });
+
+      expect(result.current.isGenerating).toBe(true);
+
+      await act(async () => {
+        resolvePromise!({ success: true, directory: '/test', filesSaved: 2, error: null });
+        await pendingPromise;
+      });
+
+      expect(result.current.isGenerating).toBe(false);
+    });
+  });
+
   describe('clearBatch', () => {
     it('clears all batch state', async () => {
       mockInvoke.mockResolvedValueOnce({

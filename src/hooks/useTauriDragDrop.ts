@@ -24,18 +24,26 @@ export function useTauriDragDrop(onDrop?: DropCallback) {
   useEffect(() => {
     let unlistenPromise: Promise<() => void> | null = null;
 
+    console.log('[useTauriDragDrop] Initializing hook...');
+
     try {
       const webview = getCurrentWebviewWindow();
+      console.log('[useTauriDragDrop] Got webview:', webview ? 'yes' : 'no');
 
       unlistenPromise = webview.onDragDropEvent((event) => {
+        console.log('[useTauriDragDrop] Event received:', event.payload.type);
         if (event.payload.type === 'over') {
           setState((s) => ({ ...s, isDragging: true }));
         } else if (event.payload.type === 'leave') {
           setState((s) => ({ ...s, isDragging: false }));
         } else if (event.payload.type === 'drop') {
+          console.log('[useTauriDragDrop] Drop event - paths:', event.payload.paths);
           setState({ isDragging: false, droppedFiles: event.payload.paths });
           if (callbackRef.current) {
+            console.log('[useTauriDragDrop] Calling callback with paths:', event.payload.paths);
             callbackRef.current(event.payload.paths);
+          } else {
+            console.log('[useTauriDragDrop] No callback registered!');
           }
         }
       });

@@ -5,6 +5,7 @@ import { useQrStore } from '../../stores/qrStore';
 import { useTauriDragDrop } from '../../hooks/useTauriDragDrop';
 
 type ItemStatus = 'pending' | 'generating' | 'done' | 'error';
+type ExportFormat = 'png' | 'svg';
 
 interface BatchItemWithStatus extends BatchItem {
   status: ItemStatus;
@@ -18,19 +19,23 @@ export function BatchView() {
     isParsing,
     isGenerating,
     parseError,
-    validationResults,
     parseCsvContent,
     pickCsvFile,
     parseCsvFile,
     generateZip,
+    validateBatch,
     clearBatch,
   } = useBatch();
 
   const [itemsWithStatus, setItemsWithStatus] = useState<BatchItemWithStatus[]>([]);
   const [isHtmlDragging, setIsHtmlDragging] = useState(false);
   const [generateProgress, setGenerateProgress] = useState(0);
-  const [validateOnGenerate, setValidateOnGenerate] = useState(true);
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
+  const [generatedItems, setGeneratedItems] = useState<BatchGenerateItem[]>([]);
+  const [isLocalGenerating, setIsLocalGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const generatingRef = useRef<Set<number>>(new Set());
 
   const store = useQrStore();
 
@@ -58,11 +63,51 @@ export function BatchView() {
         status: 'pending' as ItemStatus,
       }))
     );
+    setPreviewIndex(0);
+    setGeneratedItems([]);
+    generatingRef.current.clear();
   }, [items]);
+
+  // Preview navigation
+  const currentPreviewItem = itemsWithStatus[previewIndex] || null;
+  const canGoPrev = previewIndex > 0;
+  const canGoNext = previewIndex < itemsWithStatus.length - 1;
+
+  const goToPrevItem = useCallback(() => {
+    if (canGoPrev) setPreviewIndex((i) => i - 1);
+  }, [canGoPrev]);
+
+  const goToNextItem = useCallback(() => {
+    if (canGoNext) setPreviewIndex((i) => i + 1);
+  }, [canGoNext]);
+
+  const selectPreviewItem = useCallback((index: number) => {
+    setPreviewIndex(index);
+  }, []);
+
+  // Keyboard navigation for preview
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (itemsWithStatus.length === 0) return;
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (canGoPrev) setPreviewIndex((i) => i - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (canGoNext) setPreviewIndex((i) => i + 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [itemsWithStatus.length, canGoPrev, canGoNext]);
 
   const handleFileDrop = useCallback(
     async (file: File) => {
+      console.log('[BatchView] handleFileDrop called with file:', file.name, 'type:', file.type);
       const text = await file.text();
+      console.log('[BatchView] File content length:', text.length, 'preview:', text.substring(0, 100));
       await parseCsvContent(text);
     },
     [parseCsvContent]
@@ -74,8 +119,12 @@ export function BatchView() {
       setIsHtmlDragging(false);
 
       const file = e.dataTransfer.files[0];
+      console.log('[BatchView] Dropped file:', file?.name, 'files count:', e.dataTransfer.files.length);
       if (file && (file.name.endsWith('.csv') || file.name.endsWith('.txt'))) {
+        console.log('[BatchView] Valid CSV file from HTML drop');
         handleFileDrop(file);
+      } else {
+        console.log('[BatchView] Invalid file from HTML drop');
       }
     },
     [handleFileDrop]
@@ -102,12 +151,12 @@ export function BatchView() {
   );
 
   const generateQrForItem = useCallback(
-    async (item: BatchItemWithStatus): Promise<string | null> => {
+    async (item: BatchItemWithStatus, format: ExportFormat): Promise<string | null> => {
       return new Promise((resolve) => {
         const qr = new QRCodeStyling({
           width: store.exportSize,
           height: store.exportSize,
-          type: 'canvas',
+          type: format === 'svg' ? 'svg' : 'canvas',
           data: item.content,
           margin: 10,
           qrOptions: {
@@ -126,25 +175,28 @@ export function BatchView() {
             color: store.foreground,
           },
           backgroundOptions: store.transparentBg
-            ? undefined
+            ? { color: 'transparent' }
             : { color: store.background },
-          image: store.logo?.src,
-          imageOptions: store.logo
+          // Only include image options when there's a logo to avoid library errors
+          ...(store.logo?.src
             ? {
-                hideBackgroundDots: true,
-                imageSize: store.logo.size / 100,
-                margin: store.logo.margin,
+                image: store.logo.src,
+                imageOptions: {
+                  hideBackgroundDots: true,
+                  imageSize: store.logo.size / 100,
+                  margin: store.logo.margin,
+                },
               }
-            : undefined,
+            : {}),
         });
 
-        qr.getRawData('png').then((blob) => {
+        qr.getRawData(format).then((blob) => {
           if (!blob) {
             resolve(null);
             return;
           }
 
-          // Convert to base64
+          // Convert to base64/data URL
           const actualBlob = blob instanceof Blob ? blob : new Blob([blob]);
           const reader = new FileReader();
           reader.onloadend = () => {
@@ -157,77 +209,165 @@ export function BatchView() {
     [store]
   );
 
-  const handleGenerate = useCallback(async () => {
+  // Auto-generate QR code for current preview item
+  useEffect(() => {
+    const item = itemsWithStatus[previewIndex];
+    if (!item) return;
+    if (item.imageData) return;
+    if (item.status === 'generating') return;
+    if (generatingRef.current.has(previewIndex)) return;
+
+    generatingRef.current.add(previewIndex);
+
+    // Mark as generating
+    setItemsWithStatus((current) =>
+      current.map((it, idx) =>
+        idx === previewIndex ? { ...it, status: 'generating' as ItemStatus } : it
+      )
+    );
+
+    // Generate the QR code for preview (always use PNG for preview)
+    generateQrForItem(item, 'png')
+      .then((imageData) => {
+        setItemsWithStatus((prev) =>
+          prev.map((it, idx) =>
+            idx === previewIndex
+              ? {
+                  ...it,
+                  status: imageData ? ('done' as ItemStatus) : ('error' as ItemStatus),
+                  imageData: imageData || undefined,
+                  error: imageData ? undefined : 'Failed to generate',
+                }
+              : it
+          )
+        );
+      })
+      .catch((error) => {
+        console.error('Failed to generate preview QR:', error);
+        setItemsWithStatus((prev) =>
+          prev.map((it, idx) =>
+            idx === previewIndex
+              ? { ...it, status: 'error' as ItemStatus, error: 'Failed to generate' }
+              : it
+          )
+        );
+      })
+      .finally(() => {
+        generatingRef.current.delete(previewIndex);
+      });
+  }, [previewIndex, itemsWithStatus, generateQrForItem]);
+
+  // Generate all QR codes with validation
+  const handleGenerateAll = useCallback(async () => {
     if (itemsWithStatus.length === 0) return;
 
+    setIsLocalGenerating(true);
     setGenerateProgress(0);
-    const generatedItems: BatchGenerateItem[] = [];
+    const generated: BatchGenerateItem[] = [];
     const updatedItems = [...itemsWithStatus];
 
-    // Generate QR codes for each item
-    for (let i = 0; i < updatedItems.length; i++) {
-      const item = updatedItems[i];
-      updatedItems[i] = { ...item, status: 'generating' };
-      setItemsWithStatus([...updatedItems]);
+    try {
+      // Step 1: Generate all QR codes
+      for (let i = 0; i < updatedItems.length; i++) {
+        const item = updatedItems[i];
+        updatedItems[i] = { ...item, status: 'generating' };
+        setItemsWithStatus([...updatedItems]);
 
-      const imageData = await generateQrForItem(item);
+        try {
+          const imageData = await generateQrForItem(item, exportFormat);
 
-      if (imageData) {
-        updatedItems[i] = { ...item, status: 'done', imageData };
-        generatedItems.push({
-          row: item.row,
-          content: item.content,
-          label: item.label,
-          imageData,
-        });
-      } else {
-        updatedItems[i] = { ...item, status: 'error', error: 'Failed to generate' };
+          if (imageData) {
+            updatedItems[i] = { ...item, status: 'done', imageData };
+            generated.push({
+              row: item.row,
+              content: item.content,
+              label: item.label,
+              imageData,
+            });
+          } else {
+            updatedItems[i] = { ...item, status: 'error', error: 'Failed to generate' };
+          }
+        } catch (error) {
+          console.error(`Failed to generate QR for row ${item.row}:`, error);
+          updatedItems[i] = { ...item, status: 'error', error: 'Failed to generate' };
+        }
+
+        setItemsWithStatus([...updatedItems]);
+        setGenerateProgress(((i + 1) / updatedItems.length) * 100);
       }
 
-      setItemsWithStatus([...updatedItems]);
-      setGenerateProgress(((i + 1) / updatedItems.length) * 100);
-    }
+      // Step 2: Validate all generated QR codes
+      if (generated.length > 0) {
+        try {
+          const validationResults = await validateBatch(generated);
 
-    // Generate ZIP with optional validation
-    if (generatedItems.length > 0) {
-      const result = await generateZip(generatedItems, validateOnGenerate);
-      if (result?.success) {
-        // Update status with validation results
-        if (result.validationResults.length > 0) {
-          const finalItems = updatedItems.map((item) => {
-            const validation = result.validationResults.find((v) => v.row === item.row);
-            if (validation && !validation.success) {
-              return { ...item, status: 'error' as ItemStatus, error: validation.error || 'Validation failed' };
-            }
-            return item;
-          });
-          setItemsWithStatus(finalItems);
+          // Update items with validation results
+          setItemsWithStatus((current) =>
+            current.map((item) => {
+              const validation = validationResults.find((v) => v.row === item.row);
+              if (validation) {
+                if (!validation.success) {
+                  return {
+                    ...item,
+                    status: 'error' as ItemStatus,
+                    error: validation.error || 'Validation failed',
+                  };
+                } else if (!validation.contentMatch) {
+                  return {
+                    ...item,
+                    status: 'error' as ItemStatus,
+                    error: 'Content mismatch',
+                  };
+                }
+              }
+              return item;
+            })
+          );
+        } catch (error) {
+          console.error('Failed to validate batch:', error);
         }
       }
-    }
-  }, [itemsWithStatus, generateQrForItem, generateZip, validateOnGenerate]);
 
-  const getStatusIcon = (status: ItemStatus, row: number) => {
-    const validation = validationResults.get(row);
-
-    if (validation) {
-      if (validation.success) return <span className="text-success">✓</span>;
-      return <span className="text-danger">✕</span>;
+      setGeneratedItems(generated);
+    } finally {
+      setIsLocalGenerating(false);
     }
+  }, [itemsWithStatus, generateQrForItem, exportFormat, validateBatch]);
 
-    switch (status) {
-      case 'pending':
-        return <span className="text-dim">○</span>;
-      case 'generating':
-        return (
-          <span className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin inline-block" />
-        );
-      case 'done':
-        return <span className="text-success">✓</span>;
-      case 'error':
-        return <span className="text-danger">✕</span>;
+  // Export as ZIP (uses already generated items)
+  const handleExportZip = useCallback(async () => {
+    if (generatedItems.length === 0) return;
+
+    const result = await generateZip(generatedItems, false);
+    if (result?.success) {
+      console.log('ZIP exported successfully');
     }
-  };
+  }, [generatedItems, generateZip]);
+
+  // Download individual QR code
+  const handleDownloadCurrent = useCallback(async () => {
+    if (!currentPreviewItem?.imageData) return;
+
+    // Create download link
+    const link = document.createElement('a');
+    link.href = currentPreviewItem.imageData;
+    const filename = currentPreviewItem.label
+      ? `${currentPreviewItem.label}.${exportFormat}`
+      : `qr-code-${currentPreviewItem.row}.${exportFormat}`;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [currentPreviewItem, exportFormat]);
+
+  const handleClear = useCallback(() => {
+    clearBatch();
+    setGeneratedItems([]);
+    setGenerateProgress(0);
+  }, [clearBatch]);
+
+  const allGenerated = generatedItems.length > 0 && generatedItems.length === itemsWithStatus.length;
+  const isProcessing = isLocalGenerating || isGenerating;
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -296,17 +436,21 @@ export function BatchView() {
                   <th className="p-2 font-medium">#</th>
                   <th className="p-2 font-medium">Content</th>
                   <th className="p-2 font-medium">Type</th>
-                  <th className="p-2 font-medium text-center">Status</th>
                 </tr>
               </thead>
               <tbody>
-                {itemsWithStatus.map((item) => (
+                {itemsWithStatus.map((item, index) => (
                   <tr
                     key={item.row}
-                    className="border-t border-border hover:bg-surface-hover"
+                    onClick={() => selectPreviewItem(index)}
+                    className={`border-t border-border cursor-pointer transition-colors ${
+                      index === previewIndex
+                        ? 'bg-accent/10 hover:bg-accent/15'
+                        : 'hover:bg-surface-hover'
+                    }`}
                   >
                     <td className="p-2 text-dim">{item.row}</td>
-                    <td className="p-2 font-mono truncate max-w-[120px]" title={item.content}>
+                    <td className="p-2 font-mono truncate max-w-[140px]" title={item.content}>
                       {item.content}
                     </td>
                     <td className="p-2">
@@ -314,7 +458,6 @@ export function BatchView() {
                         {item.qrType}
                       </span>
                     </td>
-                    <td className="p-2 text-center">{getStatusIcon(item.status, item.row)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -325,29 +468,64 @@ export function BatchView() {
         {/* Actions */}
         {itemsWithStatus.length > 0 && (
           <div className="p-4 border-t border-border space-y-3">
-            <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
-              <input
-                type="checkbox"
-                checked={validateOnGenerate}
-                onChange={(e) => setValidateOnGenerate(e.target.checked)}
-                className="accent-accent"
-              />
-              Validate QR codes
-            </label>
+            {/* Format Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted">Format:</span>
+              <div className="flex gap-1 flex-1">
+                <button
+                  onClick={() => setExportFormat('png')}
+                  disabled={isProcessing}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                    exportFormat === 'png'
+                      ? 'bg-accent/20 text-accent border border-accent/50'
+                      : 'bg-surface-hover border border-border text-muted hover:text-text'
+                  } disabled:opacity-50`}
+                >
+                  PNG
+                </button>
+                <button
+                  onClick={() => setExportFormat('svg')}
+                  disabled={isProcessing}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                    exportFormat === 'svg'
+                      ? 'bg-accent/20 text-accent border border-accent/50'
+                      : 'bg-surface-hover border border-border text-muted hover:text-text'
+                  } disabled:opacity-50`}
+                >
+                  SVG
+                </button>
+              </div>
+            </div>
 
+            {/* Generate Button */}
             <button
-              onClick={handleGenerate}
-              disabled={isGenerating}
+              onClick={handleGenerateAll}
+              disabled={isProcessing}
               className="w-full py-2.5 bg-accent/20 border border-accent/50 text-accent rounded-lg text-sm font-semibold hover:bg-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isGenerating
-                ? `Generating... ${Math.round(generateProgress)}%`
-                : `Generate ${itemsWithStatus.length} QR Codes`}
+              {isLocalGenerating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                  Generating...
+                </span>
+              ) : (
+                'Generate All'
+              )}
+            </button>
+
+            {/* Export ZIP Button */}
+            <button
+              onClick={handleExportZip}
+              disabled={!allGenerated || isProcessing}
+              className="w-full py-2.5 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Export as ZIP
             </button>
 
             <button
-              onClick={clearBatch}
-              className="w-full py-2 text-xs text-muted hover:text-text border border-border rounded-lg hover:bg-surface-hover transition-colors"
+              onClick={handleClear}
+              disabled={isProcessing}
+              className="w-full py-2 text-xs text-muted hover:text-text border border-border rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
             >
               Clear
             </button>
@@ -355,7 +533,7 @@ export function BatchView() {
         )}
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel - Preview */}
       <div
         className="flex-1 flex flex-col items-center justify-center p-6"
         style={{
@@ -364,68 +542,107 @@ export function BatchView() {
         }}
       >
         {itemsWithStatus.length > 0 ? (
-          <div className="text-center max-w-lg">
-            <div className="text-5xl mb-4">▤</div>
-            <div className="text-lg text-text font-semibold mb-2">
-              {itemsWithStatus.length} items loaded
-            </div>
-            <div className="text-sm text-muted mb-4">
-              {itemsWithStatus.filter((i) => i.status === 'done').length} generated
-              {validateOnGenerate && (
-                <>
-                  {' • '}
-                  {
-                    [...validationResults.values()].filter((v) => v.success).length
-                  }{' '}
-                  validated
-                </>
-              )}
-            </div>
-
-            {isGenerating && (
-              <div className="w-full max-w-xs mx-auto">
+          <div className="flex flex-col items-center max-w-lg w-full">
+            {/* Progress bar when generating */}
+            {isLocalGenerating && (
+              <div className="w-full max-w-xs mb-6">
                 <div className="h-2 bg-surface rounded-full overflow-hidden">
                   <div
                     className="h-full bg-accent transition-all duration-300"
                     style={{ width: `${generateProgress}%` }}
                   />
                 </div>
-                <div className="text-xs text-muted mt-2">
-                  Generating QR codes and saving ZIP...
-                </div>
               </div>
             )}
 
-            {/* Preview of first few items */}
-            <div className="grid grid-cols-4 gap-2 mt-6">
-              {itemsWithStatus.slice(0, 8).map((item) => (
-                <div
-                  key={item.row}
-                  className="aspect-square bg-surface rounded-lg border border-border flex items-center justify-center text-[10px] text-dim overflow-hidden"
-                >
-                  {item.imageData ? (
-                    <img
-                      src={item.imageData}
-                      alt={`QR ${item.row}`}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    `#${item.row}`
-                  )}
+            {/* Gallery Navigation */}
+            <div className="flex items-center gap-4 w-full justify-center">
+              {/* Previous Button */}
+              <button
+                onClick={goToPrevItem}
+                disabled={!canGoPrev}
+                className="p-3 rounded-full bg-surface border border-border hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                title="Previous (←)"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* QR Preview */}
+              <div className="flex flex-col items-center">
+                <div className="bg-surface rounded-2xl p-4 border border-border shadow-lg">
+                  <div className="w-[250px] h-[250px] flex items-center justify-center bg-white rounded-lg">
+                    {currentPreviewItem?.imageData ? (
+                      <img
+                        src={currentPreviewItem.imageData}
+                        alt={`QR ${currentPreviewItem.row}`}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : currentPreviewItem?.status === 'generating' ? (
+                      <span className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <div className="text-dim text-sm text-center px-4">
+                        Click "Generate All" to create QR codes
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ))}
-            </div>
-            {itemsWithStatus.length > 8 && (
-              <div className="text-xs text-dim mt-2">
-                +{itemsWithStatus.length - 8} more
+
+                {/* Item Info */}
+                {currentPreviewItem && (
+                  <div className="mt-4 text-center">
+                    <div className="text-xs text-muted mb-1">
+                      Item {previewIndex + 1} of {itemsWithStatus.length}
+                    </div>
+                    <div className="font-mono text-sm text-text max-w-[250px] truncate" title={currentPreviewItem.content}>
+                      {currentPreviewItem.content}
+                    </div>
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                      <span className="text-[9px] font-semibold bg-accent/15 text-accent px-2 py-0.5 rounded uppercase">
+                        {currentPreviewItem.qrType}
+                      </span>
+                      {currentPreviewItem.label && (
+                        <span className="text-[10px] text-muted">
+                          {currentPreviewItem.label}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Download Current Button */}
+                {currentPreviewItem?.imageData && (
+                  <button
+                    onClick={handleDownloadCurrent}
+                    className="mt-4 px-4 py-2 bg-surface border border-border rounded-lg text-xs font-semibold hover:bg-surface-hover transition-all flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download {exportFormat.toUpperCase()}
+                  </button>
+                )}
               </div>
-            )}
+
+              {/* Next Button */}
+              <button
+                onClick={goToNextItem}
+                disabled={!canGoNext}
+                className="p-3 rounded-full bg-surface border border-border hover:bg-surface-hover disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                title="Next (→)"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="text-center text-dim">
             <span className="text-5xl block mb-3 opacity-30">▤</span>
             <div className="text-sm text-muted">Import a CSV to batch generate QR codes</div>
-            <div className="text-[11px] mt-1">Each row becomes a styled QR code, exported as ZIP</div>
+            <div className="text-[11px] mt-1">Each row becomes a styled QR code</div>
 
             {/* Example CSV */}
             <div className="mt-6 p-4 bg-surface rounded-lg border border-border text-left max-w-xs mx-auto">
