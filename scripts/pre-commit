@@ -1,0 +1,22 @@
+#!/bin/sh
+# Pre-commit hook to run typecheck and markdown lint before committing
+
+echo "Running typecheck..."
+npm run typecheck
+
+if [ $? -ne 0 ]; then
+  echo "Typecheck failed. Please fix the errors before committing."
+  exit 1
+fi
+
+echo "Typecheck passed."
+
+echo "Running markdown lint..."
+npm run lint:md
+
+if [ $? -ne 0 ]; then
+  echo "Markdown lint failed. Please fix the errors before committing."
+  exit 1
+fi
+
+echo "Markdown lint passed."

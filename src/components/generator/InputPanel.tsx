@@ -73,7 +73,11 @@ export function InputPanel() {
                 setWifiConfig({ encryption });
                 setContent(formatWifi({ ...wifiConfig, encryption }));
               }}
-              className={`${inputClassName} cursor-pointer`}
+              className={`${inputClassName} cursor-pointer appearance-none bg-[length:16px_16px] bg-[right_8px_center] bg-no-repeat`}
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                paddingRight: '32px',
+              }}
             >
               <option value="WPA">WPA/WPA2</option>
               <option value="WEP">WEP</option>
