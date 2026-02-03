@@ -43,32 +43,7 @@ function App() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-bg text-text rounded-xl border border-border">
-      {/* Title Bar */}
-      <div
-        className="h-11 bg-surface border-b border-border flex items-center px-4 shrink-0"
-        data-tauri-drag-region
-      >
-        <div className="flex gap-1.5 mr-3">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-          <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-          <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-        </div>
-        <div className="flex-1 text-center" data-tauri-drag-region>
-          <span
-            className="font-mono text-sm font-bold tracking-tight"
-            style={{
-              background: 'linear-gradient(135deg, var(--accent), #ef4444)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            ◧ QR Foundry
-          </span>
-        </div>
-        <div className="w-16" />
-      </div>
-
+    <div className="h-screen flex flex-col overflow-hidden bg-bg text-text">
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">{renderContent()}</div>
 
