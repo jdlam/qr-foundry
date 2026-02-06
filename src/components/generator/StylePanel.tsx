@@ -28,8 +28,20 @@ const DOT_STYLES: { id: DotStyle; label: string; name: string; svg: React.ReactN
   {
     id: 'classy',
     label: '◆',
-    name: 'Diamond',
+    name: 'Classy',
     svg: <svg viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" fill="currentColor" transform="rotate(45 9 9)"/></svg>,
+  },
+  {
+    id: 'classy-rounded',
+    label: '◈',
+    name: 'Classy Rounded',
+    svg: <svg viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" rx="2" fill="currentColor" transform="rotate(45 9 9)"/></svg>,
+  },
+  {
+    id: 'extra-rounded',
+    label: '⬮',
+    name: 'Extra Rounded',
+    svg: <svg viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="7" fill="currentColor"/></svg>,
   },
 ];
 
@@ -64,6 +76,17 @@ const CORNER_STYLES: { id: CornerSquareStyle; label: string; name: string; svg: 
       <svg viewBox="0 0 18 18">
         <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="2"/>
         <circle cx="9" cy="9" r="3" fill="currentColor"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'classy-rounded',
+    label: '🍃',
+    name: 'Leaf',
+    svg: (
+      <svg viewBox="0 0 18 18">
+        <rect x="2" y="2" width="14" height="14" rx="1" ry="7" fill="none" stroke="currentColor" strokeWidth="2"/>
+        <rect x="6" y="6" width="6" height="6" rx="0.5" ry="3" fill="currentColor"/>
       </svg>
     ),
   },

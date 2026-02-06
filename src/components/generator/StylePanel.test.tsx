@@ -59,14 +59,28 @@ describe('StylePanel', () => {
       expect(useQrStore.getState().dotStyle).toBe('dots');
     });
 
-    it('updates dot style when Diamond button clicked', () => {
+    it('updates dot style when Classy button clicked', () => {
       render(<StylePanel />);
 
-      fireEvent.click(screen.getByTitle('Diamond'));
+      fireEvent.click(screen.getByTitle('Classy'));
       expect(useQrStore.getState().dotStyle).toBe('classy');
     });
 
-    it('renders all 4 dot style buttons', () => {
+    it('updates dot style when Extra Rounded button clicked', () => {
+      render(<StylePanel />);
+
+      fireEvent.click(screen.getByTitle('Extra Rounded'));
+      expect(useQrStore.getState().dotStyle).toBe('extra-rounded');
+    });
+
+    it('updates dot style when Classy Rounded button clicked', () => {
+      render(<StylePanel />);
+
+      fireEvent.click(screen.getByTitle('Classy Rounded'));
+      expect(useQrStore.getState().dotStyle).toBe('classy-rounded');
+    });
+
+    it('renders all 6 dot style buttons', () => {
       render(<StylePanel />);
 
       // Square and Rounded titles appear in both Dot Style and Eye Style sections
@@ -75,7 +89,9 @@ describe('StylePanel', () => {
       expect(squareButtons.length).toBeGreaterThanOrEqual(1);
       expect(roundedButtons.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByTitle('Dots')).toBeInTheDocument();
-      expect(screen.getByTitle('Diamond')).toBeInTheDocument();
+      expect(screen.getByTitle('Classy')).toBeInTheDocument();
+      expect(screen.getByTitle('Classy Rounded')).toBeInTheDocument();
+      expect(screen.getByTitle('Extra Rounded')).toBeInTheDocument();
     });
   });
 

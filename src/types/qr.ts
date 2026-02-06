@@ -12,7 +12,7 @@ export type QrType =
 
 // Dot style options
 export type DotStyle = 'square' | 'rounded' | 'dots' | 'classy' | 'classy-rounded' | 'extra-rounded';
-export type CornerSquareStyle = 'square' | 'dot' | 'extra-rounded';
+export type CornerSquareStyle = 'square' | 'dot' | 'extra-rounded' | 'classy-rounded';
 export type CornerDotStyle = 'square' | 'dot';
 
 // Error correction levels

@@ -22,6 +22,7 @@ const cornerSquareStyleMap: Record<CornerSquareStyle, CornerSquareType> = {
   square: 'square',
   dot: 'dot',
   'extra-rounded': 'extra-rounded',
+  'classy-rounded': 'classy-rounded',
 };
 
 const cornerDotStyleMap: Record<CornerDotStyle, CornerDotType> = {
