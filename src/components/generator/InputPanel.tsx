@@ -97,11 +97,14 @@ export function InputPanel() {
                 setWifiConfig({ encryption });
                 setContent(formatWifi({ ...wifiConfig, encryption }));
               }}
-              className={`${inputClassName} cursor-pointer appearance-none bg-[length:16px_16px] bg-[right_8px_center] bg-no-repeat`}
+              className={`${inputClassName} cursor-pointer appearance-none`}
               style={{
                 ...inputStyle,
                 paddingRight: '32px',
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 8px center',
+                backgroundSize: '16px 16px',
               }}
               onFocus={handleInputFocus as unknown as React.FocusEventHandler<HTMLSelectElement>}
               onBlur={handleInputBlur as unknown as React.FocusEventHandler<HTMLSelectElement>}
