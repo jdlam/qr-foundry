@@ -33,7 +33,11 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-plans/
+
+# Documentation
+plans
+ARCHITECTURE.md
+mockups
 
 # OS files
 .DS_Store

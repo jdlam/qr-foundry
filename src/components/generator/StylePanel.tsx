@@ -6,19 +6,67 @@ import { useTauriDragDrop } from '../../hooks/useTauriDragDrop';
 import { optimizeImage, blobToDataUrl } from '../../lib/imageOptimizer';
 import type { DotStyle, CornerSquareStyle, ErrorCorrection } from '../../types/qr';
 
-const DOT_STYLES: { id: DotStyle; label: string; name: string }[] = [
-  { id: 'square', label: '■', name: 'Square' },
-  { id: 'rounded', label: '●', name: 'Rounded' },
-  { id: 'dots', label: '◉', name: 'Dots' },
-  { id: 'classy', label: '◆', name: 'Classy' },
-  { id: 'classy-rounded', label: '◇', name: 'Classy Round' },
-  { id: 'extra-rounded', label: '○', name: 'Extra Round' },
+const DOT_STYLES: { id: DotStyle; label: string; name: string; svg: React.ReactNode }[] = [
+  {
+    id: 'square',
+    label: '■',
+    name: 'Square',
+    svg: <svg viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" fill="currentColor"/></svg>,
+  },
+  {
+    id: 'rounded',
+    label: '●',
+    name: 'Rounded',
+    svg: <svg viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" rx="3" fill="currentColor"/></svg>,
+  },
+  {
+    id: 'dots',
+    label: '◉',
+    name: 'Dots',
+    svg: <svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="6" fill="currentColor"/></svg>,
+  },
+  {
+    id: 'classy',
+    label: '◆',
+    name: 'Diamond',
+    svg: <svg viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" fill="currentColor" transform="rotate(45 9 9)"/></svg>,
+  },
 ];
 
-const CORNER_STYLES: { id: CornerSquareStyle; label: string; name: string }[] = [
-  { id: 'square', label: '▣', name: 'Square' },
-  { id: 'dot', label: '◍', name: 'Dot' },
-  { id: 'extra-rounded', label: '◎', name: 'Rounded' },
+const CORNER_STYLES: { id: CornerSquareStyle; label: string; name: string; svg: React.ReactNode }[] = [
+  {
+    id: 'square',
+    label: '▣',
+    name: 'Square',
+    svg: (
+      <svg viewBox="0 0 18 18">
+        <rect x="2" y="2" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"/>
+        <rect x="6" y="6" width="6" height="6" fill="currentColor"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'extra-rounded',
+    label: '◎',
+    name: 'Rounded',
+    svg: (
+      <svg viewBox="0 0 18 18">
+        <rect x="2" y="2" width="14" height="14" rx="3" fill="none" stroke="currentColor" strokeWidth="2"/>
+        <rect x="6" y="6" width="6" height="6" rx="1.5" fill="currentColor"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'dot',
+    label: '◍',
+    name: 'Circle',
+    svg: (
+      <svg viewBox="0 0 18 18">
+        <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="2"/>
+        <circle cx="9" cy="9" r="3" fill="currentColor"/>
+      </svg>
+    ),
+  },
 ];
 
 const EC_LEVELS: { id: ErrorCorrection; percent: string; desc: string }[] = [
@@ -31,27 +79,89 @@ const EC_LEVELS: { id: ErrorCorrection; percent: string; desc: string }[] = [
 // Default logo size that fills ~80% of the logo area (32 out of 40 max)
 const DEFAULT_LOGO_SIZE = 32;
 
-function ColorSwatch({
+function ColorRow({
   label,
   value,
   onChange,
 }: {
-  label?: string;
+  label: string;
   value: string;
   onChange: (color: string) => void;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="w-8 h-8 rounded-md border-2 border-border-light overflow-hidden relative">
+    <div className="flex items-center gap-2.5 mb-2">
+      <span
+        className="font-mono text-xs font-semibold w-[22px] shrink-0"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        {label}
+      </span>
+      <div
+        className="flex items-center gap-2 px-2.5 py-1.5 flex-1 cursor-pointer rounded-sm border-2 transition-colors"
+        style={{
+          background: 'var(--input-bg)',
+          borderColor: 'var(--input-border)',
+        }}
+        onClick={() => inputRef.current?.click()}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--text-faint)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--input-border)'; }}
+      >
+        <div
+          className="w-6 h-6 rounded-sm shrink-0 border-2"
+          style={{ background: value, borderColor: 'var(--swatch-border)' }}
+        />
+        <span className="font-mono text-[13px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+          {value}
+        </span>
         <input
+          ref={inputRef}
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="absolute -inset-1.5 w-[150%] h-[150%] cursor-pointer border-none"
+          className="w-0 h-0 opacity-0 absolute pointer-events-none"
         />
       </div>
-      {label && <span className="text-[9px] text-dim">{label}</span>}
     </div>
+  );
+}
+
+function StyleButton({
+  active,
+  onClick,
+  title,
+  children,
+  wide,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
+  wide?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className="flex items-center justify-center rounded-sm border-2 transition-colors"
+      style={{
+        width: wide ? undefined : '40px',
+        height: '40px',
+        flex: wide ? 1 : undefined,
+        background: active ? 'var(--accent-bg-tint)' : 'var(--input-bg)',
+        borderColor: active ? 'var(--accent)' : 'var(--input-border)',
+        color: active ? 'var(--accent)' : 'var(--text-secondary)',
+      }}
+      onMouseEnter={(e) => {
+        if (!active) e.currentTarget.style.borderColor = 'var(--text-faint)';
+      }}
+      onMouseLeave={(e) => {
+        if (!active) e.currentTarget.style.borderColor = 'var(--input-border)';
+      }}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -91,7 +201,6 @@ export function StylePanel() {
   // Load logo from file path (used by Tauri drag-drop)
   const loadLogoFromPath = useCallback(
     async (filePath: string) => {
-      // Check if it's an image file
       const ext = filePath.toLowerCase().split('.').pop();
       if (!['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext || '')) {
         setLogoError('Invalid file type. Use PNG, JPG, or SVG.');
@@ -102,11 +211,8 @@ export function StylePanel() {
         const data = await filesystemAdapter.readFile(filePath);
         const mimeType = ext === 'svg' ? 'image/svg+xml' : `image/${ext === 'jpg' ? 'jpeg' : ext}`;
 
-        // Convert Uint8Array to data URL
         const blob = new Blob([data], { type: mimeType });
         const rawDataUrl = await blobToDataUrl(blob);
-
-        // Optimize image (resize and compress)
         const optimized = await optimizeImage(rawDataUrl, mimeType);
 
         setLogoError(null);
@@ -189,86 +295,87 @@ export function StylePanel() {
     [setLogo]
   );
 
-  return (
-    <div className="space-y-4">
-      <div className="h-px bg-border" />
+  const sectionLabelStyle: React.CSSProperties = {
+    color: 'var(--text-muted)',
+  };
 
-      <div className="text-[10px] font-bold text-muted uppercase tracking-wider">Style</div>
+  return (
+    <div className="space-y-6">
+      <div className="h-px" style={{ background: 'var(--divider)' }} />
+
+      <div
+        className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"
+        style={sectionLabelStyle}
+      >
+        Style
+      </div>
 
       {/* Dot Style */}
       <div>
-        <div className="text-[11px] text-muted mb-1.5">Dot Style</div>
-        <div className="flex gap-1 flex-wrap">
+        <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+          Dot Style
+        </div>
+        <div className="flex gap-1.5">
           {DOT_STYLES.map((s) => (
-            <button
+            <StyleButton
               key={s.id}
+              active={dotStyle === s.id}
               onClick={() => setDotStyle(s.id)}
               title={s.name}
-              className={`w-9 h-9 flex items-center justify-center rounded-md text-base transition-all ${
-                dotStyle === s.id
-                  ? 'bg-accent/20 border border-accent/60 text-accent'
-                  : 'bg-surface-hover border border-border text-muted hover:text-text'
-              }`}
             >
-              {s.label}
-            </button>
+              <span className="w-[18px] h-[18px]">{s.svg}</span>
+            </StyleButton>
           ))}
         </div>
       </div>
 
       {/* Corner Style */}
       <div>
-        <div className="text-[11px] text-muted mb-1.5">Corner Style</div>
-        <div className="flex gap-1">
+        <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+          Eye Style
+        </div>
+        <div className="flex gap-1.5">
           {CORNER_STYLES.map((s) => (
-            <button
+            <StyleButton
               key={s.id}
+              active={cornerSquareStyle === s.id}
               onClick={() => setCornerSquareStyle(s.id)}
               title={s.name}
-              className={`w-9 h-9 flex items-center justify-center rounded-md text-base transition-all ${
-                cornerSquareStyle === s.id
-                  ? 'bg-accent/20 border border-accent/60 text-accent'
-                  : 'bg-surface-hover border border-border text-muted hover:text-text'
-              }`}
             >
-              {s.label}
-            </button>
+              <span className="w-[18px] h-[18px]">{s.svg}</span>
+            </StyleButton>
           ))}
         </div>
       </div>
 
       {/* Colors */}
       <div>
-        <div className="text-[11px] text-muted mb-1.5">Colors</div>
-        <div className="flex gap-3 items-center">
-          <ColorSwatch label="FG" value={foreground} onChange={setForeground} />
-          <ColorSwatch label="BG" value={background} onChange={setBackground} />
-          <label className="flex items-center gap-1.5 text-[11px] text-muted cursor-pointer ml-2">
-            <input
-              type="checkbox"
-              checked={transparentBg}
-              onChange={(e) => setTransparentBg(e.target.checked)}
-              className="accent-accent"
-            />
-            Transparent
-          </label>
+        <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+          Colors
         </div>
-      </div>
+        <ColorRow label="FG" value={foreground} onChange={setForeground} />
+        <ColorRow label="BG" value={background} onChange={setBackground} />
 
-      {/* Gradient */}
-      <div>
-        <label className="flex items-center gap-1.5 text-[11px] text-muted cursor-pointer">
-          <input
-            type="checkbox"
-            checked={useGradient}
-            onChange={(e) => setUseGradient(e.target.checked)}
-            className="accent-accent"
-          />
-          Gradient Fill
-        </label>
+        {/* Gradient toggle */}
+        <div className="flex items-center gap-2.5 mt-2.5">
+          <div
+            className="w-9 h-5 rounded-full relative cursor-pointer transition-colors"
+            style={{ background: useGradient ? 'var(--accent)' : 'var(--input-border)' }}
+            onClick={() => setUseGradient(!useGradient)}
+          >
+            <div
+              className="w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform"
+              style={{ left: '2px', transform: useGradient ? 'translateX(16px)' : 'none' }}
+            />
+          </div>
+          <span className="text-[13px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+            Gradient Fill
+          </span>
+        </div>
         {useGradient && (
           <div className="flex gap-2 mt-2 items-center">
-            <ColorSwatch
+            <ColorRow
+              label="A"
               value={gradient.colorStops[0]?.color || '#1a1a2e'}
               onChange={(color) =>
                 setGradient({
@@ -279,8 +386,8 @@ export function StylePanel() {
                 })
               }
             />
-            <span className="text-[11px] text-dim">→</span>
-            <ColorSwatch
+            <ColorRow
+              label="B"
               value={gradient.colorStops[1]?.color || '#e94560'}
               onChange={(color) =>
                 setGradient({
@@ -293,11 +400,34 @@ export function StylePanel() {
             />
           </div>
         )}
+
+        {/* Transparent checkbox */}
+        <div className="flex items-center gap-2 mt-2">
+          <div
+            className="w-4 h-4 rounded-sm border-2 flex items-center justify-center cursor-pointer transition-colors"
+            style={{
+              borderColor: transparentBg ? 'var(--accent)' : 'var(--input-border)',
+              background: transparentBg ? 'var(--accent)' : 'transparent',
+            }}
+            onClick={() => setTransparentBg(!transparentBg)}
+          >
+            {transparentBg && (
+              <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            )}
+          </div>
+          <span className="text-[13px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+            Transparent Background
+          </span>
+        </div>
       </div>
 
       {/* Logo */}
       <div>
-        <div className="text-[11px] text-muted mb-1.5">Logo / Image</div>
+        <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+          Logo / Image
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -308,19 +438,23 @@ export function StylePanel() {
 
         {logo ? (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 p-2 bg-surface-hover rounded-lg border border-border">
+            <div
+              className="flex items-center gap-2 p-2 rounded-sm border"
+              style={{ background: 'var(--input-bg)', borderColor: 'var(--border)' }}
+            >
               <img
                 src={logo.src}
                 alt="Logo"
-                className="w-10 h-10 object-contain rounded"
+                className="w-10 h-10 object-contain rounded-sm"
               />
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-text truncate">Logo added</div>
-                <div className="text-[10px] text-dim">Size: {logo.size}%</div>
+                <div className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Logo added</div>
+                <div className="text-[10px]" style={{ color: 'var(--text-faint)' }}>Size: {logo.size}%</div>
               </div>
               <button
                 onClick={() => setLogo(null)}
-                className="text-danger text-xs hover:underline"
+                className="text-xs hover:underline"
+                style={{ color: 'var(--danger)' }}
               >
                 Remove
               </button>
@@ -329,8 +463,8 @@ export function StylePanel() {
             {/* Logo Size Slider */}
             <div>
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[11px] text-muted">Size</span>
-                <span className="text-[10px] text-dim font-mono">{logo.size}%</span>
+                <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Size</span>
+                <span className="text-[10px] font-mono" style={{ color: 'var(--text-faint)' }}>{logo.size}%</span>
               </div>
               <input
                 type="range"
@@ -340,39 +474,43 @@ export function StylePanel() {
                 onChange={(e) => setLogo({ ...logo, size: Number(e.target.value) })}
                 className="w-full accent-accent h-1"
               />
-              <div className="flex justify-between text-[9px] text-dim mt-0.5">
+              <div className="flex justify-between text-[9px] mt-0.5" style={{ color: 'var(--text-faint)' }}>
                 <span>Small</span>
                 <span>Large</span>
               </div>
               {logo.size > 30 && (
-                <div className="text-[9px] text-accent mt-1 p-1.5 bg-accent/10 rounded border border-accent/20">
-                  ⚠ Large logos may reduce scanability — use EC level Q or H
+                <div
+                  className="text-[9px] mt-1 p-1.5 rounded-sm border"
+                  style={{
+                    color: 'var(--accent)',
+                    background: 'var(--accent-bg-tint)',
+                    borderColor: 'var(--accent)',
+                    borderWidth: '1px',
+                  }}
+                >
+                  Large logos may reduce scanability — use EC level Q or H
                 </div>
               )}
             </div>
 
             {/* Logo Shape */}
-            <div className="flex gap-2">
-              <button
+            <div className="flex gap-1.5">
+              <StyleButton
+                active={logo.shape === 'square'}
                 onClick={() => setLogo({ ...logo, shape: 'square' })}
-                className={`flex-1 py-1.5 text-[11px] rounded-md font-semibold transition-all ${
-                  logo.shape === 'square'
-                    ? 'bg-accent/20 border border-accent/60 text-accent'
-                    : 'bg-surface-hover border border-border text-muted'
-                }`}
+                title="Square"
+                wide
               >
-                □ Square
-              </button>
-              <button
+                <span className="text-[11px] font-semibold">Square</span>
+              </StyleButton>
+              <StyleButton
+                active={logo.shape === 'circle'}
                 onClick={() => setLogo({ ...logo, shape: 'circle' })}
-                className={`flex-1 py-1.5 text-[11px] rounded-md font-semibold transition-all ${
-                  logo.shape === 'circle'
-                    ? 'bg-accent/20 border border-accent/60 text-accent'
-                    : 'bg-surface-hover border border-border text-muted'
-                }`}
+                title="Circle"
+                wide
               >
-                ○ Circle
-              </button>
+                <span className="text-[11px] font-semibold">Circle</span>
+              </StyleButton>
             </div>
           </div>
         ) : (
@@ -381,22 +519,42 @@ export function StylePanel() {
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleLogoDrop}
-              className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                isTauriDragging
-                  ? 'border-accent bg-accent/5'
-                  : logoError
-                    ? 'border-danger/50 bg-danger/5'
-                    : 'border-border-light hover:border-accent/50'
-              }`}
+              className="h-20 flex flex-col items-center justify-center gap-1 cursor-pointer rounded-sm border-2 border-dashed transition-colors"
+              style={{
+                background: isTauriDragging ? 'var(--accent-bg-tint)' : logoError ? 'rgba(239, 68, 68, 0.05)' : 'var(--dropzone-bg)',
+                borderColor: isTauriDragging ? 'var(--accent)' : logoError ? 'var(--danger)' : 'var(--dropzone-border)',
+              }}
+              onMouseEnter={(e) => {
+                if (!isTauriDragging && !logoError) {
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                  e.currentTarget.style.background = 'var(--accent-bg-tint)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isTauriDragging && !logoError) {
+                  e.currentTarget.style.borderColor = 'var(--dropzone-border)';
+                  e.currentTarget.style.background = 'var(--dropzone-bg)';
+                }
+              }}
             >
-              <span className="text-2xl opacity-40">+</span>
-              <div className="text-[10px] text-dim mt-1">
+              <svg className="w-5 h-5" style={{ color: 'var(--text-faint)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
                 {isTauriDragging ? 'Drop to add logo' : 'Drop logo or click to upload'}
               </div>
-              <div className="text-[9px] text-dim">PNG, JPG, SVG (auto-resized)</div>
             </div>
             {logoError && (
-              <div className="text-[9px] text-danger mt-1.5 p-1.5 bg-danger/10 rounded border border-danger/20">
+              <div
+                className="text-[9px] mt-1.5 p-1.5 rounded-sm border"
+                style={{
+                  color: 'var(--danger)',
+                  background: 'rgba(239, 68, 68, 0.05)',
+                  borderColor: 'var(--danger)',
+                }}
+              >
                 {logoError}
               </div>
             )}
@@ -406,29 +564,45 @@ export function StylePanel() {
 
       {/* Error Correction */}
       <div>
-        <div className="text-[11px] text-muted mb-1.5">Error Correction</div>
-        <div className="flex gap-1">
+        <div className="text-xs font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+          Error Correction
+        </div>
+        <div className="flex gap-1.5">
           {EC_LEVELS.map((ec) => (
             <button
               key={ec.id}
               onClick={() => setErrorCorrection(ec.id)}
-              className={`w-9 font-mono text-xs font-bold py-1.5 rounded-md transition-all ${
-                errorCorrection === ec.id
-                  ? 'bg-accent/20 border border-accent/60 text-accent'
-                  : 'bg-surface-hover border border-border text-muted hover:text-text'
-              }`}
+              className="w-10 h-9 font-mono text-xs font-semibold rounded-sm border-2 transition-colors"
+              style={{
+                background: errorCorrection === ec.id ? 'var(--accent)' : 'var(--input-bg)',
+                borderColor: errorCorrection === ec.id ? 'var(--accent)' : 'var(--input-border)',
+                color: errorCorrection === ec.id ? 'var(--btn-primary-text)' : 'var(--text-secondary)',
+              }}
+              onMouseEnter={(e) => {
+                if (errorCorrection !== ec.id) e.currentTarget.style.borderColor = 'var(--text-faint)';
+              }}
+              onMouseLeave={(e) => {
+                if (errorCorrection !== ec.id) e.currentTarget.style.borderColor = 'var(--input-border)';
+              }}
             >
               {ec.id}
             </button>
           ))}
         </div>
-        <div className="text-[9px] text-dim mt-1">
+        <div className="text-[10px] mt-1" style={{ color: 'var(--text-faint)' }}>
           {EC_LEVELS.find((ec) => ec.id === errorCorrection)?.percent} recovery —{' '}
           {EC_LEVELS.find((ec) => ec.id === errorCorrection)?.desc}
         </div>
         {logo && (errorCorrection === 'L' || errorCorrection === 'M') && (
-          <div className="text-[9px] text-accent mt-1 p-1.5 bg-accent/10 rounded border border-accent/20">
-            💡 Tip: Use Q or H when embedding a logo for best results
+          <div
+            className="text-[10px] mt-1 p-1.5 rounded-sm border"
+            style={{
+              color: 'var(--accent)',
+              background: 'var(--accent-bg-tint)',
+              borderColor: 'var(--accent)',
+            }}
+          >
+            Tip: Use Q or H when embedding a logo for best results
           </div>
         )}
       </div>

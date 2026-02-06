@@ -34,7 +34,6 @@ export function HistoryView() {
       const store = useQrStore.getState();
       store.setContent(item.content);
 
-      // Parse and apply the style
       try {
         const style = JSON.parse(item.styleJson);
         if (style.dotStyle) store.setDotStyle(style.dotStyle);
@@ -94,16 +93,23 @@ export function HistoryView() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Left Panel */}
-      <div className="w-72 border-r border-border flex flex-col overflow-hidden shrink-0">
-        <div className="p-4 border-b border-border">
+      <div
+        className="w-72 flex flex-col overflow-hidden shrink-0"
+        style={{ borderRight: '1px solid var(--border)' }}
+      >
+        <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center justify-between mb-2">
-            <div className="text-[10px] font-bold text-muted uppercase tracking-wider">
+            <div
+              className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"
+              style={{ color: 'var(--text-muted)' }}
+            >
               History ({total})
             </div>
             {items.length > 0 && (
               <button
                 onClick={handleClearAll}
-                className="text-[10px] text-danger hover:underline"
+                className="text-[10px] hover:underline"
+                style={{ color: 'var(--danger)' }}
               >
                 Clear All
               </button>
@@ -114,15 +120,22 @@ export function HistoryView() {
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search history..."
-            className="w-full bg-surface-hover border border-border rounded-md px-3 py-2 text-xs text-text outline-none focus:border-accent/50"
+            className="w-full rounded-sm px-3 py-2 text-xs outline-none border-2 transition-colors"
+            style={{
+              background: 'var(--input-bg)',
+              borderColor: 'var(--input-border)',
+              color: 'var(--text-primary)',
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--input-border)'; }}
           />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {isLoading && items.length === 0 ? (
-            <div className="text-center text-dim text-xs py-8">Loading...</div>
+            <div className="text-center text-xs py-8" style={{ color: 'var(--text-faint)' }}>Loading...</div>
           ) : items.length === 0 ? (
-            <div className="text-center text-dim text-xs py-8">
+            <div className="text-center text-xs py-8" style={{ color: 'var(--text-faint)' }}>
               {searchTerm ? 'No results found' : 'No history yet'}
             </div>
           ) : (
@@ -131,21 +144,30 @@ export function HistoryView() {
                 <div
                   key={item.id}
                   onClick={() => handleSelectItem(item)}
-                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                    selectedItem?.id === item.id
-                      ? 'bg-accent/10 border-accent/30'
-                      : 'bg-surface-hover border-border hover:border-accent/20'
-                  }`}
+                  className="p-3 rounded-sm border cursor-pointer transition-all"
+                  style={{
+                    background: selectedItem?.id === item.id ? 'var(--active-bg)' : 'var(--input-bg)',
+                    borderColor: selectedItem?.id === item.id ? 'var(--accent)' : 'var(--border)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedItem?.id !== item.id) e.currentTarget.style.borderColor = 'var(--text-faint)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedItem?.id !== item.id) e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
                 >
-                  <div className="font-mono text-xs text-text truncate">{item.content}</div>
+                  <div className="font-mono text-xs truncate" style={{ color: 'var(--text-primary)' }}>{item.content}</div>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-[9px] font-semibold bg-accent/15 text-accent px-1.5 py-0.5 rounded uppercase">
+                    <span
+                      className="text-[9px] font-semibold px-1.5 py-0.5 rounded-sm uppercase"
+                      style={{ background: 'var(--accent-bg-tint)', color: 'var(--accent)' }}
+                    >
                       {item.qrType}
                     </span>
-                    <span className="text-[10px] text-dim">{formatTime(item.createdAt)}</span>
+                    <span className="text-[10px]" style={{ color: 'var(--text-faint)' }}>{formatTime(item.createdAt)}</span>
                   </div>
                   {item.label && (
-                    <div className="text-[10px] text-muted mt-1 truncate">{item.label}</div>
+                    <div className="text-[10px] mt-1 truncate" style={{ color: 'var(--text-muted)' }}>{item.label}</div>
                   )}
                 </div>
               ))}
@@ -154,7 +176,11 @@ export function HistoryView() {
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoading}
-                  className="w-full py-2 text-xs text-muted hover:text-accent border border-border rounded-lg hover:bg-surface-hover transition-colors disabled:opacity-50"
+                  className="w-full py-2 text-xs rounded-sm border transition-colors disabled:opacity-50"
+                  style={{
+                    color: 'var(--text-muted)',
+                    borderColor: 'var(--border)',
+                  }}
                 >
                   {isLoading ? 'Loading...' : 'Load More'}
                 </button>
@@ -165,57 +191,77 @@ export function HistoryView() {
       </div>
 
       {/* Right Panel */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center p-6"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, var(--surface-hover) 0%, var(--bg) 70%)',
-        }}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
         {selectedItem ? (
           <div className="text-center max-w-md">
             {selectedItem.thumbnail && (
               <img
                 src={selectedItem.thumbnail}
                 alt="QR Preview"
-                className="w-48 h-48 mx-auto mb-4 rounded-lg border border-border"
+                className="w-48 h-48 mx-auto mb-4 rounded-sm border"
+                style={{ borderColor: 'var(--border)' }}
               />
             )}
-            <div className="text-lg text-text font-semibold mb-2">
+            <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
               {selectedItem.label || 'QR Code'}
             </div>
-            <div className="font-mono text-sm text-muted bg-surface p-4 rounded-lg border border-border break-all max-h-32 overflow-y-auto">
+            <div
+              className="font-mono text-sm p-4 rounded-sm border break-all max-h-32 overflow-y-auto"
+              style={{
+                color: 'var(--text-muted)',
+                background: 'var(--input-bg)',
+                borderColor: 'var(--border)',
+              }}
+            >
               {selectedItem.content}
             </div>
             <div className="flex gap-2 mt-4 justify-center">
               <button
                 onClick={() => handleLoadItem(selectedItem)}
-                className="px-4 py-2 bg-accent/20 border border-accent/50 text-accent rounded-lg text-sm font-semibold hover:bg-accent/30 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'var(--accent-bg-tint)',
+                  borderColor: 'var(--accent)',
+                  color: 'var(--accent)',
+                }}
               >
-                ◧ Load in Generator
+                Load in Generator
               </button>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(selectedItem.content);
                   toast.success('Copied to clipboard');
                 }}
-                className="px-4 py-2 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'var(--btn-secondary-bg)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-secondary)',
+                }}
               >
-                📋 Copy
+                Copy
               </button>
               <button
                 onClick={() => handleDelete(selectedItem.id)}
-                className="px-4 py-2 bg-danger/10 border border-danger/30 text-danger rounded-lg text-sm font-semibold hover:bg-danger/20 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.05)',
+                  borderColor: 'var(--danger)',
+                  color: 'var(--danger)',
+                }}
               >
-                🗑 Delete
+                Delete
               </button>
             </div>
           </div>
         ) : (
-          <div className="text-center text-dim">
-            <span className="text-5xl block mb-3 opacity-30">↻</span>
-            <div className="text-sm text-muted">Select an item from history</div>
-            <div className="text-[11px] mt-1">Click to preview, then load into generator</div>
+          <div className="text-center">
+            <svg className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--text-faint)', opacity: 0.3 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Select an item from history</div>
+            <div className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>Click to preview, then load into generator</div>
           </div>
         )}
       </div>

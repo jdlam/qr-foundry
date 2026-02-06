@@ -40,8 +40,8 @@ describe('Preview', () => {
       useQrStore.getState().setContent('https://example.com');
       render(<Preview />);
 
-      // Find the container div that holds the QR code
-      const container = document.querySelector('.w-\\[300px\\].h-\\[300px\\]');
+      // Find the container div that holds the QR code (now 280px)
+      const container = document.querySelector('.w-\\[280px\\].h-\\[280px\\]');
       expect(container).toBeDefined();
 
       // Check that the checkerboard style is applied
@@ -55,11 +55,11 @@ describe('Preview', () => {
       useQrStore.getState().setContent('https://example.com');
       render(<Preview />);
 
-      // Find the container div that holds the QR code
-      const container = document.querySelector('.w-\\[300px\\].h-\\[300px\\]');
+      // Find the container div that holds the QR code (now 280px)
+      const container = document.querySelector('.w-\\[280px\\].h-\\[280px\\]');
       expect(container).toBeDefined();
 
-      // Check that no inline style is applied (or style doesn't contain checkerboard)
+      // Check that no inline style contains checkerboard
       const style = container?.getAttribute('style');
       const hasCheckerboard = style ? style.includes('linear-gradient') : false;
       expect(hasCheckerboard).toBe(false);
@@ -67,25 +67,28 @@ describe('Preview', () => {
   });
 
   describe('export info', () => {
-    it('displays export size', () => {
+    it('displays export size in dropdown', () => {
       useQrStore.getState().setExportSize(1024);
       render(<Preview />);
 
-      expect(screen.getByText('Size: 1024×1024')).toBeInTheDocument();
+      // Size is now a select dropdown
+      expect(screen.getByText('Size')).toBeInTheDocument();
+      const select = screen.getByDisplayValue('1024px');
+      expect(select).toBeInTheDocument();
     });
 
     it('displays error correction level', () => {
       useQrStore.getState().setErrorCorrection('H');
       render(<Preview />);
 
-      expect(screen.getByText('EC: H (30%)')).toBeInTheDocument();
+      expect(screen.getByText(/H \(30%\)/)).toBeInTheDocument();
     });
 
     it('displays input type', () => {
       useQrStore.getState().setInputType('wifi');
       render(<Preview />);
 
-      expect(screen.getByText('Type: WIFI')).toBeInTheDocument();
+      expect(screen.getByText('WIFI')).toBeInTheDocument();
     });
   });
 
@@ -127,13 +130,18 @@ describe('Preview', () => {
   });
 
   describe('size selector', () => {
-    it('renders size options', () => {
+    it('renders size options in dropdown', () => {
       render(<Preview />);
 
-      expect(screen.getByText('512px')).toBeInTheDocument();
-      expect(screen.getByText('1024px')).toBeInTheDocument();
-      expect(screen.getByText('2048px')).toBeInTheDocument();
-      expect(screen.getByText('4096px')).toBeInTheDocument();
+      // Size is now a select with option elements
+      const select = document.querySelector('select');
+      expect(select).toBeDefined();
+      const options = select?.querySelectorAll('option');
+      const values = Array.from(options || []).map((o) => o.textContent);
+      expect(values).toContain('512px');
+      expect(values).toContain('1024px');
+      expect(values).toContain('2048px');
+      expect(values).toContain('4096px');
     });
   });
 });

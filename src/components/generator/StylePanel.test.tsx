@@ -59,35 +59,40 @@ describe('StylePanel', () => {
       expect(useQrStore.getState().dotStyle).toBe('dots');
     });
 
-    it('updates dot style when Classy button clicked', () => {
+    it('updates dot style when Diamond button clicked', () => {
       render(<StylePanel />);
 
-      fireEvent.click(screen.getByTitle('Classy'));
+      fireEvent.click(screen.getByTitle('Diamond'));
       expect(useQrStore.getState().dotStyle).toBe('classy');
     });
 
-    it('updates dot style when Extra Round button clicked', () => {
+    it('renders all 4 dot style buttons', () => {
       render(<StylePanel />);
 
-      fireEvent.click(screen.getByTitle('Extra Round'));
-      expect(useQrStore.getState().dotStyle).toBe('extra-rounded');
+      // Square and Rounded titles appear in both Dot Style and Eye Style sections
+      const squareButtons = screen.getAllByTitle('Square');
+      const roundedButtons = screen.getAllByTitle('Rounded');
+      expect(squareButtons.length).toBeGreaterThanOrEqual(1);
+      expect(roundedButtons.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByTitle('Dots')).toBeInTheDocument();
+      expect(screen.getByTitle('Diamond')).toBeInTheDocument();
     });
   });
 
-  describe('Corner Style', () => {
-    it('renders corner style section', () => {
+  describe('Eye Style', () => {
+    it('renders eye style section', () => {
       render(<StylePanel />);
 
-      expect(screen.getByText('Corner Style')).toBeInTheDocument();
+      expect(screen.getByText('Eye Style')).toBeInTheDocument();
     });
 
-    it('updates corner square style when Dot button clicked', () => {
+    it('updates corner square style when Circle button clicked', () => {
       render(<StylePanel />);
 
-      // Find corner style Dot button (there might be multiple "Dot" titles)
-      const dotButtons = screen.getAllByTitle('Dot');
+      // Find the Circle button in the eye style section
+      const circleButtons = screen.getAllByTitle('Circle');
       // Click each until we get the corner one (corner style buttons update cornerSquareStyle)
-      for (const btn of dotButtons) {
+      for (const btn of circleButtons) {
         fireEvent.click(btn);
         if (useQrStore.getState().cornerSquareStyle === 'dot') break;
       }
@@ -113,35 +118,32 @@ describe('StylePanel', () => {
       expect(colorInputs?.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('renders transparent background checkbox', () => {
+    it('renders transparent background option', () => {
       render(<StylePanel />);
 
-      expect(screen.getByText('Transparent')).toBeInTheDocument();
+      expect(screen.getByText('Transparent Background')).toBeInTheDocument();
     });
 
     it('toggles transparent background', () => {
       render(<StylePanel />);
 
-      // Find the transparent checkbox by looking at all checkboxes
-      const checkboxes = screen.getAllByRole('checkbox');
-      const transparentCheckbox = checkboxes.find((cb) => {
-        const label = cb.closest('label');
-        return label?.textContent?.includes('Transparent');
-      });
+      // The transparent checkbox is a custom div, find it by its adjacent text
+      const transparentText = screen.getByText('Transparent Background');
+      const transparentToggle = transparentText.previousElementSibling;
 
-      expect(transparentCheckbox).toBeDefined();
+      expect(transparentToggle).toBeDefined();
       expect(useQrStore.getState().transparentBg).toBe(false);
 
-      fireEvent.click(transparentCheckbox!);
+      fireEvent.click(transparentToggle!);
       expect(useQrStore.getState().transparentBg).toBe(true);
 
-      fireEvent.click(transparentCheckbox!);
+      fireEvent.click(transparentToggle!);
       expect(useQrStore.getState().transparentBg).toBe(false);
     });
   });
 
   describe('Gradient', () => {
-    it('renders gradient checkbox', () => {
+    it('renders gradient toggle', () => {
       render(<StylePanel />);
 
       expect(screen.getByText('Gradient Fill')).toBeInTheDocument();
@@ -150,17 +152,14 @@ describe('StylePanel', () => {
     it('toggles gradient option', () => {
       render(<StylePanel />);
 
-      // Find the gradient checkbox
-      const checkboxes = screen.getAllByRole('checkbox');
-      const gradientCheckbox = checkboxes.find((cb) => {
-        const label = cb.closest('label');
-        return label?.textContent?.includes('Gradient Fill');
-      });
+      // The gradient toggle is a custom toggle switch (div), find it by its adjacent text
+      const gradientText = screen.getByText('Gradient Fill');
+      const gradientToggle = gradientText.previousElementSibling;
 
-      expect(gradientCheckbox).toBeDefined();
+      expect(gradientToggle).toBeDefined();
       expect(useQrStore.getState().useGradient).toBe(false);
 
-      fireEvent.click(gradientCheckbox!);
+      fireEvent.click(gradientToggle!);
       expect(useQrStore.getState().useGradient).toBe(true);
     });
 
@@ -168,8 +167,9 @@ describe('StylePanel', () => {
       useQrStore.getState().setUseGradient(true);
       render(<StylePanel />);
 
-      // Should show the arrow between colors
-      expect(screen.getByText('→')).toBeInTheDocument();
+      // Should show A and B labels for gradient colors
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('B')).toBeInTheDocument();
     });
   });
 
@@ -178,7 +178,6 @@ describe('StylePanel', () => {
       render(<StylePanel />);
 
       expect(screen.getByText('Drop logo or click to upload')).toBeInTheDocument();
-      expect(screen.getByText(/PNG, JPG, SVG.*auto-resized/)).toBeInTheDocument();
     });
 
     it('renders logo controls when logo is set', () => {
@@ -244,11 +243,14 @@ describe('StylePanel', () => {
       });
       render(<StylePanel />);
 
-      expect(screen.getByText('□ Square')).toBeInTheDocument();
-      expect(screen.getByText('○ Circle')).toBeInTheDocument();
+      // Shape buttons use title attribute (without emoji prefixes)
+      const squareButtons = screen.getAllByTitle('Square');
+      const circleButtons = screen.getAllByTitle('Circle');
+      expect(squareButtons.length).toBeGreaterThanOrEqual(1);
+      expect(circleButtons.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('updates logo shape when shape button clicked', () => {
+    it('updates logo shape when Circle shape button clicked', () => {
       useQrStore.getState().setLogo({
         src: 'data:image/png;base64,test',
         size: 25,
@@ -257,7 +259,13 @@ describe('StylePanel', () => {
       });
       render(<StylePanel />);
 
-      fireEvent.click(screen.getByText('○ Circle'));
+      // Find Circle buttons - the logo shape one vs the eye style one
+      const circleButtons = screen.getAllByTitle('Circle');
+      // Click each to find the one that sets logo shape
+      for (const btn of circleButtons) {
+        fireEvent.click(btn);
+        if (useQrStore.getState().logo?.shape === 'circle') break;
+      }
       expect(useQrStore.getState().logo?.shape).toBe('circle');
     });
   });
@@ -539,10 +547,10 @@ describe('StylePanel', () => {
       expect(optimizeImage).toHaveBeenCalled();
     });
 
-    it('displays auto-resize info in drop zone', () => {
+    it('displays upload text in drop zone', () => {
       render(<StylePanel />);
 
-      expect(screen.getByText(/auto-resized/)).toBeInTheDocument();
+      expect(screen.getByText('Drop logo or click to upload')).toBeInTheDocument();
     });
   });
 });

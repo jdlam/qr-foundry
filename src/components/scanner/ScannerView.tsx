@@ -16,7 +16,6 @@ export function ScannerView() {
     async (paths: string[]) => {
       const filePath = paths[0];
       if (filePath) {
-        // Check if it's an image file
         const ext = filePath.toLowerCase().split('.').pop();
         if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'].includes(ext || '')) {
           setError(null);
@@ -30,11 +29,8 @@ export function ScannerView() {
   );
 
   const { isDragging: isTauriDragging } = useTauriDragDrop(handleTauriFileDrop);
-
-  // Combine both drag states for visual feedback
   const isDragging = isHtmlDragging || isTauriDragging;
 
-  // Clear error when scan result changes
   useEffect(() => {
     if (scanResult) {
       setError(scanResult.error);
@@ -44,8 +40,6 @@ export function ScannerView() {
   const handleFileDrop = useCallback(
     async (file: File) => {
       setError(null);
-
-      // Read file as data URL
       const reader = new FileReader();
       reader.onloadend = async () => {
         const dataUrl = reader.result as string;
@@ -63,7 +57,6 @@ export function ScannerView() {
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsHtmlDragging(false);
-
       const file = e.dataTransfer.files[0];
       if (file && file.type.startsWith('image/')) {
         handleFileDrop(file);
@@ -78,7 +71,6 @@ export function ScannerView() {
     async (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
       if (!items) return;
-
       for (const item of items) {
         if (item.type.startsWith('image/')) {
           const file = item.getAsFile();
@@ -99,7 +91,6 @@ export function ScannerView() {
     }
   }, [pickImageFile, scanFromFile]);
 
-  // Listen for paste events
   useEffect(() => {
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
@@ -114,7 +105,6 @@ export function ScannerView() {
 
   const handleRegenerate = useCallback(() => {
     if (scanResult?.content) {
-      // Load the scanned content into the generator
       const store = useQrStore.getState();
       store.setContent(scanResult.content);
       toast.success('Loaded in Generator');
@@ -124,9 +114,15 @@ export function ScannerView() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Left Panel */}
-      <div className="w-72 border-r border-border flex flex-col overflow-hidden shrink-0">
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">
+      <div
+        className="w-72 flex flex-col overflow-hidden shrink-0"
+        style={{ borderRight: '1px solid var(--border)' }}
+      >
+        <div className="flex-1 overflow-y-auto p-5">
+          <div
+            className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] mb-2.5"
+            style={{ color: 'var(--text-muted)' }}
+          >
             Scan QR Code
           </div>
 
@@ -139,22 +135,28 @@ export function ScannerView() {
             }}
             onDragLeave={() => setIsHtmlDragging(false)}
             onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-              isDragging
-                ? 'border-accent bg-accent/5'
-                : 'border-border-light hover:border-accent/50'
-            }`}
+            className="border-2 border-dashed rounded-sm p-8 text-center cursor-pointer transition-colors"
+            style={{
+              borderColor: isDragging ? 'var(--accent)' : 'var(--dropzone-border)',
+              background: isDragging ? 'var(--accent-bg-tint)' : 'var(--dropzone-bg)',
+            }}
           >
             {isScanning ? (
               <>
-                <span className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin inline-block mb-2" />
-                <div className="text-xs text-accent">Scanning...</div>
+                <span className="w-6 h-6 border-2 rounded-full animate-spin inline-block mb-2" style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }} />
+                <div className="text-xs" style={{ color: 'var(--accent)' }}>Scanning...</div>
               </>
             ) : (
               <>
-                <span className="text-3xl opacity-40">⊞</span>
-                <div className="text-xs text-muted mt-2">Drop QR image here</div>
-                <div className="text-[10px] text-dim mt-1">
+                <svg className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--text-faint)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                  <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                  <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                  <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                </svg>
+                <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Drop QR image here</div>
+                <div className="text-[10px] mt-1" style={{ color: 'var(--text-faint)' }}>
                   or click to browse / paste (⌘V)
                 </div>
               </>
@@ -163,33 +165,44 @@ export function ScannerView() {
 
           {/* Result */}
           {(scanResult || error) && (
-            <div className="mt-5 p-3 bg-surface-hover rounded-lg border border-border">
-              <div className="text-[10px] text-dim uppercase tracking-wider mb-1.5">
+            <div
+              className="mt-5 p-3 rounded-sm border"
+              style={{ background: 'var(--input-bg)', borderColor: 'var(--border)' }}
+            >
+              <div
+                className="text-[10px] uppercase tracking-wider mb-1.5"
+                style={{ color: 'var(--text-faint)' }}
+              >
                 {error || !scanResult?.success ? 'Error' : 'Decoded Content'}
               </div>
               {error || !scanResult?.success ? (
-                <div className="text-xs text-danger">
+                <div className="text-xs" style={{ color: 'var(--danger)' }}>
                   {error || scanResult?.error || 'Unknown error'}
                 </div>
               ) : (
                 <>
-                  <div className="font-mono text-xs text-text break-all max-h-32 overflow-y-auto">
+                  <div className="font-mono text-xs break-all max-h-32 overflow-y-auto" style={{ color: 'var(--text-primary)' }}>
                     {scanResult?.content}
                   </div>
                   <div className="flex items-center justify-between mt-3">
-                    <span className="text-[9px] font-semibold bg-accent/15 text-accent px-2 py-0.5 rounded uppercase">
+                    <span
+                      className="text-[9px] font-semibold px-2 py-0.5 rounded-sm uppercase"
+                      style={{ background: 'var(--accent-bg-tint)', color: 'var(--accent)' }}
+                    >
                       {scanResult?.qrType}
                     </span>
                     <div className="flex gap-2">
                       <button
                         onClick={handleCopyContent}
-                        className="text-[10px] text-muted hover:text-accent transition-colors"
+                        className="text-[10px] transition-colors"
+                        style={{ color: 'var(--text-muted)' }}
                       >
                         Copy
                       </button>
                       <button
                         onClick={handleRegenerate}
-                        className="text-[10px] text-muted hover:text-accent transition-colors"
+                        className="text-[10px] transition-colors"
+                        style={{ color: 'var(--text-muted)' }}
                       >
                         Re-generate
                       </button>
@@ -204,7 +217,11 @@ export function ScannerView() {
           {scanResult && (
             <button
               onClick={clearScan}
-              className="w-full mt-3 py-2 text-xs text-muted hover:text-text border border-border rounded-lg hover:bg-surface-hover transition-colors"
+              className="w-full mt-3 py-2 text-xs rounded-sm border transition-colors"
+              style={{
+                color: 'var(--text-muted)',
+                borderColor: 'var(--border)',
+              }}
             >
               Clear
             </button>
@@ -213,48 +230,70 @@ export function ScannerView() {
       </div>
 
       {/* Right Panel */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center p-6"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, var(--surface-hover) 0%, var(--bg) 70%)',
-        }}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
         {scanResult?.success ? (
           <div className="text-center max-w-md">
-            <div className="text-5xl mb-4">✓</div>
-            <div className="text-lg text-text font-semibold mb-2">QR Code Decoded</div>
-            <div className="font-mono text-sm text-muted bg-surface p-4 rounded-lg border border-border break-all max-h-48 overflow-y-auto">
+            <div className="text-5xl mb-4" style={{ color: 'var(--success)' }}>✓</div>
+            <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>QR Code Decoded</div>
+            <div
+              className="font-mono text-sm p-4 rounded-sm border break-all max-h-48 overflow-y-auto"
+              style={{
+                color: 'var(--text-muted)',
+                background: 'var(--input-bg)',
+                borderColor: 'var(--border)',
+              }}
+            >
               {scanResult.content}
             </div>
             <div className="flex gap-2 mt-4 justify-center flex-wrap">
               <button
                 onClick={handleCopyContent}
-                className="px-4 py-2 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'var(--btn-secondary-bg)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-secondary)',
+                }}
               >
-                📋 Copy Content
+                Copy Content
               </button>
               {scanResult.qrType === 'url' && (
                 <button
                   onClick={() => window.open(scanResult.content!, '_blank')}
-                  className="px-4 py-2 bg-accent/20 border border-accent/50 text-accent rounded-lg text-sm font-semibold hover:bg-accent/30 transition-all"
+                  className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                  style={{
+                    background: 'var(--accent-bg-tint)',
+                    borderColor: 'var(--accent)',
+                    color: 'var(--accent)',
+                  }}
                 >
-                  🔗 Open URL
+                  Open URL
                 </button>
               )}
               <button
                 onClick={handleRegenerate}
-                className="px-4 py-2 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'var(--btn-secondary-bg)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-secondary)',
+                }}
               >
-                ◧ Re-generate
+                Re-generate
               </button>
             </div>
           </div>
         ) : (
-          <div className="text-center text-dim">
-            <span className="text-5xl block mb-3 opacity-30">⊞</span>
-            <div className="text-sm text-muted">Drop a QR code image to scan</div>
-            <div className="text-[11px] mt-1">Supports PNG, JPG, WebP, and clipboard</div>
+          <div className="text-center">
+            <svg className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--text-faint)', opacity: 0.3 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+              <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+            </svg>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Drop a QR code image to scan</div>
+            <div className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>Supports PNG, JPG, WebP, and clipboard</div>
           </div>
         )}
       </div>

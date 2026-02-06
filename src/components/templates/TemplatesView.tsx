@@ -71,11 +71,7 @@ export function TemplatesView() {
     } else {
       toast.error('Failed to save template');
     }
-  }, [
-    newTemplateName,
-    store,
-    saveTemplate,
-  ]);
+  }, [newTemplateName, store, saveTemplate]);
 
   const handleDelete = useCallback(
     async (id: number) => {
@@ -122,10 +118,16 @@ export function TemplatesView() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Left Panel */}
-      <div className="w-72 border-r border-border flex flex-col overflow-hidden shrink-0">
-        <div className="p-4 border-b border-border">
+      <div
+        className="w-72 flex flex-col overflow-hidden shrink-0"
+        style={{ borderRight: '1px solid var(--border)' }}
+      >
+        <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[10px] font-bold text-muted uppercase tracking-wider">
+            <div
+              className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em]"
+              style={{ color: 'var(--text-muted)' }}
+            >
               Templates ({templates.length})
             </div>
             <button
@@ -133,7 +135,12 @@ export function TemplatesView() {
                 setIsCreating(true);
                 setSelectedTemplate(null);
               }}
-              className="text-[10px] font-semibold bg-accent/20 border border-accent/40 text-accent px-2 py-1 rounded hover:bg-accent/30 transition-colors"
+              className="text-[10px] font-semibold px-2 py-1 rounded-sm border transition-colors"
+              style={{
+                background: 'var(--accent-bg-tint)',
+                borderColor: 'var(--accent)',
+                color: 'var(--accent)',
+              }}
             >
               + Save Current
             </button>
@@ -142,9 +149,9 @@ export function TemplatesView() {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {isLoading ? (
-            <div className="text-center text-dim text-xs py-8">Loading...</div>
+            <div className="text-center text-xs py-8" style={{ color: 'var(--text-faint)' }}>Loading...</div>
           ) : templates.length === 0 ? (
-            <div className="text-center text-dim text-xs py-8">
+            <div className="text-center text-xs py-8" style={{ color: 'var(--text-faint)' }}>
               No templates yet. Save your current style as a template!
             </div>
           ) : (
@@ -154,16 +161,22 @@ export function TemplatesView() {
                 <div
                   key={template.id}
                   onClick={() => handleSelectTemplate(template)}
-                  className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center gap-3 ${
-                    selectedTemplate?.id === template.id
-                      ? 'bg-accent/10 border-accent/30'
-                      : 'bg-surface-hover border-border hover:border-accent/20'
-                  }`}
+                  className="p-3 rounded-sm border cursor-pointer transition-all flex items-center gap-3"
+                  style={{
+                    background: selectedTemplate?.id === template.id ? 'var(--active-bg)' : 'var(--input-bg)',
+                    borderColor: selectedTemplate?.id === template.id ? 'var(--accent)' : 'var(--border)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedTemplate?.id !== template.id) e.currentTarget.style.borderColor = 'var(--text-faint)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedTemplate?.id !== template.id) e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
                 >
                   {/* Style Preview */}
                   <div
-                    className="w-10 h-10 rounded-md border-2 border-border flex items-center justify-center shrink-0"
-                    style={{ background: preview.bg }}
+                    className="w-10 h-10 rounded-sm border-2 flex items-center justify-center shrink-0"
+                    style={{ background: preview.bg, borderColor: 'var(--border)' }}
                   >
                     <div
                       className="w-4 h-4"
@@ -180,15 +193,18 @@ export function TemplatesView() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-text flex items-center gap-1.5">
+                    <div className="text-xs font-semibold flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
                       {template.name}
                       {template.isDefault && (
-                        <span className="text-[9px] bg-accent/20 text-accent px-1.5 rounded">
+                        <span
+                          className="text-[9px] px-1.5 rounded-sm"
+                          style={{ background: 'var(--accent-bg-tint)', color: 'var(--accent)' }}
+                        >
                           Default
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-dim mt-0.5">
+                    <div className="text-[10px] mt-0.5" style={{ color: 'var(--text-faint)' }}>
                       {preview.dotStyle} dots
                     </div>
                   </div>
@@ -200,33 +216,43 @@ export function TemplatesView() {
       </div>
 
       {/* Right Panel */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center p-6"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, var(--surface-hover) 0%, var(--bg) 70%)',
-        }}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
         {isCreating ? (
           <div className="text-center max-w-md w-full">
-            <div className="text-5xl mb-4">◫</div>
-            <div className="text-lg text-text font-semibold mb-4">Save as Template</div>
+            <svg className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--text-faint)', opacity: 0.5 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="1" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="9" y1="21" x2="9" y2="9" />
+            </svg>
+            <div className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Save as Template</div>
             <input
               type="text"
               value={newTemplateName}
               onChange={(e) => setNewTemplateName(e.target.value)}
               placeholder="Template name..."
-              className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-text outline-none focus:border-accent/50 mb-4"
+              className="w-full rounded-sm px-4 py-3 text-sm outline-none border-2 mb-4 transition-colors"
+              style={{
+                background: 'var(--input-bg)',
+                borderColor: 'var(--input-border)',
+                color: 'var(--text-primary)',
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--input-border)'; }}
               autoFocus
             />
-            <div className="text-xs text-dim mb-4">
+            <div className="text-xs mb-4" style={{ color: 'var(--text-faint)' }}>
               This will save your current style settings (colors, dots, logo, etc.)
             </div>
             <div className="flex gap-2 justify-center">
               <button
                 onClick={handleSaveCurrentAsTemplate}
                 disabled={!newTemplateName.trim()}
-                className="px-6 py-2 bg-accent/20 border border-accent/50 text-accent rounded-lg text-sm font-semibold hover:bg-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 rounded-sm text-sm font-semibold border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'var(--accent-bg-tint)',
+                  borderColor: 'var(--accent)',
+                  color: 'var(--accent)',
+                }}
               >
                 Save Template
               </button>
@@ -235,7 +261,12 @@ export function TemplatesView() {
                   setIsCreating(false);
                   setNewTemplateName('');
                 }}
-                className="px-4 py-2 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'var(--btn-secondary-bg)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-secondary)',
+                }}
               >
                 Cancel
               </button>
@@ -243,39 +274,62 @@ export function TemplatesView() {
           </div>
         ) : selectedTemplate ? (
           <div className="text-center max-w-md">
-            <div className="text-5xl mb-4">◫</div>
-            <div className="text-lg text-text font-semibold mb-2">{selectedTemplate.name}</div>
+            <svg className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--text-faint)', opacity: 0.5 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="1" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="9" y1="21" x2="9" y2="9" />
+            </svg>
+            <div className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{selectedTemplate.name}</div>
             {selectedTemplate.isDefault && (
-              <div className="text-xs text-accent mb-4">★ Default Template</div>
+              <div className="text-xs mb-4" style={{ color: 'var(--accent)' }}>Default Template</div>
             )}
             <div className="flex gap-2 mt-4 justify-center flex-wrap">
               <button
                 onClick={() => handleApplyTemplate(selectedTemplate)}
-                className="px-4 py-2 bg-accent/20 border border-accent/50 text-accent rounded-lg text-sm font-semibold hover:bg-accent/30 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'var(--accent-bg-tint)',
+                  borderColor: 'var(--accent)',
+                  color: 'var(--accent)',
+                }}
               >
                 Apply Style
               </button>
               {!selectedTemplate.isDefault && (
                 <button
                   onClick={() => handleSetDefault(selectedTemplate.id)}
-                  className="px-4 py-2 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all"
+                  className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                  style={{
+                    background: 'var(--btn-secondary-bg)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-secondary)',
+                  }}
                 >
-                  ★ Set as Default
+                  Set as Default
                 </button>
               )}
               <button
                 onClick={() => handleDelete(selectedTemplate.id)}
-                className="px-4 py-2 bg-danger/10 border border-danger/30 text-danger rounded-lg text-sm font-semibold hover:bg-danger/20 transition-all"
+                className="px-4 py-2 rounded-sm text-sm font-semibold border transition-all"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.05)',
+                  borderColor: 'var(--danger)',
+                  color: 'var(--danger)',
+                }}
               >
-                🗑 Delete
+                Delete
               </button>
             </div>
           </div>
         ) : (
-          <div className="text-center text-dim">
-            <span className="text-5xl block mb-3 opacity-30">◫</span>
-            <div className="text-sm text-muted">Select a template to preview</div>
-            <div className="text-[11px] mt-1">Or save your current style as a new template</div>
+          <div className="text-center">
+            <svg className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--text-faint)', opacity: 0.3 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="1" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="9" y1="21" x2="9" y2="9" />
+            </svg>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Select a template to preview</div>
+            <div className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>Or save your current style as a new template</div>
           </div>
         )}
       </div>

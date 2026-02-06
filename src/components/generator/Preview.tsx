@@ -65,7 +65,6 @@ export function Preview() {
   );
 
   const handleValidate = useCallback(async () => {
-    // Use a clean, simple QR image for validation (more reliable decoding)
     const dataUrl = await getValidationDataUrl();
     if (dataUrl) {
       await validate(dataUrl);
@@ -87,7 +86,6 @@ export function Preview() {
         // Fall back to browser clipboard
       }
 
-      // Browser fallback
       const blob = await getBlob('png');
       if (blob) {
         try {
@@ -116,7 +114,6 @@ export function Preview() {
           toast.error('Failed to export PNG');
         }
       } catch {
-        // Fall back to browser download
         const blob = await getBlob('png');
         if (blob) {
           const url = URL.createObjectURL(blob);
@@ -148,7 +145,6 @@ export function Preview() {
           toast.error('Failed to export SVG');
         }
       } catch {
-        // Fall back to browser download
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -170,25 +166,60 @@ export function Preview() {
   }[errorCorrection];
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-6">
       {/* QR Preview Container */}
-      <div className="bg-surface rounded-2xl p-6 border border-border shadow-lg">
-        <div
-          ref={containerRef}
-          className="w-[300px] h-[300px] flex items-center justify-center rounded-lg"
-          style={transparentBg ? checkerboardStyle : undefined}
-        />
-      </div>
+      <div
+        ref={containerRef}
+        className="w-[280px] h-[280px] flex items-center justify-center rounded-sm"
+        style={{
+          border: '1px solid var(--border)',
+          background: transparentBg ? undefined : 'var(--qr-bg)',
+          ...(transparentBg ? checkerboardStyle : {}),
+        }}
+      />
 
-      {/* Info Bar */}
-      <div className="flex gap-4 text-xs text-muted font-mono">
-        <span>
-          Size: {exportSize}×{exportSize}
+      {/* Meta Info Row */}
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5">
+          <span
+            className="font-mono text-[11px] font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--text-faint)' }}
+          >
+            Size
+          </span>
+          <select
+            value={exportSize}
+            onChange={(e) => useQrStore.getState().setExportSize(Number(e.target.value))}
+            className="font-mono text-xs font-medium rounded-sm border outline-none cursor-pointer appearance-none"
+            style={{
+              padding: '4px 24px 4px 8px',
+              background: 'var(--input-bg)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-secondary)',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239ca3af' stroke-width='1.5'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 6px center',
+            }}
+          >
+            {[512, 1024, 2048, 4096].map((size) => (
+              <option key={size} value={size}>{size}px</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span
+            className="font-mono text-[11px] font-semibold uppercase tracking-wide"
+            style={{ color: 'var(--text-faint)' }}
+          >
+            EC
+          </span>
+          <span className="font-mono text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+            {errorCorrection} ({ecPercent})
+          </span>
+        </div>
+        <span className="font-mono text-[11px]" style={{ color: 'var(--text-faint)' }}>
+          {inputType.toUpperCase()}
         </span>
-        <span>
-          EC: {errorCorrection} ({ecPercent})
-        </span>
-        <span>Type: {inputType.toUpperCase()}</span>
       </div>
 
       {/* Validation Badge */}
@@ -200,56 +231,106 @@ export function Preview() {
         isValidating={isValidating}
       />
 
-      {/* Size Selector */}
-      <div className="flex gap-1">
-        {[512, 1024, 2048, 4096].map((size) => (
-          <button
-            key={size}
-            onClick={() => useQrStore.getState().setExportSize(size)}
-            className={`px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all ${
-              exportSize === size
-                ? 'bg-accent/20 border border-accent/60 text-accent'
-                : 'bg-surface-hover border border-border text-muted hover:text-text'
-            }`}
-          >
-            {size}px
-          </button>
-        ))}
-      </div>
-
-      {/* Export Buttons */}
-      <div className="flex gap-2 flex-wrap justify-center">
-        <button
-          onClick={handleCopy}
-          disabled={!content || isExporting}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-            copySuccess
-              ? 'bg-success/20 border border-success/50 text-success'
-              : 'bg-surface-hover border border-border hover:bg-border/50'
-          }`}
-        >
-          <span>{copySuccess ? '✓' : '📋'}</span>
-          {copySuccess ? 'Copied!' : 'Copy'}
-        </button>
+      {/* Export Bar */}
+      <div className="flex gap-2 w-full max-w-[400px]">
+        {/* PNG - Primary */}
         <button
           onClick={handleExportPng}
           disabled={!content || isExporting}
-          className="flex items-center gap-2 px-4 py-2 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-sm border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: exportSuccess === 'PNG saved!' ? 'var(--success-bg)' : 'var(--accent)',
+            borderColor: exportSuccess === 'PNG saved!' ? 'var(--success)' : 'var(--accent)',
+            color: exportSuccess === 'PNG saved!' ? 'var(--success)' : 'var(--btn-primary-text)',
+          }}
         >
-          <span>🖼</span> PNG
+          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="1" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          <span className="text-xs font-semibold">{exportSuccess === 'PNG saved!' ? 'Saved!' : 'PNG'}</span>
         </button>
+
+        {/* SVG */}
         <button
           onClick={handleExportSvg}
           disabled={!content || isExporting}
-          className="flex items-center gap-2 px-4 py-2 bg-surface-hover border border-border rounded-lg text-sm font-semibold hover:bg-border/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-sm border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: exportSuccess === 'SVG saved!' ? 'var(--success-bg)' : 'var(--input-bg)',
+            borderColor: exportSuccess === 'SVG saved!' ? 'var(--success)' : 'var(--border)',
+            color: exportSuccess === 'SVG saved!' ? 'var(--success)' : 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (!exportSuccess) e.currentTarget.style.borderColor = 'var(--text-faint)';
+          }}
+          onMouseLeave={(e) => {
+            if (!exportSuccess) e.currentTarget.style.borderColor = 'var(--border)';
+          }}
         >
-          <span>◇</span> SVG
+          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
+          </svg>
+          <span className="text-xs font-semibold">{exportSuccess === 'SVG saved!' ? 'Saved!' : 'SVG'}</span>
+          <span className="font-mono text-[8px] font-bold uppercase" style={{ color: 'var(--badge-pro-text)' }}>PRO</span>
+        </button>
+
+        {/* PDF placeholder */}
+        <button
+          disabled
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-sm border-2 opacity-50 cursor-not-allowed"
+          style={{
+            background: 'var(--input-bg)',
+            borderColor: 'var(--border)',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          <span className="text-xs font-semibold">PDF</span>
+          <span className="font-mono text-[8px] font-bold uppercase" style={{ color: 'var(--badge-pro-text)' }}>PRO</span>
+        </button>
+
+        {/* Copy */}
+        <button
+          onClick={handleCopy}
+          disabled={!content || isExporting}
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-sm border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: copySuccess ? 'var(--success-bg)' : 'var(--input-bg)',
+            borderColor: copySuccess ? 'var(--success)' : 'var(--border)',
+            color: copySuccess ? 'var(--success)' : 'var(--text-secondary)',
+          }}
+          onMouseEnter={(e) => {
+            if (!copySuccess) e.currentTarget.style.borderColor = 'var(--text-faint)';
+          }}
+          onMouseLeave={(e) => {
+            if (!copySuccess) e.currentTarget.style.borderColor = 'var(--border)';
+          }}
+        >
+          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {copySuccess ? (
+              <polyline points="20 6 9 17 4 12" />
+            ) : (
+              <>
+                <rect x="9" y="9" width="13" height="13" rx="1" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </>
+            )}
+          </svg>
+          <span className="text-xs font-semibold">{copySuccess ? 'Copied!' : 'Copy'}</span>
         </button>
       </div>
 
       {/* Export Success Message */}
       {exportSuccess && (
-        <div className="text-xs text-success font-medium animate-pulse">{exportSuccess}</div>
+        <div className="text-xs font-medium animate-pulse" style={{ color: 'var(--success)' }}>
+          {exportSuccess}
+        </div>
       )}
     </div>
   );
