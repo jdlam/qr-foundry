@@ -10,15 +10,15 @@ import {
 } from '../../lib/formatters';
 import type { QrType } from '../../types/qr';
 
-const INPUT_TYPES: { id: QrType; label: string; icon: string }[] = [
-  { id: 'url', label: 'URL', icon: '🔗' },
-  { id: 'text', label: 'Text', icon: '✎' },
-  { id: 'wifi', label: 'WiFi', icon: '📶' },
-  { id: 'phone', label: 'Phone', icon: '📞' },
-  { id: 'vcard', label: 'vCard', icon: '👤' },
-  { id: 'email', label: 'Email', icon: '✉️' },
-  { id: 'sms', label: 'SMS', icon: '💬' },
-  { id: 'geo', label: 'Location', icon: '📍' },
+const INPUT_TYPES: { id: QrType; label: string; badge?: 'pro' }[] = [
+  { id: 'url', label: 'URL' },
+  { id: 'text', label: 'Text' },
+  { id: 'wifi', label: 'WiFi' },
+  { id: 'phone', label: 'Phone' },
+  { id: 'vcard', label: 'vCard', badge: 'pro' },
+  { id: 'email', label: 'Email', badge: 'pro' },
+  { id: 'sms', label: 'SMS', badge: 'pro' },
+  { id: 'geo', label: 'Location', badge: 'pro' },
 ];
 
 export function InputPanel() {
@@ -40,7 +40,25 @@ export function InputPanel() {
   } = useQrStore();
 
   const inputClassName =
-    'w-full bg-surface-hover border border-border rounded-md px-3 py-2 text-sm font-mono text-text outline-none focus:border-accent/50 transition-colors';
+    'w-full text-sm rounded-sm px-3 py-2.5 outline-none transition-all' +
+    ' border-2' +
+    ' focus:shadow-[0_0_0_3px_var(--accent-focus-ring)]';
+
+  const inputStyle: React.CSSProperties = {
+    background: 'var(--input-bg)',
+    borderColor: 'var(--input-border)',
+    color: 'var(--text-primary)',
+  };
+
+  const inputFocusColor = 'var(--accent)';
+
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    e.currentTarget.style.borderColor = inputFocusColor;
+  };
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    e.currentTarget.style.borderColor = 'var(--input-border)';
+  };
 
   const renderInputFields = () => {
     switch (inputType) {
@@ -55,6 +73,9 @@ export function InputPanel() {
               }}
               placeholder="Network name (SSID)"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <input
               value={wifiConfig.password}
@@ -65,6 +86,9 @@ export function InputPanel() {
               placeholder="Password"
               type="password"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <select
               value={wifiConfig.encryption}
@@ -73,17 +97,23 @@ export function InputPanel() {
                 setWifiConfig({ encryption });
                 setContent(formatWifi({ ...wifiConfig, encryption }));
               }}
-              className={`${inputClassName} cursor-pointer appearance-none bg-[length:16px_16px] bg-[right_8px_center] bg-no-repeat`}
+              className={`${inputClassName} cursor-pointer appearance-none`}
               style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                ...inputStyle,
                 paddingRight: '32px',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 8px center',
+                backgroundSize: '16px 16px',
               }}
+              onFocus={handleInputFocus as unknown as React.FocusEventHandler<HTMLSelectElement>}
+              onBlur={handleInputBlur as unknown as React.FocusEventHandler<HTMLSelectElement>}
             >
               <option value="WPA">WPA/WPA2</option>
               <option value="WEP">WEP</option>
               <option value="nopass">No Password</option>
             </select>
-            <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
+            <label className="flex items-center gap-2 text-[13px] cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
               <input
                 type="checkbox"
                 checked={wifiConfig.hidden}
@@ -110,6 +140,9 @@ export function InputPanel() {
                 }}
                 placeholder="First name"
                 className={inputClassName}
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
               />
               <input
                 value={vcardConfig.lastName}
@@ -119,6 +152,9 @@ export function InputPanel() {
                 }}
                 placeholder="Last name"
                 className={inputClassName}
+                style={inputStyle}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
               />
             </div>
             <input
@@ -129,6 +165,9 @@ export function InputPanel() {
               }}
               placeholder="Organization"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <input
               value={vcardConfig.phone || ''}
@@ -138,6 +177,9 @@ export function InputPanel() {
               }}
               placeholder="Phone"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <input
               value={vcardConfig.email || ''}
@@ -147,6 +189,9 @@ export function InputPanel() {
               }}
               placeholder="Email"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <input
               value={vcardConfig.url || ''}
@@ -156,6 +201,9 @@ export function InputPanel() {
               }}
               placeholder="Website"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
           </div>
         );
@@ -171,6 +219,9 @@ export function InputPanel() {
               }}
               placeholder="Recipient email"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <input
               value={emailConfig.subject || ''}
@@ -180,6 +231,9 @@ export function InputPanel() {
               }}
               placeholder="Subject"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <textarea
               value={emailConfig.body || ''}
@@ -190,6 +244,9 @@ export function InputPanel() {
               placeholder="Body"
               rows={2}
               className={`${inputClassName} resize-y`}
+              style={inputStyle}
+              onFocus={handleInputFocus as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
+              onBlur={handleInputBlur as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
             />
           </div>
         );
@@ -205,6 +262,9 @@ export function InputPanel() {
               }}
               placeholder="Phone number"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <textarea
               value={smsConfig.message || ''}
@@ -215,6 +275,9 @@ export function InputPanel() {
               placeholder="Message (optional)"
               rows={2}
               className={`${inputClassName} resize-y`}
+              style={inputStyle}
+              onFocus={handleInputFocus as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
+              onBlur={handleInputBlur as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
             />
           </div>
         );
@@ -226,6 +289,9 @@ export function InputPanel() {
             onChange={(e) => setContent(formatPhone(e.target.value))}
             placeholder="+1 555-0123"
             className={inputClassName}
+            style={inputStyle}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
           />
         );
 
@@ -240,6 +306,9 @@ export function InputPanel() {
               }}
               placeholder="Latitude"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
             <input
               value={geoConfig.longitude}
@@ -249,6 +318,9 @@ export function InputPanel() {
               }}
               placeholder="Longitude"
               className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
             />
           </div>
         );
@@ -260,6 +332,9 @@ export function InputPanel() {
             onChange={(e) => setContent(formatUrl(e.target.value))}
             placeholder="https://example.com"
             className={inputClassName}
+            style={inputStyle}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
           />
         );
 
@@ -271,43 +346,86 @@ export function InputPanel() {
             placeholder="Enter your text..."
             rows={3}
             className={`${inputClassName} resize-y min-h-[60px]`}
+            style={inputStyle}
+            onFocus={handleInputFocus as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
+            onBlur={handleInputBlur as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
           />
         );
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Content Type Selector */}
       <div>
-        <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">
-          Content Type
+        <div
+          className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] mb-2.5"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          Type
         </div>
-        <div className="grid grid-cols-3 gap-1">
-          {INPUT_TYPES.map((type) => (
-            <button
-              key={type.id}
-              onClick={() => setInputType(type.id)}
-              className={`flex flex-col items-center gap-1 p-2 rounded-md text-[10px] font-semibold transition-all ${
-                inputType === type.id
-                  ? 'bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/50 text-accent'
-                  : 'bg-surface-hover border border-border text-muted hover:text-text'
-              }`}
-            >
-              <span className="text-base">{type.icon}</span>
-              <span>{type.label}</span>
-            </button>
-          ))}
+        <div className="flex flex-col gap-0.5">
+          {INPUT_TYPES.map((type) => {
+            const isActive = inputType === type.id;
+            return (
+              <button
+                key={type.id}
+                onClick={() => setInputType(type.id)}
+                className="flex items-center gap-2.5 w-full text-left rounded-sm transition-colors"
+                style={{
+                  padding: '7px 10px',
+                  background: isActive ? 'var(--active-bg)' : 'transparent',
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.currentTarget.style.background = 'var(--hover-bg)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                {/* Radio circle */}
+                <div
+                  className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors"
+                  style={{ borderColor: isActive ? 'var(--accent)' : 'var(--input-border)' }}
+                >
+                  {isActive && (
+                    <div
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: 'var(--accent)' }}
+                    />
+                  )}
+                </div>
+                <span className="text-sm font-medium flex-1">{type.label}</span>
+                {type.badge && (
+                  <span
+                    className="font-mono text-[9px] font-bold uppercase tracking-wide px-[5px] py-px rounded-sm"
+                    style={{
+                      background: 'var(--badge-pro-bg)',
+                      color: 'var(--badge-pro-text)',
+                    }}
+                  >
+                    PRO
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Content Input */}
       <div>
-        <div className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">
+        <div
+          className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] mb-2.5"
+          style={{ color: 'var(--text-muted)' }}
+        >
           Content
         </div>
         {renderInputFields()}
-        <div className="text-[10px] text-dim font-mono mt-1">{content.length} chars</div>
+        <div className="text-[11px] font-mono mt-1.5" style={{ color: 'var(--text-faint)' }}>
+          {content.length} chars
+        </div>
       </div>
     </div>
   );

@@ -275,7 +275,9 @@ describe('ScannerView', () => {
 
       render(<ScannerView />);
 
-      fireEvent.click(screen.getByText('Re-generate'));
+      // Re-generate appears in both sidebar and main view
+      const regenButtons = screen.getAllByText('Re-generate');
+      fireEvent.click(regenButtons[0]);
 
       expect(useQrStore.getState().content).toBe('https://example.com');
       expect(toast.success).toHaveBeenCalledWith('Loaded in Generator');
