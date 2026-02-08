@@ -1,0 +1,7 @@
+{
+  "name": "qr-foundry",
+  "private": true,
+  "scripts": {
+    "sync": "for dir in . qr-foundry-app qr-foundry-worker qr-foundry-api qr-foundry-site; do echo \"\\n=== $dir ===\" && git -C \"$dir\" checkout main && git -C \"$dir\" pull; done"
+  }
+}
