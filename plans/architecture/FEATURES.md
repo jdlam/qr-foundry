@@ -105,8 +105,8 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | JWT issuance and validation | -- | -- | -- | [x] Billing API |
 | Token refresh | -- | -- | -- | [x] Billing API |
 | Password reset | -- | -- | -- | [ ] Billing API |
-| Login/signup UI | -- | -- | -- | [ ] App |
-| Token storage (keychain / cookies) | -- | -- | -- | [ ] App |
+| Login/signup UI | -- | -- | -- | [x] App |
+| Token storage (LazyStore / localStorage) | -- | -- | -- | [x] App |
 | **Billing & Subscriptions** | | | | |
 | Stripe Checkout (Pro, Subscription, Add-on) | -- | -- | -- | [x] Billing API |
 | Stripe Customer Portal | -- | -- | -- | [x] Billing API |
@@ -121,7 +121,7 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Windows desktop app (Tauri) | Yes | Yes | Yes | [x] |
 | Linux desktop app (Tauri) | Yes | Yes | Yes | [x] |
 | Web app (`app.qr-foundry.com`) | Yes | Yes | Yes | [ ] |
-| Platform adapters (8 adapters, auth pending) | -- | -- | -- | [~] App |
+| Platform adapters (8 adapters including auth) | -- | -- | -- | [x] App |
 | Sidebar navigation | Yes | Yes | Yes | [x] App |
 | Title bar with theme toggle | Yes | Yes | Yes | [x] App |
 | Status bar (dimensions, EC level, validation) | Yes | Yes | Yes | [x] App |
@@ -379,15 +379,15 @@ Account system for Pro purchases, subscriptions, and cross-device access.
 - [x] User info endpoint: `GET /api/me` (Billing API)
 - [x] Password hashing: PBKDF2-SHA256 via Web Crypto API (Billing API)
 
-**Features (App — planned):**
-- [ ] Login/signup UI (modal or dedicated screen) (App, see app.md Phase 1)
-- [ ] Token storage: OS keychain via Tauri secure storage (Desktop App)
-- [ ] Token storage: `httpOnly` cookie or `localStorage` (Web App)
-- [ ] Shared `{ getToken, setToken, clearToken }` interface (App)
-- [ ] Auth state in app store (logged in/out, user info) (App)
-- [ ] Session expiry handling (redirect to login, show message) (App)
-- [ ] Account section in settings (email, plan tier, logout) (App)
-- [ ] Token refresh before expiry (App)
+**Features (App — shipped):**
+- [x] Login/signup UI (`AuthModal` using `@radix-ui/react-dialog`) (App, see app.md Phase 1)
+- [x] Token storage: `LazyStore` from `@tauri-apps/plugin-store` with file `auth.json` (Desktop App)
+- [x] Token storage: `localStorage` with key `qr-foundry-token` (Web App)
+- [x] Shared `AuthAdapter` interface with `{ getToken, setToken, clearToken }` (App)
+- [x] Auth state in Zustand `authStore` (user, plan, token, loading states) (App)
+- [ ] Session expiry handling (redirect to login, show message) (App) — partial: 401 during refresh triggers logout
+- [~] Account section in sidebar (email, plan tier badge, Sign Out button) (App) — no dedicated settings screen yet
+- [x] Token refresh scheduled 5 minutes before JWT `exp` via `setTimeout` (App)
 
 **Services:** Billing API, Desktop App, Web App
 
@@ -478,7 +478,7 @@ Ship the same React codebase on desktop (Tauri) and web, with platform-specific 
 - [x] Design token system: 60+ CSS variables, Inter + JetBrains Mono fonts, amber accent palette (App)
 
 **Features (partially shipped):**
-- [ ] Platform adapter: auth (`platform/tauri/auth.ts` vs `platform/web/auth.ts`) (App, see app.md Phase 5) — not yet implemented
+- [x] Platform adapter: auth (`platform/tauri/auth.ts` via LazyStore, `platform/web/auth.ts` via localStorage) (App)
 - [x] Platform adapter: filesystem/export (Tauri invoke vs browser download API) (App)
 - [x] Platform adapter: clipboard (Tauri clipboard API vs browser Clipboard API) (App)
 - [x] Platform adapter: history (Tauri SQLite vs localStorage) (App)
@@ -611,20 +611,20 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Customization | 9 | 1 | 0 | 10 |
 | Validation | 5 | 0 | 0 | 5 |
 | Export | 3 | 0 | 3 | 6 |
-| Batch Generation | 5 | 1 | 0 | 6 |
-| QR Scanner | 4 | 1 | 0 | 5 |
-| History & Templates | 6 | 1 | 1 | 8 |
+| Batch Generation | 6 | 1 | 0 | 7 |
+| QR Scanner | 5 | 1 | 0 | 6 |
+| History & Templates | 7 | 1 | 1 | 9 |
 | Dynamic QR Codes (Worker) | 16 | 0 | 5 | 21 |
 | Scan Analytics (Worker) | 10 | 0 | 6 | 16 |
-| User Accounts & Auth | 6 | 0 | 10 | 16 |
+| User Accounts & Auth | 12 | 1 | 3 | 16 |
 | Billing & Subscriptions | 4 | 0 | 6 | 10 |
 | Trial Management | 5 | 0 | 3 | 8 |
 | Feature Gating | 2 | 0 | 5 | 7 |
-| Platform & Distribution | 20 | 0 | 9 | 29 |
+| Platform & Distribution | 21 | 0 | 8 | 29 |
 | Marketing Site | 0 | 0 | 12 | 12 |
 | Settings & Preferences | 1 | 0 | 12 | 13 |
 | Native App Features | 0 | 0 | 10 | 10 |
-| Infrastructure | 4 | 1 | 5 | 10 |
-| **Totals** | **110** | **5** | **88** | **203** |
+| Infrastructure | 4 | 0 | 3 | 7 |
+| **Totals** | **120** | **5** | **78** | **203** |
 
-Core QR generation, customization, validation, and the Worker API backend are substantially complete. The Billing API (auth, trials, Stripe, plan tier) is largely implemented — remaining work is quota writes to Worker KV and production deployment. The desktop app has been redesigned with sidebar navigation, theme support, and a full platform abstraction layer for web builds. The primary remaining work is in app-side auth integration, feature gating UI, dynamic code and analytics UI, web app deployment, and the marketing site.
+Core QR generation, customization, validation, and the Worker API backend are substantially complete. The Billing API (auth, trials, Stripe, plan tier) is largely implemented — remaining work is quota writes to Worker KV and production deployment. The desktop app has been redesigned with sidebar navigation, theme support, a full platform abstraction layer for web builds, and app-side auth integration (login/signup modal, JWT token storage, session restore, token refresh). The primary remaining work is feature gating UI, dynamic code and analytics UI, web app deployment, and the marketing site.

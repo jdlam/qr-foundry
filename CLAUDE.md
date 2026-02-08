@@ -73,10 +73,10 @@ shared docs whenever a feature or change is implemented:
 |---------|--------|
 | **Worker** | Phases 1-7 automated complete (160 tests), manual deploy/infra pending |
 | **Billing API** | Phases 1-4 and 6 complete (107 tests), Phase 5 (quota writes) and 7 (deploy) pending |
-| **Desktop App** | Core QR features + platform adapters + UI redesign complete; auth/gating/dynamic codes pending |
+| **Desktop App** | Core QR features + platform adapters + UI redesign + auth integration complete (420 tests); feature gating/dynamic codes pending |
 | **Marketing Site** | Not started |
 
-**Feature totals:** 110 shipped, 5 partial, 88 planned (203 total)
+**Feature totals:** 120 shipped, 5 partial, 78 planned (203 total)
 
 ## Pricing Model
 

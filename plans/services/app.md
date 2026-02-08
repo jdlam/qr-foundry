@@ -17,20 +17,23 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 **Goal:** Users can sign up, log in, and maintain a session. The app stores and sends JWTs for authenticated API calls.
 
-- [ ] Implement signup flow (calls Billing API `POST /api/auth/signup`)
+- [x] Implement signup flow (calls Billing API `POST /api/auth/signup`)
   - Auto-starts 7-day Pro trial on signup
   - Returns JWT token
-- [ ] Implement login flow (calls Billing API `POST /api/auth/login`)
-- [ ] Implement logout (clear stored token)
-- [ ] Implement token refresh (call Billing API `POST /api/auth/refresh` before expiry)
-- [ ] Token storage abstraction:
-  - Desktop: OS keychain via Tauri secure storage (`platform/tauri/auth.ts`)
-  - Web: `httpOnly` cookie or `localStorage` (`platform/web/auth.ts`)
-  - Both export `{ getToken, setToken, clearToken }` interface
-- [ ] Add auth state to app store (logged in/out, current user info)
-- [ ] Add login/signup UI (modal or dedicated screen)
+- [x] Implement login flow (calls Billing API `POST /api/auth/login`)
+- [x] Implement logout (clear stored token)
+- [x] Implement token refresh (call Billing API `POST /api/auth/refresh` before expiry)
+  - Scheduled via `setTimeout` 5 minutes before JWT `exp`
+- [x] Token storage abstraction:
+  - Desktop: `LazyStore` from `@tauri-apps/plugin-store` (`platform/tauri/auth.ts`)
+  - Web: `localStorage` (`platform/web/auth.ts`)
+  - Both export `{ getToken, setToken, clearToken }` via `AuthAdapter` interface
+- [x] Add auth state to app store (Zustand `authStore` with user, plan, token, loading states)
+- [x] Add login/signup UI (`AuthModal` using `@radix-ui/react-dialog`)
 - [ ] Handle session expiry gracefully (redirect to login, show message)
-- [ ] Add "Account" section in settings (email, plan tier, logout)
+- [~] Add "Account" section in settings (email, plan tier, logout)
+  - Sidebar bottom section shows email, plan tier badge, and Sign Out when logged in
+  - No dedicated settings screen yet
 
 **Dependencies:** Billing API Phase 2 (Auth) must be deployed.
 
@@ -146,16 +149,16 @@ The Worker-side analytics endpoints (`GET /api/analytics/:code` and `GET /api/an
   - [x] `ScannerAdapter` — QR decoding (Tauri file read vs jsQR in browser)
   - [x] `BatchAdapter` — Batch processing (CSV import, zip creation)
   - [x] `DragDropAdapter` — Drag-drop file handling
-  - [ ] `auth` adapter — `{ getToken, setToken, clearToken }` — not yet implemented
-    - `platform/tauri/auth.ts` — OS keychain via Tauri secure storage
-    - `platform/web/auth.ts` — `localStorage` or `httpOnly` cookie
+  - [x] `auth` adapter — `{ getToken, setToken, clearToken }` via `AuthAdapter` interface
+    - `platform/tauri/auth.ts` — `LazyStore` from `@tauri-apps/plugin-store`
+    - `platform/web/auth.ts` — `localStorage`
 - [x] Configure Vite path aliases (`@platform/*`) to resolve via `VITE_PLATFORM` env var
 - [x] Platform detection helpers: `isTauri()`, `isWeb()`, `platformName()`
 - [x] Components conditionally hide features not available on web (e.g., ZIP export)
 - [x] Verify desktop app still builds and works after restructuring
 - [x] `npm run dev:web` and `npm run build:web` scripts
 
-**Exit criteria:** The React codebase is cleanly split between shared code and platform-specific adapters. Desktop app still works identically. ✅ (Auth adapter deferred to Phase 1 when Billing API integration begins.)
+**Exit criteria:** The React codebase is cleanly split between shared code and platform-specific adapters. Desktop app still works identically. ✅ (Auth adapter shipped as part of Phase 1 auth integration.)
 
 ---
 
