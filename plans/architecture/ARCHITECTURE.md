@@ -316,12 +316,32 @@ Someone scans QR            Worker                   Analytics Engine
 | **Preview** | Merge to `main` | `qr-foundry-worker-preview` | `qr-foundry-codes-preview` | `qr_scans_preview` | TBD | TBD | `qr-foundry-site-preview.<account>.workers.dev` |
 | **Dev** | Pull request | `qr-foundry-worker-dev` | `qr-foundry-codes-dev` | `qr_scans_dev` | `localhost` | `localhost:5173` | `qr-foundry-site-dev.<account>.workers.dev` |
 
+### Deployment Pipeline (all services)
+
+All services follow the same CI/CD pattern:
+
+| Trigger | Deploys to | Purpose |
+|---------|------------|---------|
+| Pull request | **dev** | Review changes before merge |
+| Push to `main` (PR merge) | **preview** | Verify after merge, before production |
+| GitHub Release published | **production** | Promote to live |
+| Manual workflow dispatch | **any** | Ad-hoc deploys |
+
+#### Release Process
+
+1. Open a PR → auto-deploys to **dev** for review
+2. Merge PR to `main` → auto-deploys to **preview**
+3. Verify preview looks correct
+4. Create a GitHub Release to deploy to **production**:
+   - **CLI:** `gh release create v0.1.0 --title "v0.1.0" --notes "Release notes"`
+   - **UI:** Repo → Releases → Draft a new release → create tag → target `main` → Publish
+
 ### Deployment Details
 
 | Service | Platform | CI/CD | Config |
 |---------|----------|-------|--------|
-| **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions: dev on PR, preview on merge, production on release/manual | `wrangler.toml` + `.github/workflows/deploy.yml` |
-| **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | TBD | `wrangler.toml` |
+| **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
+| **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Billing API** | TBD | TBD | — |
 | **Web App** | TBD | TBD | — |
 
@@ -341,6 +361,9 @@ All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`:
 | Repo | Secret | Purpose |
 |------|--------|---------|
 | `qr-foundry-site` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
+| `qr-foundry-site` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
+| `qr-foundry-worker` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
+| `qr-foundry-worker` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
 
 ---
 
