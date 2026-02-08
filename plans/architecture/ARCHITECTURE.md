@@ -310,17 +310,17 @@ Someone scans QR            Worker                   Analytics Engine
 
 ## Environment Matrix
 
-| Environment | Redirect Worker | KV Namespace | Analytics | Billing API | Web App | Marketing Site |
-|-------------|----------------|-------------|-----------|-------------|---------|----------------|
-| **Production** | `qr-foundry-worker` | `qr-foundry-codes` | `qr_scans` | `api.qr-foundry.com` | `app.qr-foundry.com` | `qr-foundry.com` |
-| **Preview** | `qr-foundry-worker-preview` | `qr-foundry-codes-preview` | `qr_scans_preview` | TBD | TBD | `qr-foundry-site-preview.<account>.workers.dev` |
-| **Dev** | `qr-foundry-worker-dev` | `qr-foundry-codes-dev` | `qr_scans_dev` | `localhost` | `localhost:5173` | `localhost:4321` |
+| Environment | Trigger | Redirect Worker | KV Namespace | Analytics | Billing API | Web App | Marketing Site |
+|-------------|---------|----------------|-------------|-----------|-------------|---------|----------------|
+| **Production** | Release / manual | `qr-foundry-worker` | `qr-foundry-codes` | `qr_scans` | `api.qr-foundry.com` | `app.qr-foundry.com` | `qr-foundry.com` |
+| **Preview** | Merge to `main` | `qr-foundry-worker-preview` | `qr-foundry-codes-preview` | `qr_scans_preview` | TBD | TBD | `qr-foundry-site-preview.<account>.workers.dev` |
+| **Dev** | Pull request | `qr-foundry-worker-dev` | `qr-foundry-codes-dev` | `qr_scans_dev` | `localhost` | `localhost:5173` | `qr-foundry-site-dev.<account>.workers.dev` |
 
 ### Deployment Details
 
 | Service | Platform | CI/CD | Config |
 |---------|----------|-------|--------|
-| **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions → `wrangler deploy` on merge to `main` | `wrangler.toml` + `.github/workflows/deploy.yml` |
+| **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions: dev on PR, preview on merge, production on release/manual | `wrangler.toml` + `.github/workflows/deploy.yml` |
 | **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | TBD | `wrangler.toml` |
 | **Billing API** | TBD | TBD | — |
 | **Web App** | TBD | TBD | — |
