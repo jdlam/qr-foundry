@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 type TabId = 'generator' | 'batch' | 'scanner' | 'history' | 'templates' | 'dynamic';
 
 interface SidebarProps {
@@ -89,10 +91,13 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div
-      className="w-[220px] flex flex-col shrink-0 transition-colors"
+      className="flex flex-col shrink-0 transition-all duration-200"
       style={{
+        width: collapsed ? 54 : 220,
         background: 'var(--sidebar-bg)',
         borderRight: '1px solid var(--border)',
       }}
@@ -105,12 +110,18 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => onTabChange(item.id)}
+              title={collapsed ? item.label : undefined}
               className="flex items-center gap-2.5 w-full text-left text-sm font-medium transition-colors rounded-sm"
               style={{
-                padding: isActive ? '8px 12px 8px 9px' : '8px 12px',
+                padding: collapsed
+                  ? '8px'
+                  : isActive ? '8px 12px 8px 9px' : '8px 12px',
+                justifyContent: collapsed ? 'center' : undefined,
                 background: isActive ? 'var(--active-bg)' : 'transparent',
                 color: isActive ? 'var(--accent)' : 'var(--text-muted)',
-                borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent',
+                borderLeft: collapsed
+                  ? undefined
+                  : isActive ? '3px solid var(--accent)' : '3px solid transparent',
               }}
               onMouseEnter={(e) => {
                 if (!isActive) {
@@ -128,55 +139,113 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               <span className="w-[18px] h-[18px] shrink-0 flex items-center justify-center">
                 {item.icon}
               </span>
-              <span className="flex-1">{item.label}</span>
-              {item.badge && (
-                <span
-                  className="font-mono text-[9px] font-bold uppercase tracking-wide px-[5px] py-px rounded-sm leading-snug"
-                  style={{
-                    background: item.badge === 'pro' ? 'var(--badge-pro-bg)' : 'var(--badge-soon-bg)',
-                    color: item.badge === 'pro' ? 'var(--badge-pro-text)' : 'var(--badge-soon-text)',
-                  }}
-                >
-                  {item.badge === 'pro' ? 'PRO' : 'SOON'}
-                </span>
+              {!collapsed && (
+                <>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge && (
+                    <span
+                      className="font-mono text-[9px] font-bold uppercase tracking-wide px-[5px] py-px rounded-sm leading-snug"
+                      style={{
+                        background: item.badge === 'pro' ? 'var(--badge-pro-bg)' : 'var(--badge-soon-bg)',
+                        color: item.badge === 'pro' ? 'var(--badge-pro-text)' : 'var(--badge-soon-text)',
+                      }}
+                    >
+                      {item.badge === 'pro' ? 'PRO' : 'SOON'}
+                    </span>
+                  )}
+                </>
               )}
             </button>
           );
         })}
       </nav>
 
-      {/* User section */}
+      {/* Bottom section */}
       <div
-        className="p-3 transition-colors"
+        className="transition-colors"
         style={{ borderTop: '1px solid var(--border)' }}
       >
-        <div
-          className="flex items-center gap-2.5 p-2 rounded-sm cursor-pointer transition-colors"
-          style={{ background: 'transparent' }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-        >
-          <div
-            className="w-8 h-8 rounded-sm flex items-center justify-center shrink-0"
-            style={{
-              background: 'var(--panel-bg)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-faint)',
+        {/* User section */}
+        <div className="p-3">
+          {collapsed ? (
+            <div
+              className="w-8 h-8 mx-auto rounded-sm flex items-center justify-center cursor-pointer transition-colors"
+              style={{
+                background: 'var(--panel-bg)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-faint)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--panel-bg)'; }}
+              title="Sign In"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+          ) : (
+            <div
+              className="flex items-center gap-2.5 p-2 rounded-sm cursor-pointer transition-colors"
+              style={{ background: 'transparent' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <div
+                className="w-8 h-8 rounded-sm flex items-center justify-center shrink-0"
+                style={{
+                  background: 'var(--panel-bg)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-faint)',
+                }}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <div className="text-[13px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  Sign In
+                </div>
+                <div className="text-[11px] font-mono" style={{ color: 'var(--text-faint)' }}>
+                  Free tier
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Collapse toggle */}
+        <div className="px-2 pb-2">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-full flex items-center justify-center py-1.5 rounded-sm transition-colors"
+            style={{ color: 'var(--text-faint)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--hover-bg)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
             }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--text-faint)';
+            }}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
+            <svg
+              className="w-4 h-4 transition-transform duration-200"
+              style={{ transform: collapsed ? 'rotate(180deg)' : undefined }}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="11 17 6 12 11 7" />
+              <polyline points="18 17 13 12 18 7" />
             </svg>
-          </div>
-          <div className="flex-1">
-            <div className="text-[13px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-              Sign In
-            </div>
-            <div className="text-[11px] font-mono" style={{ color: 'var(--text-faint)' }}>
-              Free tier
-            </div>
-          </div>
+          </button>
         </div>
       </div>
     </div>
