@@ -7,7 +7,7 @@
 
 This plan covers the implementation of the QR Foundry redirect Worker from initial setup through production deployment. Work is broken into phases that each result in a deployable, testable milestone.
 
-For system-wide architecture and how this service fits with the Billing API, desktop app, and web app, see [`ARCHITECTURE.md`](ARCHITECTURE.md).
+For system-wide architecture and how this service fits with the Billing API, desktop app, and web app, see [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
 
 ---
 

@@ -21,17 +21,21 @@ All four repos are cloned as siblings under this directory and reference
 ```
 qr-foundry/                  ← this repo (qr-foundry-plans)
 ├── CLAUDE.md                # This file
-├── plans/                   # Shared planning docs
+├── README.md                # Project overview and repo links
+├── plans/
 │   ├── PLAN.md              # Plan index (start here)
-│   ├── FEATURES.md          # Master feature list (203 features, status tracking)
-│   ├── ARCHITECTURE.md      # System architecture, data flows, API contracts
-│   ├── product-spec.md      # Original product specification
-│   ├── app.md               # Desktop + Web App implementation phases
-│   ├── worker.md            # Redirect Worker implementation phases
-│   ├── billing-api.md       # Billing API implementation phases
-│   ├── marketing-site.md    # Marketing site implementation phases
-│   ├── mockups.md           # Marketing site design mockups
-│   └── qr-forge-mockup.jsx  # React UI mockup component
+│   ├── architecture/        # Product & architecture docs
+│   │   ├── FEATURES.md      # Master feature list (203 features, status tracking)
+│   │   ├── ARCHITECTURE.md  # System architecture, data flows, API contracts
+│   │   └── product-spec.md  # Original product specification
+│   ├── services/            # Per-service implementation plans
+│   │   ├── app.md           # Desktop + Web App phases
+│   │   ├── worker.md        # Redirect Worker phases
+│   │   ├── billing-api.md   # Billing API phases
+│   │   └── marketing-site.md# Marketing site phases
+│   └── design/              # Design & mockups
+│       ├── mockups.md       # Marketing site design mockups
+│       └── qr-forge-mockup.jsx  # React UI mockup component
 ├── qr-foundry-app/          # (gitignored) Desktop + Web App repo
 ├── qr-foundry-worker/       # (gitignored) Redirect Worker repo
 ├── qr-foundry-api/          # (gitignored) Billing API repo
@@ -42,26 +46,26 @@ qr-foundry/                  ← this repo (qr-foundry-plans)
 
 - **[`plans/PLAN.md`](plans/PLAN.md)** — Start here. Lightweight index
   with per-service status and pricing quick reference.
-- **[`plans/FEATURES.md`](plans/FEATURES.md)** — Master feature list
-  with `[x]`/`[ ]`/`[~]` status markers across all services.
-  Updated by each repo when features are implemented.
-- **[`plans/ARCHITECTURE.md`](plans/ARCHITECTURE.md)** — System-wide
-  architecture, service interactions, auth/quota/scan flows, data
-  ownership, and environment configuration.
+- **[`plans/architecture/FEATURES.md`](plans/architecture/FEATURES.md)** —
+  Master feature list with `[x]`/`[ ]`/`[~]` status markers across all
+  services. Updated by each repo when features are implemented.
+- **[`plans/architecture/ARCHITECTURE.md`](plans/architecture/ARCHITECTURE.md)** —
+  System-wide architecture, service interactions, auth/quota/scan flows,
+  data ownership, and environment configuration.
 
 ## How This Repo Is Used
 
 Each service repo's `CLAUDE.md` contains instructions to update these
 shared docs whenever a feature or change is implemented:
 
-- **`plans/FEATURES.md`** — Check off completed features, mark partials
-  with `[~]`, update summary table counts
-- **`plans/<service>.md`** — Check off completed items in the relevant
-  phase, add sub-items if implementation reveals additional work
+- **`plans/architecture/FEATURES.md`** — Check off completed features,
+  mark partials with `[~]`, update summary table counts
+- **`plans/services/<service>.md`** — Check off completed items in the
+  relevant phase, add sub-items if implementation reveals additional work
 - **`plans/PLAN.md`** — Update status column when a major milestone
   is reached
-- **`plans/ARCHITECTURE.md`** — Update when system architecture, data
-  flows, API contracts, or environment config changes
+- **`plans/architecture/ARCHITECTURE.md`** — Update when system
+  architecture, data flows, API contracts, or environment config changes
 
 ## Current Status
 
@@ -84,5 +88,5 @@ shared docs whenever a feature or change is implemented:
 | Subscription | ~$5-7/month | Pro + dynamic QR codes (25 included), analytics |
 | Add-on | TBD per pack | Extra dynamic code slots |
 
-See [`plans/ARCHITECTURE.md`](plans/ARCHITECTURE.md) for full pricing
+See [`plans/architecture/ARCHITECTURE.md`](plans/architecture/ARCHITECTURE.md) for full pricing
 details, trial rules, and quota mapping.

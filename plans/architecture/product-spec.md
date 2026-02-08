@@ -772,10 +772,10 @@ Detailed per-service plans live in `plans/`. Below is a summary of what's been c
 
 ### Remaining Work (see per-service plans)
 
-- **Worker** — Quota enforcement, scan analytics API, infrastructure. See [`plans/worker.md`](plans/worker.md).
-- **App (Desktop + Web)** — Auth integration, feature gating, dynamic code UI, analytics dashboard, platform abstraction, web deployment. See [`plans/app.md`](plans/app.md).
-- **Billing API** — Scaffold, auth, trial management, Stripe, quota management, plan tier API. See [`plans/billing-api.md`](plans/billing-api.md).
-- **Marketing Site** — Landing page, pricing page, SEO, deployment. See [`plans/marketing-site.md`](plans/marketing-site.md).
+- **Worker** — Quota enforcement, scan analytics API, infrastructure. See [`services/worker.md`](../services/worker.md).
+- **App (Desktop + Web)** — Auth integration, feature gating, dynamic code UI, analytics dashboard, platform abstraction, web deployment. See [`services/app.md`](../services/app.md).
+- **Billing API** — Scaffold, auth, trial management, Stripe, quota management, plan tier API. See [`services/billing-api.md`](../services/billing-api.md).
+- **Marketing Site** — Landing page, pricing page, SEO, deployment. See [`services/marketing-site.md`](../services/marketing-site.md).
 
 ### Future Features (Backlog)
 

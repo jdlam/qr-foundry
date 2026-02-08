@@ -350,10 +350,10 @@ The build system (Vite) uses path aliases to resolve `@platform/*` imports to th
 
 Detailed implementation plans:
 
-- [`worker.md`](worker.md) — Redirect Worker (`qr-foundry-worker`)
-- [`app.md`](app.md) — Desktop + Web App (`qr-foundry-app`)
-- [`billing-api.md`](billing-api.md) — Billing API (`qr-foundry-api`)
-- [`marketing-site.md`](marketing-site.md) — Marketing Site (`qr-foundry-site`)
+- [`worker.md`](../services/worker.md) — Redirect Worker (`qr-foundry-worker`)
+- [`app.md`](../services/app.md) — Desktop + Web App (`qr-foundry-app`)
+- [`billing-api.md`](../services/billing-api.md) — Billing API (`qr-foundry-api`)
+- [`marketing-site.md`](../services/marketing-site.md) — Marketing Site (`qr-foundry-site`)
 
 ---
 

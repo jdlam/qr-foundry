@@ -7,7 +7,7 @@
 
 The Billing API handles authentication, subscription management, one-time purchases, trial tracking, and quota control. It is the source of truth for what a user has purchased and what features they can access. Both the desktop app and web app call this API for auth and plan checks.
 
-For system-wide architecture, see [`ARCHITECTURE.md`](ARCHITECTURE.md).
+For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
 
 ---
 

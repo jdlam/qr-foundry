@@ -522,7 +522,7 @@ Public-facing landing page that explains the product, showcases features, and dr
 - [ ] Privacy-friendly analytics: Plausible or Fathom (Site)
 - [ ] Deployment to Vercel or Cloudflare Pages with DNS (`qr-foundry.com`) (Site, see marketing-site.md Phase 4)
 - [ ] Redirects: `www` -> apex, `/app` -> web app, `/download` -> store links (Site)
-- [ ] Six design directions explored: Workshop, Matrix, Broadsheet, Playground, Terminal, Gallery (see [mockups.md](mockups.md))
+- [ ] Six design directions explored: Workshop, Matrix, Broadsheet, Playground, Terminal, Gallery (see [mockups.md](../design/mockups.md))
 
 **Services:** Marketing Site (`qr-foundry-site`)
 

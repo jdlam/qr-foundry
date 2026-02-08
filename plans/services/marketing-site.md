@@ -7,7 +7,7 @@
 
 The marketing site is the public-facing landing page for QR Foundry. It explains the product, showcases features, displays pricing, and directs users to download the desktop app or use the web app.
 
-For system-wide architecture, see [`ARCHITECTURE.md`](ARCHITECTURE.md).
+For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
 
 ---
 

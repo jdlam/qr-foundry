@@ -74,7 +74,7 @@ QR Foundry is a QR code generator that ships as a **desktop app** (macOS, Window
 
 **Feature totals:** 110 shipped, 5 partial, 88 planned (203 total)
 
-See [`plans/FEATURES.md`](plans/FEATURES.md) for the full feature breakdown.
+See [`plans/architecture/FEATURES.md`](plans/architecture/FEATURES.md) for the full feature breakdown.
 
 ## Shared Documentation
 
@@ -83,13 +83,17 @@ This repo contains the shared planning docs referenced by all service repos:
 | Document | Description |
 |----------|-------------|
 | [`plans/PLAN.md`](plans/PLAN.md) | Plan index — start here |
-| [`plans/FEATURES.md`](plans/FEATURES.md) | Master feature list with status tracking |
-| [`plans/ARCHITECTURE.md`](plans/ARCHITECTURE.md) | System architecture, data flows, API contracts |
-| [`plans/product-spec.md`](plans/product-spec.md) | Original product specification |
-| [`plans/app.md`](plans/app.md) | Desktop + Web App implementation phases |
-| [`plans/worker.md`](plans/worker.md) | Redirect Worker implementation phases |
-| [`plans/billing-api.md`](plans/billing-api.md) | Billing API implementation phases |
-| [`plans/marketing-site.md`](plans/marketing-site.md) | Marketing site implementation phases |
+| **Architecture** | |
+| [`plans/architecture/FEATURES.md`](plans/architecture/FEATURES.md) | Master feature list with status tracking |
+| [`plans/architecture/ARCHITECTURE.md`](plans/architecture/ARCHITECTURE.md) | System architecture, data flows, API contracts |
+| [`plans/architecture/product-spec.md`](plans/architecture/product-spec.md) | Original product specification |
+| **Service Plans** | |
+| [`plans/services/app.md`](plans/services/app.md) | Desktop + Web App implementation phases |
+| [`plans/services/worker.md`](plans/services/worker.md) | Redirect Worker implementation phases |
+| [`plans/services/billing-api.md`](plans/services/billing-api.md) | Billing API implementation phases |
+| [`plans/services/marketing-site.md`](plans/services/marketing-site.md) | Marketing site implementation phases |
+| **Design** | |
+| [`plans/design/mockups.md`](plans/design/mockups.md) | Marketing site design mockups |
 
 ## Local Setup
 

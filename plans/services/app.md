@@ -7,9 +7,9 @@
 
 This plan covers the work needed to integrate the desktop app with the Billing API and Worker API, add feature gating, build the dynamic code management UI and analytics dashboard, abstract platform differences, and ship a web version.
 
-The desktop app's core QR generation, customization, and export features are already built (see [`product-spec.md`](product-spec.md) for completed phases). This plan picks up from there.
+The desktop app's core QR generation, customization, and export features are already built (see [`product-spec.md`](../architecture/product-spec.md) for completed phases). This plan picks up from there.
 
-For system-wide architecture, see [`ARCHITECTURE.md`](ARCHITECTURE.md).
+For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
 
 ---
 
