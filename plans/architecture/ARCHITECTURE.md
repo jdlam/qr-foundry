@@ -310,11 +310,49 @@ Someone scans QR            Worker                   Analytics Engine
 
 ## Environment Matrix
 
-| Environment | Trigger | Redirect Worker | KV Namespace | Analytics | Billing API | Web App | Marketing Site |
-|-------------|---------|----------------|-------------|-----------|-------------|---------|----------------|
-| **Production** | Release / manual | `qr-foundry-worker` | `qr-foundry-codes` | `qr_scans` | `api.qr-foundry.com` | `app.qr-foundry.com` | `qr-foundry.com` |
-| **Preview** | Merge to `main` | `qr-foundry-worker-preview` | `qr-foundry-codes-preview` | `qr_scans_preview` | TBD | TBD | `qr-foundry-site-preview.<account>.workers.dev` |
-| **Dev** | Pull request | `qr-foundry-worker-dev` | `qr-foundry-codes-dev` | `qr_scans_dev` | `localhost` | `localhost:5173` | `qr-foundry-site-dev.<account>.workers.dev` |
+### Service URLs per Environment
+
+Each environment tier is self-contained — all services within a tier reference each other, never across tiers.
+
+| Service | Local | Dev (PR) | Preview (main) | Production (release) |
+|---------|-------|----------|----------------|---------------------|
+| **Marketing Site** | `http://localhost:4321` | `qr-foundry-site-dev.<account>.workers.dev` | `qr-foundry-site-preview.<account>.workers.dev` | `qr-foundry.com` |
+| **Billing API** | `http://localhost:8787` | `qr-foundry-api-dev.<account>.workers.dev` | `qr-foundry-api-preview.<account>.workers.dev` | `api.qr-foundry.com` |
+| **Redirect Worker** | `http://localhost:8788` | `qr-foundry-worker-dev.<account>.workers.dev` | `qr-foundry-worker-preview.<account>.workers.dev` | `qrfo.link` |
+| **App (web)** | `http://localhost:5173` | TBD | `app-preview.qr-foundry.com` | `app.qr-foundry.com` |
+| **App (desktop)** | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` |
+
+### Cross-Service URL References
+
+These are the env vars / config values each service uses to reference other services. All must match the correct tier.
+
+| Service | Config | Local | Dev | Preview | Production |
+|---------|--------|-------|-----|---------|------------|
+| **Worker** | `FALLBACK_URL` (wrangler.toml / .dev.vars) | `http://localhost:4321` | `https://qr-foundry-site-dev.<account>.workers.dev` | `https://qr-foundry-site-preview.<account>.workers.dev` | `https://qr-foundry.com` |
+| **API** | `CORS_ORIGINS` (wrangler.toml / .dev.vars) | `http://localhost:5173,http://localhost:4321,tauri://localhost` | `https://qr-foundry-site-dev.<account>.workers.dev,tauri://localhost,http://localhost:5173` | `https://app-preview.qr-foundry.com,https://qr-foundry-site-preview.<account>.workers.dev,tauri://localhost,http://localhost:5173` | `https://app.qr-foundry.com,tauri://localhost` |
+| **App** | `VITE_API_URL` (.env files) | `http://localhost:8787` | `http://localhost:8787` | `https://qr-foundry-api-preview.<account>.workers.dev` | `https://api.qr-foundry.com` |
+
+### Worker & API Cloudflare Resources
+
+| Environment | Worker name | API name | KV Namespace | Analytics |
+|-------------|-------------|----------|-------------|-----------|
+| **Production** | `qr-foundry-worker` | `qr-foundry-api` | `qr-foundry-codes` | `qr_scans` |
+| **Preview** | `qr-foundry-worker-preview` | `qr-foundry-api-preview` | `qr-foundry-codes-preview` | `qr_scans_preview` |
+| **Dev** | `qr-foundry-worker-dev` | `qr-foundry-api-dev` | `qr-foundry-codes-dev` | `qr_scans_dev` |
+
+### Local Development
+
+To run all services locally, start each in a separate terminal:
+
+| Service | Command | Port | Directory |
+|---------|---------|------|-----------|
+| Marketing Site | `npm run dev` | 4321 | `qr-foundry-site/` |
+| Billing API | `bun run dev` | 8787 | `qr-foundry-api/` |
+| Redirect Worker | `npm run dev` | 8788 | `qr-foundry-worker/` |
+| App (web) | `npm run dev:web` | 5173 | `qr-foundry-app/` |
+| App (desktop) | `npm run tauri dev` | 5173 + Tauri | `qr-foundry-app/` |
+
+**Local overrides:** Workers use `.dev.vars` files (gitignored) to override wrangler.toml vars for local dev. Copy `.dev.vars.example` → `.dev.vars` in each Worker repo. The app uses `.env.development` (committed) for Vite env vars.
 
 ### Deployment Pipeline (all services)
 
@@ -342,7 +380,7 @@ All services follow the same CI/CD pattern:
 |---------|----------|-------|--------|
 | **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
-| **Billing API** | TBD | TBD | — |
+| **Billing API** | Cloudflare Workers + Turso | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Web App** | TBD | TBD | — |
 
 ### DNS (Cloudflare)
@@ -353,7 +391,7 @@ All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`:
 |--------|------|--------|
 | `qr-foundry.com` | CNAME (proxied) | `qr-foundry-site.<account>.workers.dev` |
 | `www` | CNAME (proxied) | `qr-foundry.com` (redirect rule to apex) |
-| `api.qr-foundry.com` | Worker route | `qr-foundry-worker` |
+| `api.qr-foundry.com` | Worker route | `qr-foundry-api` |
 | `app.qr-foundry.com` | CNAME (proxied) | TBD |
 
 ### GitHub Secrets Required
@@ -364,6 +402,8 @@ All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`:
 | `qr-foundry-site` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
 | `qr-foundry-worker` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
 | `qr-foundry-worker` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
+| `qr-foundry-api` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
+| `qr-foundry-api` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
 
 ---
 
