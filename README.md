@@ -9,7 +9,7 @@ QR Foundry is a QR code generator that ships as a **desktop app** (macOS, Window
 | **Desktop + Web App** | [qr-foundry-app](https://github.com/jdlam/qr-foundry-app) | Tauri + React + TypeScript | downloadable / `app.qr-foundry.com` |
 | **Redirect Worker** | [qr-foundry-worker](https://github.com/jdlam/qr-foundry-worker) | Cloudflare Worker + KV + Analytics Engine | `qrfo.link` |
 | **Billing API** | [qr-foundry-api](https://github.com/jdlam/qr-foundry-api) | Hono + Drizzle + Turso | `api.qr-foundry.com` |
-| **Marketing Site** | [qr-foundry-site](https://github.com/jdlam/qr-foundry-site) | Astro + Tailwind (planned) | `qr-foundry.com` |
+| **Marketing Site** | [qr-foundry-site](https://github.com/jdlam/qr-foundry-site) | Astro + React + Tailwind CSS v4 | `qr-foundry.com` |
 | **Shared Plans** | [qr-foundry-plans](https://github.com/jdlam/qr-foundry-plans) (this repo) | Markdown | — |
 
 ## Architecture
@@ -70,9 +70,9 @@ QR Foundry is a QR code generator that ships as a **desktop app** (macOS, Window
 | **Desktop App** | Core complete — QR generation, customization, export, batch, scanner, templates, history, theming |
 | **Worker** | Phases 1-7 automated complete (160 tests) — redirects, CRUD, analytics, quota, validation |
 | **Billing API** | Phases 1-4, 6 complete (107 tests) — auth, trials, Stripe, plan tiers |
-| **Marketing Site** | Not started |
+| **Marketing Site** | Phase 1 complete — landing page, QR generator, dark/light theme, pricing, CI/CD |
 
-**Feature totals:** 110 shipped, 5 partial, 88 planned (203 total)
+**Feature totals:** 120 shipped, 5 partial, 78 planned (203 total)
 
 See [`plans/architecture/FEATURES.md`](plans/architecture/FEATURES.md) for the full feature breakdown.
 

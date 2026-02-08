@@ -310,11 +310,37 @@ Someone scans QR            Worker                   Analytics Engine
 
 ## Environment Matrix
 
-| Environment | Worker | KV Namespace | Analytics | Billing API | Web App |
-|-------------|--------|-------------|-----------|-------------|---------|
-| Production | `qr-foundry-worker` | `qr-foundry-codes` | `qr_scans` | `api.qr-foundry.com` | `app.qr-foundry.com` |
-| Preview | `qr-foundry-worker-preview` | `qr-foundry-codes-preview` | `qr_scans_preview` | TBD | TBD |
-| Dev | `qr-foundry-worker-dev` | `qr-foundry-codes-dev` | `qr_scans_dev` | `localhost` | `localhost:5173` |
+| Environment | Redirect Worker | KV Namespace | Analytics | Billing API | Web App | Marketing Site |
+|-------------|----------------|-------------|-----------|-------------|---------|----------------|
+| **Production** | `qr-foundry-worker` | `qr-foundry-codes` | `qr_scans` | `api.qr-foundry.com` | `app.qr-foundry.com` | `qr-foundry.com` |
+| **Preview** | `qr-foundry-worker-preview` | `qr-foundry-codes-preview` | `qr_scans_preview` | TBD | TBD | `qr-foundry-site-preview.<account>.workers.dev` |
+| **Dev** | `qr-foundry-worker-dev` | `qr-foundry-codes-dev` | `qr_scans_dev` | `localhost` | `localhost:5173` | `localhost:4321` |
+
+### Deployment Details
+
+| Service | Platform | CI/CD | Config |
+|---------|----------|-------|--------|
+| **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions → `wrangler deploy` on merge to `main` | `wrangler.toml` + `.github/workflows/deploy.yml` |
+| **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | TBD | `wrangler.toml` |
+| **Billing API** | TBD | TBD | — |
+| **Web App** | TBD | TBD | — |
+
+### DNS (Cloudflare)
+
+All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`:
+
+| Record | Type | Target |
+|--------|------|--------|
+| `qr-foundry.com` | CNAME (proxied) | `qr-foundry-site.<account>.workers.dev` |
+| `www` | CNAME (proxied) | `qr-foundry.com` (redirect rule to apex) |
+| `api.qr-foundry.com` | Worker route | `qr-foundry-worker` |
+| `app.qr-foundry.com` | CNAME (proxied) | TBD |
+
+### GitHub Secrets Required
+
+| Repo | Secret | Purpose |
+|------|--------|---------|
+| `qr-foundry-site` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
 
 ---
 
