@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import { AuthModal } from '../auth/AuthModal';
 
 type TabId = 'generator' | 'batch' | 'scanner' | 'history' | 'templates' | 'dynamic';
 
@@ -12,6 +14,19 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   badge?: 'pro' | 'soon';
+}
+
+function formatTierLabel(tier: string, trialDaysRemaining?: number): string {
+  switch (tier) {
+    case 'pro_trial':
+      return `Pro Trial (${trialDaysRemaining ?? 0}d left)`;
+    case 'pro':
+      return 'Pro';
+    case 'subscription':
+      return 'Subscription';
+    default:
+      return 'Free tier';
+  }
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -92,6 +107,8 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const { user, plan, isLoggedIn, logout } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
     <div
@@ -167,22 +184,38 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       >
         {collapsed ? (
           <div className="flex flex-col items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-sm flex items-center justify-center cursor-pointer transition-colors"
-              style={{
-                background: 'var(--panel-bg)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-faint)',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--panel-bg)'; }}
-              title="Sign In"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
+            {isLoggedIn ? (
+              <div
+                className="w-8 h-8 rounded-sm flex items-center justify-center cursor-pointer transition-colors"
+                style={{
+                  background: 'var(--accent)',
+                  color: 'var(--accent-text, #fff)',
+                }}
+                title={user?.email ?? 'Account'}
+              >
+                <span className="text-xs font-bold uppercase">
+                  {user?.email?.charAt(0) ?? '?'}
+                </span>
+              </div>
+            ) : (
+              <div
+                className="w-8 h-8 rounded-sm flex items-center justify-center cursor-pointer transition-colors"
+                style={{
+                  background: 'var(--panel-bg)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-faint)',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hover-bg)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--panel-bg)'; }}
+                onClick={() => setAuthModalOpen(true)}
+                title="Sign In"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+            )}
             <button
               onClick={() => setCollapsed(false)}
               className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors"
@@ -203,12 +236,77 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
               </svg>
             </button>
           </div>
+        ) : isLoggedIn ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2.5 p-2">
+              <div
+                className="w-8 h-8 rounded-sm flex items-center justify-center shrink-0"
+                style={{
+                  background: 'var(--accent)',
+                  color: 'var(--accent-text, #fff)',
+                }}
+              >
+                <span className="text-xs font-bold uppercase">
+                  {user?.email?.charAt(0) ?? '?'}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div
+                  className="text-[13px] font-medium truncate"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  {user?.email}
+                </div>
+                <div
+                  className="text-[11px] font-mono"
+                  style={{ color: 'var(--text-faint)' }}
+                >
+                  {plan ? formatTierLabel(plan.tier, plan.trialDaysRemaining) : 'Free tier'}
+                </div>
+              </div>
+              <button
+                onClick={() => setCollapsed(true)}
+                className="w-6 h-6 flex items-center justify-center rounded-sm shrink-0 transition-colors"
+                style={{ color: 'var(--text-faint)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--hover-bg)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-faint)';
+                }}
+                title="Collapse sidebar"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="11 17 6 12 11 7" />
+                  <polyline points="18 17 13 12 18 7" />
+                </svg>
+              </button>
+            </div>
+            <button
+              onClick={logout}
+              className="text-[11px] font-medium px-2 py-1 rounded-sm text-left transition-colors"
+              style={{ color: 'var(--text-faint)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.background = 'var(--hover-bg)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-faint)';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              Sign Out
+            </button>
+          </div>
         ) : (
           <div className="flex items-center gap-2.5 p-2 rounded-sm">
             <div
               className="flex items-center gap-2.5 flex-1 cursor-pointer rounded-sm transition-colors p-0"
               onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = ''; }}
+              onClick={() => setAuthModalOpen(true)}
             >
               <div
                 className="w-8 h-8 rounded-sm flex items-center justify-center shrink-0"
@@ -254,6 +352,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           </div>
         )}
       </div>
+
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 }

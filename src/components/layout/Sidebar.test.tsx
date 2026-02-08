@@ -1,13 +1,50 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Sidebar } from './Sidebar';
 import type { TabId } from './Sidebar';
+
+// Mock useAuth hook
+const mockLogout = vi.fn();
+let mockAuthState: Record<string, unknown> = {
+  user: null,
+  plan: null,
+  isLoggedIn: false,
+  isLoading: false,
+  isAuthenticating: false,
+  login: vi.fn(),
+  signup: vi.fn(),
+  logout: mockLogout,
+};
+
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: () => mockAuthState,
+}));
+
+// Mock AuthModal to avoid pulling in dialog dependencies
+vi.mock('../auth/AuthModal', () => ({
+  AuthModal: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="auth-modal">Auth Modal</div> : null,
+}));
 
 describe('Sidebar', () => {
   const defaultProps = {
     activeTab: 'generator' as TabId,
     onTabChange: vi.fn(),
   };
+
+  beforeEach(() => {
+    mockAuthState = {
+      user: null,
+      plan: null,
+      isLoggedIn: false,
+      isLoading: false,
+      isAuthenticating: false,
+      login: vi.fn(),
+      signup: vi.fn(),
+      logout: mockLogout,
+    };
+    mockLogout.mockReset();
+  });
 
   describe('Navigation items', () => {
     it('renders all nav items with labels when expanded', () => {
@@ -53,7 +90,7 @@ describe('Sidebar', () => {
     });
   });
 
-  describe('Bottom section', () => {
+  describe('Bottom section — logged out', () => {
     it('shows Sign In text when expanded', () => {
       render(<Sidebar {...defaultProps} />);
 
@@ -64,10 +101,71 @@ describe('Sidebar', () => {
     it('shows Sign In tooltip when collapsed', () => {
       render(<Sidebar {...defaultProps} />);
 
-      // Collapse the sidebar
       fireEvent.click(screen.getByTitle('Collapse sidebar'));
 
       expect(screen.getByTitle('Sign In')).toBeInTheDocument();
+    });
+
+    it('opens auth modal when sign-in area is clicked (expanded)', () => {
+      render(<Sidebar {...defaultProps} />);
+
+      // Click the sign-in area
+      fireEvent.click(screen.getByText('Sign In'));
+
+      expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
+    });
+
+    it('opens auth modal when sign-in icon is clicked (collapsed)', () => {
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByTitle('Collapse sidebar'));
+      fireEvent.click(screen.getByTitle('Sign In'));
+
+      expect(screen.getByTestId('auth-modal')).toBeInTheDocument();
+    });
+  });
+
+  describe('Bottom section — logged in', () => {
+    beforeEach(() => {
+      mockAuthState = {
+        user: { id: '1', email: 'test@example.com', createdAt: '2025-01-01' },
+        plan: { tier: 'pro_trial', features: [], maxCodes: 25, trialDaysRemaining: 5 },
+        isLoggedIn: true,
+        isLoading: false,
+        isAuthenticating: false,
+        login: vi.fn(),
+        signup: vi.fn(),
+        logout: mockLogout,
+      };
+    });
+
+    it('shows user email and plan tier when expanded', () => {
+      render(<Sidebar {...defaultProps} />);
+
+      expect(screen.getByText('test@example.com')).toBeInTheDocument();
+      expect(screen.getByText('Pro Trial (5d left)')).toBeInTheDocument();
+    });
+
+    it('shows sign out button when expanded', () => {
+      render(<Sidebar {...defaultProps} />);
+
+      expect(screen.getByText('Sign Out')).toBeInTheDocument();
+    });
+
+    it('calls logout when sign out is clicked', () => {
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByText('Sign Out'));
+      expect(mockLogout).toHaveBeenCalled();
+    });
+
+    it('shows user initial avatar when collapsed', () => {
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByTitle('Collapse sidebar'));
+
+      // Should show the user initial
+      expect(screen.getByText('t')).toBeInTheDocument();
     });
   });
 
@@ -105,7 +203,6 @@ describe('Sidebar', () => {
 
       fireEvent.click(screen.getByTitle('Collapse sidebar'));
 
-      // Nav items should have title attributes for tooltips
       expect(screen.getByTitle('Generator')).toBeInTheDocument();
       expect(screen.getByTitle('Batch')).toBeInTheDocument();
       expect(screen.getByTitle('Scanner')).toBeInTheDocument();
@@ -117,11 +214,9 @@ describe('Sidebar', () => {
     it('expands when expand button is clicked', () => {
       render(<Sidebar {...defaultProps} />);
 
-      // Collapse first
       fireEvent.click(screen.getByTitle('Collapse sidebar'));
       expect(screen.queryByText('Generator')).not.toBeInTheDocument();
 
-      // Expand
       fireEvent.click(screen.getByTitle('Expand sidebar'));
       expect(screen.getByText('Generator')).toBeInTheDocument();
       expect(screen.getByText('Free tier')).toBeInTheDocument();
@@ -133,7 +228,6 @@ describe('Sidebar', () => {
 
       fireEvent.click(screen.getByTitle('Collapse sidebar'));
 
-      // Click a nav button by its tooltip title
       fireEvent.click(screen.getByTitle('Scanner'));
       expect(onTabChange).toHaveBeenCalledWith('scanner');
     });
