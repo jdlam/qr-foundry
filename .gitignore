@@ -1,0 +1,8 @@
+# Child repos — each has its own git history
+qr-foundry-app/
+qr-foundry-worker/
+qr-foundry-api/
+qr-foundry-site/
+
+# OS files
+.DS_Store

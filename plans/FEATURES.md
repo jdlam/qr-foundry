@@ -1,0 +1,630 @@
+# QR Foundry — Master Feature List
+
+## Product Overview
+
+QR Foundry is a cross-platform QR code generator shipping as a Tauri desktop app (macOS, Windows, Linux) and a web app (`app.qr-foundry.com`). It covers the full lifecycle from generation and customization to dynamic QR codes with changeable destinations and scan analytics. Five services work together: the desktop/web app (shared React codebase), a Cloudflare Worker for redirects and dynamic code CRUD (`qrfo.link`), a Billing API for auth and subscriptions (`api.qr-foundry.com`), and a marketing site (`qr-foundry.com`). See [ARCHITECTURE.md](ARCHITECTURE.md) for the full system diagram and service interaction flows.
+
+## Pricing Tiers
+
+| Tier | Price | Summary |
+|------|-------|---------|
+| **Free** | $0 | Basic QR types, basic colors, PNG export, clipboard, scanner, limited history (10 codes). No account required. |
+| **Pro Trial** | $0 / 7 days | All Pro features for 7 days after signup. Reverts to Free on expiry. No dynamic codes. |
+| **Pro** | ~$12-15 one-time | Full customization, all export formats, batch CSV, templates, unlimited history, web asset pack. |
+| **Subscription** | ~$5-7/month | Everything in Pro + dynamic QR codes (25 active), scan analytics dashboard, code management. |
+| **Add-on** | TBD per pack | Additional dynamic code slots (e.g., 25 more). Requires active subscription. |
+
+Full pricing breakdown, revenue per channel, and quota mapping in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Feature Matrix
+
+Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemented
+
+| Feature | Free | Pro | Subscription | Status |
+|---------|------|-----|--------------|--------|
+| **QR Generation** | | | | |
+| URL input | Yes | Yes | Yes | [x] |
+| Plain text input | Yes | Yes | Yes | [x] |
+| WiFi input | Yes | Yes | Yes | [x] |
+| Phone input | Yes | Yes | Yes | [x] |
+| vCard input | -- | Yes | Yes | [x] |
+| Email input | -- | Yes | Yes | [x] |
+| SMS input | -- | Yes | Yes | [x] |
+| Geo/location input | -- | Yes | Yes | [x] |
+| Calendar event input | -- | Yes | Yes | [ ] |
+| Live preview | Yes | Yes | Yes | [x] |
+| **Customization** | | | | |
+| Foreground/background colors | Yes | Yes | Yes | [x] |
+| Gradient fills | -- | Yes | Yes | [x] |
+| Dot styles (square, rounded, dots, classy, classy-rounded, extra-rounded) | -- | Yes | Yes | [x] |
+| Eye/corner styles (square, rounded, circle, leaf) | -- | Yes | Yes | [x] |
+| Logo embedding (drag-drop) | -- | Yes | Yes | [x] |
+| Logo sizing (10-40% of QR area) | -- | Yes | Yes | [x] |
+| Logo shape (square/circle mask) | -- | Yes | Yes | [x] |
+| Logo placement (center only; corners/finder eyes planned) | -- | Yes | Yes | [~] |
+| Transparent backgrounds | -- | Yes | Yes | [x] |
+| Error correction manual control (L/M/Q/H) | -- | Yes | Yes | [x] |
+| **Validation** | | | | |
+| Built-in scan validation (render-decode-compare) | Yes | Yes | Yes | [x] |
+| Three-state feedback (pass/marginal/fail) | Yes | Yes | Yes | [x] |
+| Smart warnings (logo + EC risk detection) | Yes | Yes | Yes | [x] |
+| Auto-reset on content/style change | Yes | Yes | Yes | [x] |
+| Batch validation | -- | Yes | Yes | [x] |
+| **Export** | | | | |
+| PNG export (up to 4096x4096, size presets) | Yes | Yes | Yes | [x] |
+| SVG export | -- | Yes | Yes | [x] |
+| PDF export (print-ready, bleed/trim marks) | -- | Yes | Yes | [ ] |
+| EPS export | -- | Yes | Yes | [ ] |
+| Clipboard copy | Yes | Yes | Yes | [x] |
+| Web asset pack (favicons + manifest + HTML meta) | -- | Yes | Yes | [ ] |
+| **Batch Generation** | | | | |
+| CSV import and parse | -- | Yes | Yes | [x] |
+| Bulk generation with progress | -- | Yes | Yes | [x] |
+| Per-row validation during generation | -- | Yes | Yes | [x] |
+| ZIP export | -- | Yes | Yes | [~] |
+| Apply style template to batch | -- | Yes | Yes | [x] |
+| **QR Scanner** | | | | |
+| Decode from dropped image | Yes | Yes | Yes | [x] |
+| Decode from clipboard paste | Yes | Yes | Yes | [~] |
+| Re-generate decoded content | Yes | Yes | Yes | [x] |
+| Copy decoded content | Yes | Yes | Yes | [x] |
+| Open URL in browser | Yes | Yes | Yes | [x] |
+| **History** | | | | |
+| Save generated QRs | 10 limit | Unlimited | Unlimited | [x] |
+| Search history | Yes | Yes | Yes | [x] |
+| Load from history | Yes | Yes | Yes | [~] |
+| **Templates** | | | | |
+| Save style presets | -- | Yes | Yes | [x] |
+| Load style presets | -- | Yes | Yes | [x] |
+| Default template | -- | Yes | Yes | [ ] |
+| **Dynamic QR Codes** | | | | |
+| Create dynamic code (encodes `qrfo.link/:shortCode`) | -- | -- | Yes | [x] Worker |
+| Custom short codes | -- | -- | Yes | [x] Worker |
+| List codes with status filter | -- | -- | Yes | [x] Worker |
+| Edit destination URL | -- | -- | Yes | [x] Worker |
+| Pause/resume codes | -- | -- | Yes | [x] Worker |
+| Delete codes | -- | -- | Yes | [x] Worker |
+| Quota enforcement (active codes only) | -- | -- | Yes | [x] Worker |
+| Usage endpoint (active/paused/expired counts) | -- | -- | Yes | [x] Worker |
+| Public 302 redirect | -- | -- | Yes | [x] Worker |
+| Branded 404 page (not found/paused/expired) | -- | -- | Yes | [x] Worker |
+| Dynamic code management UI (app) | -- | -- | Yes | [ ] App |
+| "Make Dynamic" toggle in generator | -- | -- | Yes | [ ] App |
+| **Scan Analytics** | | | | |
+| Scan event logging (Analytics Engine) | -- | -- | Yes | [x] Worker |
+| Per-code analytics API | -- | -- | Yes | [x] Worker |
+| Overview analytics API | -- | -- | Yes | [x] Worker |
+| Analytics dashboard UI (app) | -- | -- | Yes | [ ] App |
+| Per-code analytics view (app) | -- | -- | Yes | [ ] App |
+| Date range filtering | -- | -- | Yes | [x] Worker |
+| Granularity toggle (hourly/daily/weekly) | -- | -- | Yes | [x] Worker |
+| Response caching (5-10 min) | -- | -- | Yes | [x] Worker |
+| **User Accounts & Auth** | | | | |
+| Signup (with auto Pro trial) | -- | -- | -- | [x] Billing API |
+| Login | -- | -- | -- | [x] Billing API |
+| JWT issuance and validation | -- | -- | -- | [x] Billing API |
+| Token refresh | -- | -- | -- | [x] Billing API |
+| Password reset | -- | -- | -- | [ ] Billing API |
+| Login/signup UI | -- | -- | -- | [ ] App |
+| Token storage (keychain / cookies) | -- | -- | -- | [ ] App |
+| **Billing & Subscriptions** | | | | |
+| Stripe Checkout (Pro, Subscription, Add-on) | -- | -- | -- | [x] Billing API |
+| Stripe Customer Portal | -- | -- | -- | [x] Billing API |
+| Stripe webhook handler | -- | -- | -- | [x] Billing API |
+| Quota writes to Worker KV | -- | -- | -- | [ ] Billing API |
+| **Feature Gating** | | | | |
+| Plan tier API (`GET /api/me/plan`) | -- | -- | -- | [x] Billing API |
+| `<FeatureGate>` component | -- | -- | -- | [ ] App |
+| Trial banner / upgrade prompts | -- | -- | -- | [ ] App |
+| **Platform & Distribution** | | | | |
+| macOS desktop app (Tauri) | Yes | Yes | Yes | [x] |
+| Windows desktop app (Tauri) | Yes | Yes | Yes | [x] |
+| Linux desktop app (Tauri) | Yes | Yes | Yes | [x] |
+| Web app (`app.qr-foundry.com`) | Yes | Yes | Yes | [ ] |
+| Platform adapters (8 adapters, auth pending) | -- | -- | -- | [~] App |
+| Sidebar navigation | Yes | Yes | Yes | [x] App |
+| Title bar with theme toggle | Yes | Yes | Yes | [x] App |
+| Status bar (dimensions, EC level, validation) | Yes | Yes | Yes | [x] App |
+| Dark/light/system theme | Yes | Yes | Yes | [x] App |
+| Design token system (60+ CSS variables) | Yes | Yes | Yes | [x] App |
+| **Marketing Site** | | | | |
+| Landing page with embedded QR generator | -- | -- | -- | [ ] Site |
+| Pricing comparison page | -- | -- | -- | [ ] Site |
+| Blog/SEO content | -- | -- | -- | [ ] Site |
+| **Infrastructure** | | | | |
+| Worker CI/CD (lint, typecheck, test on PR) | -- | -- | -- | [x] Worker |
+| Worker deploy workflow (Releases -> production) | -- | -- | -- | [x] Worker |
+| Billing API CI/CD (lint, typecheck, test on PR) | -- | -- | -- | [x] Billing API |
+| Billing API deploy workflow | -- | -- | -- | [x] Billing API |
+| Custom domain `qrfo.link` | -- | -- | -- | [ ] Worker |
+| Custom domain `api.qr-foundry.com` | -- | -- | -- | [ ] Billing API |
+| Rate limiting on redirect path | -- | -- | -- | [ ] Worker |
+
+## Feature Details
+
+### QR Code Generation
+
+Create QR codes from multiple content types with real-time live preview.
+
+**User stories:**
+- As a free user, I want to paste a URL and instantly see a QR code so that I can download it without creating an account.
+- As a Pro user, I want to create a vCard QR code with my full contact information so that people can scan it at conferences and save my details.
+- As a user, I want to see the QR code update in real time as I type so that I can see exactly what I am generating before exporting.
+- As a Pro user, I want to manually set the error correction level so that I can balance between data density and scan reliability for print use cases.
+
+**Features:**
+- [x] URL input with live preview (App, Free)
+- [x] Plain text input (App, Free)
+- [x] WiFi input (SSID, password, encryption, hidden toggle) (App, Free)
+- [x] Phone number input (App, Free)
+- [x] vCard input (name, org, title, email, phone, URL, address) (App, Pro)
+- [x] Email compose input (App, Pro)
+- [x] SMS input (App, Pro)
+- [x] Geographic location input (App, Pro)
+- [ ] Calendar event input (App, Pro) — no form or formatter implemented yet
+- [x] Live preview canvas with real-time updates (App)
+- [x] Error correction selection: L/M/Q/H with guidance (App, Pro)
+
+**Services:** Desktop App, Web App
+
+### Customization
+
+Style QR codes with brand colors, gradients, logos, and custom dot/eye patterns.
+
+**User stories:**
+- As a free user, I want to change the foreground and background colors so that my QR code matches my brand's color scheme.
+- As a Pro user, I want to embed my company logo in the center of the QR code so that it looks professional on printed materials.
+- As a Pro user, I want to apply a gradient fill across the QR dots so that the code looks modern and visually appealing.
+- As a Pro user, I want to choose from different dot and eye styles (rounded, diamond, circle, leaf) so that I can create a unique visual identity.
+- As a Pro user, I want to export with a transparent background so that I can place the QR code on any colored surface or photograph.
+
+**Features:**
+- [x] Foreground/background color picker (App, Free)
+- [x] Linear gradient fills across QR dots (App, Pro)
+- [x] Dot styles: square, rounded, dots, classy, classy-rounded, extra-rounded (App, Pro)
+- [x] Eye/corner styles: square, rounded, circle, leaf (App, Pro)
+- [x] Logo embedding via drag-drop (App, Pro)
+- [x] Adjustable logo size: 10-40% of QR area with real-time preview (App, Pro)
+- [x] Logo shape: square or circle mask with automatic padding (App, Pro)
+- [~] Logo placement: center only (corners and finder eyes not yet implemented) (App, Pro)
+- [x] Logo auto-resize (max 512px), transparent border trimming, auto-compression over 500KB (App, Pro)
+- [x] Transparent background (PNG/SVG with alpha channel) (App, Pro)
+
+**Services:** Desktop App, Web App
+
+### Validation
+
+Verify that styled QR codes remain scannable after customization.
+
+**User stories:**
+- As a user, I want to verify my QR code scans correctly before printing so that I do not waste materials on an unscannable code.
+- As a user, I want to receive a warning when my logo is too large relative to the error correction level so that I can adjust before exporting.
+- As a user generating a batch of codes, I want every code validated automatically so that I can identify failures before export.
+
+**Features:**
+- [x] One-click scan validation: renders QR to image, decodes it, compares with original content (App)
+- [x] Three-state feedback: pass (scans clean), marginal (low confidence), fail (cannot decode) (App)
+- [x] Smart warnings when logo size + EC level combo risks scanability (App)
+- [x] Auto-reset: validation resets when any style or content changes (App)
+- [x] Batch validation: validates every code during batch generation, flags failures before export (App, Pro)
+
+**Services:** Desktop App (Rust backend for decode), Web App
+
+### Export
+
+Save QR codes in multiple formats for screen and print.
+
+**User stories:**
+- As a free user, I want to download my QR code as a PNG so that I can use it in documents and social media.
+- As a free user, I want to copy the QR code to my clipboard so that I can paste it directly into a design tool.
+- As a Pro user, I want to export as SVG so that my QR code scales perfectly for any print size.
+- As a Pro user, I want print-ready PDF export with bleed and trim marks so that my print shop can use the file directly.
+- As a Pro user, I want a web asset pack (favicons, manifest.json, HTML meta tags) generated from my QR code so that I can add it to my website in one step.
+
+**Features:**
+- [x] PNG export with multiple size presets (up to 4096x4096) (App, Free)
+- [x] SVG export (vector, infinitely scalable) (App, Pro)
+- [ ] PDF export (print-ready with optional bleed/trim marks) (App, Pro)
+- [ ] EPS export (professional print workflows) (App, Pro)
+- [x] Clipboard copy (one-click) (App, Free)
+- [ ] Web asset pack: full favicon set + manifest.json + HTML meta tags + browserconfig.xml (App, Pro)
+
+**Services:** Desktop App (Rust backend for PNG/SVG/PDF/EPS), Web App (browser-based PNG/SVG/clipboard)
+
+### Batch Generation
+
+Generate multiple QR codes from a CSV file in a single operation.
+
+**User stories:**
+- As a Pro user, I want to import a CSV of URLs and generate branded QR codes for all of them at once so that I can prepare materials for a product catalog.
+- As a Pro user, I want to apply a saved style template to an entire batch so that all codes match my brand identity.
+- As a Pro user, I want to export all generated codes as a ZIP file so that I can hand them off to my design team.
+
+**Features:**
+- [x] CSV drop zone with parsing (expected columns: content, type, label) (App, Pro)
+- [x] Preview table with row status (pending, generating, validating, done, error) (App, Pro)
+- [x] Apply current style template to all batch items (App, Pro)
+- [x] Bulk generation with per-row validation (App, Pro)
+- [x] Individual download from preview (App, Pro)
+- [~] ZIP export of all generated codes (App, Pro) — partially implemented, toast confirmation pending
+- [x] Format selection (PNG/SVG) for batch output (App, Pro)
+
+**Services:** Desktop App (Rust CSV parsing + batch generation), Web App
+
+### QR Scanner
+
+Decode existing QR codes from images or clipboard.
+
+**User stories:**
+- As a user, I want to drop a QR code image into the app and see its decoded content so that I can verify what a code contains.
+- As a user, I want to re-generate a scanned QR code with my own styling so that I can create a branded version of an existing code.
+
+**Features:**
+- [x] Decode from dropped image file (App, Free)
+- [~] Decode from clipboard paste (Cmd+V) (App, Free) — partially working
+- [x] Display decoded content with detected type, EC level, and QR version (App, Free)
+- [x] Copy decoded content to clipboard (App, Free)
+- [x] Open decoded URL in browser (App, Free)
+- [x] Re-generate: load decoded content into the Generator tab (App, Free)
+
+**Services:** Desktop App (jsQR for frontend decode, rqrr for Rust-side), Web App
+
+### History & Templates
+
+Save and organize previously generated QR codes and reusable style presets.
+
+**User stories:**
+- As a free user, I want my last 10 generated QR codes saved automatically so that I can revisit them without re-entering content.
+- As a Pro user, I want unlimited history with search so that I can find any QR code I have ever generated.
+- As a Pro user, I want to save my brand's style settings as a template so that I can apply them to new QR codes with one click.
+
+**Features:**
+- [x] Auto-save generated QRs to history with thumbnail (App)
+- [x] Limited history: 10 codes (App, Free)
+- [x] Unlimited history (App, Pro)
+- [x] Searchable history list (App)
+- [~] Click history item to reload content and style (App) — partially working
+- [x] Save style presets as named templates (App, Pro)
+- [x] Load template to apply all style settings (App, Pro)
+- [ ] Default template applied on startup (App, Pro) — backlog
+- [x] SQLite storage for history and templates (Desktop App)
+
+**Services:** Desktop App (SQLite), Web App (planned storage TBD)
+
+### Dynamic QR Codes
+
+Create QR codes whose destination URL can be changed after printing. The QR encodes a short URL (`qrfo.link/:shortCode`) that redirects to the current destination.
+
+**User stories:**
+- As a Subscription user, I want to create a dynamic QR code so that I can print it on materials and change the destination URL later without reprinting.
+- As a Subscription user, I want to pause a dynamic code so that it temporarily stops redirecting while I update my campaign.
+- As a Subscription user, I want to see how many of my 25 code slots I have used so that I know when to purchase more or clean up unused codes.
+- As a Subscription user, I want to set a custom short code so that the URL in the QR code is meaningful and recognizable.
+
+**Features (Worker API — shipped):**
+- [x] Create dynamic code with generated or custom short code (Worker, see worker.md Phase 3)
+- [x] 7-character short codes from 55-char alphabet (excludes ambiguous chars: 0, O, l, 1, I) (Worker)
+- [x] Custom short code with availability check and collision detection (Worker)
+- [x] List all codes for an owner with optional status filter (active/paused/expired) (Worker)
+- [x] Get single code details with ownership check (Worker)
+- [x] Update destination URL, status, label, expiration, password (partial updates) (Worker)
+- [x] Pause/resume codes (status toggle) (Worker)
+- [x] Delete codes permanently with ownership check (Worker)
+- [x] CORS preflight handling (Worker)
+- [x] Public 302 redirect: `qrfo.link/:shortCode` -> destination URL (Worker)
+- [x] Branded 404 pages with reason-specific messages (not found / paused / expired) (Worker)
+- [x] Root path and nested paths redirect to marketing site (Worker)
+- [x] Quota enforcement: active codes only count against limit (Worker, see worker.md Phase 4)
+- [x] Lazy quota bootstrap with self-healing recount (Worker)
+- [x] Usage endpoint: returns active/paused/expired counts and remaining quota (Worker)
+- [x] Input sanitization: label, password, expiration date validators (Worker, see worker.md Phase 7)
+
+**Features (App UI — planned):**
+- [ ] Worker API client module with error handling (401 -> login, 403 -> quota message) (App, see app.md Phase 3)
+- [ ] "Make Dynamic" toggle in the generator (App)
+- [ ] Dynamic Codes list view with status filter and usage bar (App)
+- [ ] Code detail view: inline edit destination, label, pause/resume, delete, copy short URL (App)
+- [ ] Quota limit display and upgrade prompt when at capacity (App)
+
+**Services:** Worker (API + redirect), Desktop App (UI), Web App (UI)
+
+### Scan Analytics
+
+Track how dynamic QR codes are scanned: counts, geographic data, traffic sources, and trends over time.
+
+**User stories:**
+- As a Subscription user, I want to see how many times each of my dynamic codes has been scanned so that I can measure campaign effectiveness.
+- As a Subscription user, I want to see which countries and cities my scans come from so that I can understand my audience geography.
+- As a Subscription user, I want to view scan trends over time (daily, weekly) so that I can correlate spikes with marketing campaigns.
+- As a Subscription user, I want an overview dashboard across all my codes so that I can see my total reach at a glance.
+
+**Features (Worker API — shipped):**
+- [x] Scan event logging to Analytics Engine via `ctx.waitUntil` (non-blocking) (Worker)
+- [x] Captured data points: short code, country, city, user agent, referer (Worker)
+- [x] Per-code analytics endpoint: `GET /api/analytics/:code` (Worker, see worker.md Phase 5)
+- [x] Overview analytics endpoint: `GET /api/analytics` (Worker, see worker.md Phase 5)
+- [x] SQL API queries (total scans, time series, top countries, top cities, top referers, top codes) (Worker)
+- [x] Ownership enforcement: KV check before querying analytics (Worker)
+- [x] Date range filtering with sensible defaults (last 30 days) (Worker)
+- [x] Granularity toggle: hourly, daily, weekly (Worker)
+- [x] Response caching: 5 min per-code, 10 min overview (Worker)
+- [x] Labels from KV records attached to top codes in overview (Worker)
+
+**Features (App UI — planned):**
+- [ ] Analytics API client methods (App, see app.md Phase 4)
+- [ ] Per-code analytics view: scan count, time series chart, top countries/cities/referers (App)
+- [ ] Overview dashboard: total scans, most-scanned codes, aggregate country breakdown, time chart (App)
+- [ ] Charting library integration (recharts, chart.js, or lightweight alternative) (App)
+- [ ] Date range picker (App)
+- [ ] Loading and empty states (App)
+
+**Services:** Worker (event logging + query API), Desktop App (dashboard UI), Web App (dashboard UI)
+
+### User Accounts & Auth
+
+Account system for Pro purchases, subscriptions, and cross-device access.
+
+**User stories:**
+- As a new user, I want to sign up and automatically receive a 7-day Pro trial so that I can try all features before purchasing.
+- As a returning user, I want to log in and have my session persist across app restarts so that I do not need to re-authenticate every time.
+- As a user, I want to reset my password via email so that I can recover my account if I forget my credentials.
+
+**Features (Billing API — mostly shipped):**
+- [x] Signup with auto 7-day Pro trial (Billing API, see billing-api.md Phase 2)
+- [x] Login with credential validation (Billing API)
+- [x] JWT issuance with claims: `sub` (user ID), `email`, `iat`, `exp` (7-day expiry) (Billing API)
+- [x] Token refresh endpoint (Billing API)
+- [ ] Password reset flow: forgot password email + reset token + password update (Billing API) — deferred, requires email service
+- [ ] Email verification (optional for launch, schema supports it) (Billing API) — deferred
+- [x] User info endpoint: `GET /api/me` (Billing API)
+- [x] Password hashing: PBKDF2-SHA256 via Web Crypto API (Billing API)
+
+**Features (App — planned):**
+- [ ] Login/signup UI (modal or dedicated screen) (App, see app.md Phase 1)
+- [ ] Token storage: OS keychain via Tauri secure storage (Desktop App)
+- [ ] Token storage: `httpOnly` cookie or `localStorage` (Web App)
+- [ ] Shared `{ getToken, setToken, clearToken }` interface (App)
+- [ ] Auth state in app store (logged in/out, user info) (App)
+- [ ] Session expiry handling (redirect to login, show message) (App)
+- [ ] Account section in settings (email, plan tier, logout) (App)
+- [ ] Token refresh before expiry (App)
+
+**Services:** Billing API, Desktop App, Web App
+
+### Billing & Subscriptions
+
+Payment processing for Pro purchases, recurring subscriptions, and add-on code packs.
+
+**User stories:**
+- As a user, I want to purchase Pro with a single one-time payment so that I unlock all customization and export features permanently.
+- As a user, I want to subscribe monthly for dynamic QR codes so that I can manage changeable codes and view scan analytics.
+- As a power user, I want to buy additional code slots so that I can manage more than 25 active dynamic codes.
+- As a subscriber, I want to manage my subscription (upgrade, downgrade, cancel, update payment) through a self-service portal.
+
+**Features:**
+- [x] Stripe Checkout sessions for Pro, Subscription, and Add-on products (Billing API, see billing-api.md Phase 4)
+- [x] Stripe Customer Portal for subscription management (Billing API)
+- [x] Stripe webhook handler: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed` (Billing API)
+- [x] Purchase and subscription state tracking in database (Billing API)
+- [ ] Quota writes to Worker KV after purchase/subscription events (Billing API, see billing-api.md Phase 5)
+- [ ] Quota increment on add-on purchase (read current, add purchased amount, write back) (Billing API)
+- [ ] Quota reduction on subscription cancel/downgrade (block new creates, keep existing codes) (Billing API)
+- [ ] Mac App Store IAP integration (Desktop App, future)
+- [ ] Microsoft Store IAP integration (Desktop App, future)
+- [ ] Gumroad license key validation (Desktop App, future)
+
+**Services:** Billing API, Stripe, Desktop App, Web App
+
+### Trial Management
+
+Free 7-day trial of Pro features for every new user.
+
+**User stories:**
+- As a new user, I want to try all Pro features for 7 days without entering payment information so that I can evaluate the product risk-free.
+- As a trial user, I want to see how many days remain in my trial so that I can decide whether to purchase before it expires.
+- As a user whose trial has expired, I want my existing QR codes preserved in history (just with advanced exports locked) so that I do not lose my work.
+
+**Features:**
+- [x] Auto-create trial record on signup: `{ userId, startedAt, expiresAt: now + 7 days }` (Billing API, see billing-api.md Phase 3)
+- [x] Trial status computation: active -> pro_trial, expired without purchase -> free, purchased -> pro/subscription (Billing API)
+- [x] Trial does NOT include dynamic QR codes (Billing API)
+- [x] One trial per user, enforced by unique constraint (Billing API)
+- [x] Trial days remaining in plan tier response (Billing API)
+- [ ] Trial banner in app: "X days left in your Pro trial" (App, see app.md Phase 2)
+- [ ] Upgrade prompt when trial expires (App)
+- [ ] Graceful feature degradation: lock advanced features, preserve history (App)
+
+**Services:** Billing API, Desktop App, Web App
+
+### Feature Gating
+
+Plan-based UI gating: show/hide features, display lock icons, and prompt upgrades.
+
+**User stories:**
+- As a free user, I want to see lock icons on Pro features so that I understand what I would get by upgrading.
+- As a free user, I want to click a locked feature and see a clear upgrade prompt with pricing so that the upgrade path is obvious.
+- As a Pro user, I want the dynamic codes tab to show a subscription upsell so that I know how to access dynamic QR codes.
+- As a user offline, I want the app to use my last known plan tier so that I can still work without an internet connection.
+
+**Features:**
+- [x] Plan tier API: `GET /api/me/plan` returning tier, features list, maxCodes, trialDaysRemaining (Billing API, see billing-api.md Phase 6)
+- [x] Feature key definitions mapped to tiers (basic_qr_types, advanced_customization, svg_export, batch_generation, templates, dynamic_codes, analytics, etc.) (Billing API)
+- [ ] `usePlan` hook: fetch plan on app startup, cache result (App, see app.md Phase 2)
+- [ ] `<FeatureGate>` component: wraps gated features, shows lock icon + upsell for insufficient tier (App)
+- [ ] Tier-based gating rules: Free (basic types, basic colors, PNG, clipboard, scanner, 10 history), Pro (all types, full customization, all exports, batch, templates, unlimited history), Subscription (Pro + dynamic codes + analytics) (App)
+- [ ] Upgrade/purchase buttons linking to appropriate store or Stripe checkout (App)
+- [ ] Offline graceful degradation: cache last known tier, fall back to Free if Billing API unreachable (App)
+
+**Services:** Billing API (tier computation), Desktop App (UI gating), Web App (UI gating)
+
+### Platform & Distribution
+
+Ship the same React codebase on desktop (Tauri) and web, with platform-specific adapters.
+
+**User stories:**
+- As a macOS user, I want to download a native desktop app from the Mac App Store so that I get a fast, integrated experience with system-level features.
+- As a user without admin privileges, I want to use the web app at `app.qr-foundry.com` so that I can generate and manage QR codes without installing software.
+- As a developer, I want platform differences abstracted behind adapter interfaces so that UI components work identically on desktop and web.
+
+**Features (shipped):**
+- [x] Tauri desktop app scaffold with React + TypeScript (Desktop App)
+- [x] macOS, Windows, Linux builds (Desktop App)
+- [x] Rust backend for file export, validation, batch, scanner (Desktop App)
+- [x] SQLite storage for history and templates (Desktop App)
+- [x] Sidebar navigation with 6 tabs (Generator, Batch, Scanner, History, Templates, Dynamic Codes placeholder) (App)
+- [x] Custom title bar with QR Foundry branding, theme toggle, and window controls (App)
+- [x] Status bar showing export dimensions, EC level, and validation state (App)
+- [x] Dark/light/system theme with `themeStore`, CSS variables, and localStorage persistence (App)
+- [x] Design token system: 60+ CSS variables, Inter + JetBrains Mono fonts, amber accent palette (App)
+
+**Features (partially shipped):**
+- [ ] Platform adapter: auth (`platform/tauri/auth.ts` vs `platform/web/auth.ts`) (App, see app.md Phase 5) — not yet implemented
+- [x] Platform adapter: filesystem/export (Tauri invoke vs browser download API) (App)
+- [x] Platform adapter: clipboard (Tauri clipboard API vs browser Clipboard API) (App)
+- [x] Platform adapter: history (Tauri SQLite vs localStorage) (App)
+- [x] Platform adapter: templates (Tauri SQLite vs localStorage) (App)
+- [x] Platform adapter: scanner (Tauri file read vs jsQR in browser) (App)
+- [x] Platform adapter: batch (Tauri CSV + zip vs browser Blob) (App)
+- [x] Platform adapter: drag-drop (Tauri file events vs browser File API) (App)
+- [x] Shared adapter interfaces in `src/platform/types.ts` (App)
+- [x] Vite path aliases (`@platform/*`) for build-time platform resolution via `VITE_PLATFORM` env var (App)
+- [x] Platform detection helpers: `isTauri()`, `isWeb()`, `platformName()` (App)
+- [ ] Web build config (`vite.config.web.ts`) and entry point (App, see app.md Phase 6)
+- [x] `npm run dev:web` and `npm run build:web` scripts (App)
+- [ ] Web app deployment to Vercel or Cloudflare Pages (App)
+- [ ] DNS configuration: `app.qr-foundry.com` (App)
+- [ ] Web app CI/CD pipeline (App)
+- [ ] Browser QR scanning via `MediaDevices` API (App, future)
+- [ ] Mac App Store submission with IAP (Desktop App, future)
+- [ ] Microsoft Store submission with IAP (Desktop App, future)
+- [ ] Gumroad direct download distribution (Desktop App, future)
+
+**Services:** Desktop App, Web App
+
+### Marketing Site
+
+Public-facing landing page that explains the product, showcases features, and drives downloads/signups.
+
+**User stories:**
+- As a visitor, I want to generate a free QR code directly on the landing page so that I can try the product without downloading anything.
+- As a potential customer, I want to see a clear pricing comparison so that I can decide which tier fits my needs.
+- As a business owner searching for "branded QR code generator," I want to find QR Foundry in search results so that I discover the tool organically.
+
+**Features:**
+- [ ] Landing page: hero, feature showcase, live interactive QR generator, CTAs (Site, see marketing-site.md Phase 1)
+- [ ] Embedded QR generator using the same `qr-code-styling` library as the app (Site)
+- [ ] Social proof section: testimonials, Product Hunt badge, App Store ratings (Site)
+- [ ] Pricing comparison page with FAQ (Site, see marketing-site.md Phase 2)
+- [ ] Blog/content section with 3-5 initial SEO articles (Site, see marketing-site.md Phase 3)
+- [ ] Technical SEO: sitemap.xml, robots.txt, OpenGraph/Twitter Card meta, structured data (Site)
+- [ ] Google Search Console setup (Site)
+- [ ] Responsive design: mobile, tablet, desktop (Site)
+- [ ] Privacy-friendly analytics: Plausible or Fathom (Site)
+- [ ] Deployment to Vercel or Cloudflare Pages with DNS (`qr-foundry.com`) (Site, see marketing-site.md Phase 4)
+- [ ] Redirects: `www` -> apex, `/app` -> web app, `/download` -> store links (Site)
+- [ ] Six design directions explored: Workshop, Matrix, Broadsheet, Playground, Terminal, Gallery (see [mockups.md](mockups.md))
+
+**Services:** Marketing Site (`qr-foundry-site`)
+
+### Settings & Preferences
+
+User-configurable defaults and app behavior. (Backlog — see product-spec.md Section 5.)
+
+**User stories:**
+- As a user, I want to set my default export format and size so that I do not need to change it every time I generate a code.
+- As a user, I want to choose dark or light theme so that the app matches my system appearance.
+- As a user, I want to control whether QR codes are auto-saved to history so that I can keep my history clean during experimentation.
+
+**Features:**
+- [ ] Settings infrastructure (Tauri store or SQLite `settings` table) (Desktop App)
+- [ ] Native macOS Preferences menu item (Cmd+,) (Desktop App)
+- [ ] Settings window or in-app settings tab (App)
+- [ ] Default export format (PNG/SVG) (App)
+- [ ] Default export size (512px, 1024px, 2048px, 4096px) (App)
+- [ ] Default error correction level (L/M/Q/H) (App)
+- [x] Theme preference (dark/light/system) (App) — implemented via `themeStore` with localStorage persistence and system preference detection
+- [ ] Default template to apply on startup (App)
+- [ ] History auto-save toggle (on/off) (App)
+- [ ] History retention period (7 days, 30 days, forever) (App)
+- [ ] Clear history on app quit toggle (App)
+- [ ] Batch export default output folder (App)
+- [ ] Batch filename pattern template (App)
+
+**Services:** Desktop App, Web App
+
+### Native App Features
+
+Desktop-specific features leveraging Tauri and OS capabilities. (Backlog — see product-spec.md Section 5.)
+
+**User stories:**
+- As a power user, I want keyboard shortcuts for common actions (export, validate, copy) so that I can work faster.
+- As a macOS user, I want a proper native menu bar with File, Edit, View, QR, Window, and Help menus so that the app feels like a first-class citizen.
+- As a user, I want the app to check for updates automatically so that I always have the latest features and bug fixes.
+
+**Features:**
+- [ ] Native menu system via Tauri (File, Edit, View, QR, Window, Help menus) (Desktop App)
+- [ ] File menu: New QR, Open (history item), Export, Export As... (Desktop App)
+- [ ] Edit menu: Undo, Redo, Cut, Copy, Paste, Select All (Desktop App)
+- [ ] View menu: Toggle sidebar, Zoom controls (Desktop App)
+- [ ] QR menu: Validate, Copy to Clipboard, Save to History (Desktop App)
+- [ ] Keyboard shortcuts customization (Desktop App)
+- [ ] Auto-updater via Tauri (Desktop App)
+- [ ] System tray quick-generate mode (Desktop App)
+- [ ] iCloud sync for templates and history (Desktop App, macOS)
+- [ ] Quick Actions / Shortcuts integration (Desktop App, macOS)
+
+**Services:** Desktop App
+
+## Backlog / Future Ideas
+
+Features that are explicitly deferred or speculative. Not on any current implementation phase.
+
+### Worker / Dynamic Codes
+- [ ] **Password-protected links** — Serve an HTML challenge page for gated redirects (worker.md Future)
+- [ ] **Per-user JWT auth** — Replace single shared bearer token with per-user JWTs (worker.md Future, billing-api.md Phase 2)
+- [ ] **Custom redirect domains** — Let users bring their own domains, e.g. `go.mycompany.com` (ARCHITECTURE.md Future)
+- [ ] **Bulk operations API** — Batch create/update/delete for CSV-driven workflows (worker.md Future)
+- [ ] **Webhook notifications** — Notify users when a code hits a scan milestone (worker.md Future)
+- [ ] **A/B redirect testing** — Split traffic between two destination URLs with configurable weights (worker.md Future)
+- [ ] **QR code expiration warnings** — Email or in-app notification before a code expires (worker.md Future)
+- [ ] **Rate limiting** — Cloudflare WAF rate limiting or Durable Object token bucket (ARCHITECTURE.md Future)
+
+### App
+- [ ] **PDF/EPS export** — Print-ready PDF with bleed/trim marks and EPS for professional workflows
+- [ ] **Web asset pack** — Full favicon set + manifest.json + HTML meta tags
+- [ ] **iCloud sync** — Sync templates and history across devices (product-spec.md Section 5)
+- [ ] **Quick Actions / Shortcuts integration** — macOS Shortcuts app integration (product-spec.md Section 5)
+- [ ] **Menu bar quick-generate mode** — Generate from system tray without opening the full app (product-spec.md Section 5)
+- [ ] **Keyboard shortcuts customization** — User-defined keyboard shortcuts (product-spec.md Section 5)
+- [ ] **Browser QR scanning via camera** — `MediaDevices` API on web (app.md Phase 5)
+
+### Billing
+- [ ] **Webhook from Billing -> Worker** — Call a webhook endpoint instead of direct KV writes (ARCHITECTURE.md Future)
+- [ ] **App Store receipt validation** — Server-side validation for Mac/Microsoft Store purchases
+- [ ] **Add-on without subscription** — Whether standalone code slot purchases should be allowed
+
+## Implementation Status Summary
+
+| Area | Shipped | Partial | Planned | Total |
+|------|---------|---------|---------|-------|
+| QR Code Generation | 10 | 0 | 1 | 11 |
+| Customization | 9 | 1 | 0 | 10 |
+| Validation | 5 | 0 | 0 | 5 |
+| Export | 3 | 0 | 3 | 6 |
+| Batch Generation | 5 | 1 | 0 | 6 |
+| QR Scanner | 4 | 1 | 0 | 5 |
+| History & Templates | 6 | 1 | 1 | 8 |
+| Dynamic QR Codes (Worker) | 16 | 0 | 5 | 21 |
+| Scan Analytics (Worker) | 10 | 0 | 6 | 16 |
+| User Accounts & Auth | 6 | 0 | 10 | 16 |
+| Billing & Subscriptions | 4 | 0 | 6 | 10 |
+| Trial Management | 5 | 0 | 3 | 8 |
+| Feature Gating | 2 | 0 | 5 | 7 |
+| Platform & Distribution | 20 | 0 | 9 | 29 |
+| Marketing Site | 0 | 0 | 12 | 12 |
+| Settings & Preferences | 1 | 0 | 12 | 13 |
+| Native App Features | 0 | 0 | 10 | 10 |
+| Infrastructure | 4 | 1 | 5 | 10 |
+| **Totals** | **110** | **5** | **88** | **203** |
+
+Core QR generation, customization, validation, and the Worker API backend are substantially complete. The Billing API (auth, trials, Stripe, plan tier) is largely implemented — remaining work is quota writes to Worker KV and production deployment. The desktop app has been redesigned with sidebar navigation, theme support, and a full platform abstraction layer for web builds. The primary remaining work is in app-side auth integration, feature gating UI, dynamic code and analytics UI, web app deployment, and the marketing site.
