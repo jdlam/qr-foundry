@@ -385,13 +385,15 @@ All services follow the same CI/CD pattern:
 
 ### DNS (Cloudflare)
 
-All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`:
+All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`.
+
+**Important:** Do NOT manually CNAME to `*.workers.dev` — that triggers Error 1014 (CNAME Cross-User Banned) because `workers.dev` is on Cloudflare's own account. Use Worker **Custom Domains** instead, which are configured in each service's `wrangler.toml` and automatically create the DNS records on deploy.
 
 | Record | Type | Target |
 |--------|------|--------|
-| `qr-foundry.com` | CNAME (proxied) | `qr-foundry-site.<account>.workers.dev` |
-| `www` | CNAME (proxied) | `qr-foundry.com` (redirect rule to apex) |
-| `api.qr-foundry.com` | Worker route | `qr-foundry-api` |
+| `qr-foundry.com` | Worker Custom Domain | `qr-foundry-site` (via `wrangler.toml` routes) |
+| `www` | CNAME (proxied) → Redirect Rule | `qr-foundry.com` + 301 redirect rule to apex |
+| `api.qr-foundry.com` | Worker Custom Domain | `qr-foundry-api` (via `wrangler.toml` routes) |
 | `app.qr-foundry.com` | CNAME (proxied) | TBD |
 
 ### GitHub Secrets Required
