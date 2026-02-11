@@ -111,26 +111,27 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ---
 
-## Phase 5: Quota Management
+## Phase 5: Quota Management ✅
 
 **Goal:** After purchase/subscription events, the Billing API writes quota records to the Worker's KV store so the Worker can enforce code limits.
 
-- [ ] Implement KV write helper — calls Cloudflare KV API to write `_quota::userId` records
+- [x] Implement KV write helper — calls Cloudflare KV API to write `_quota::userId` records
   - Uses Cloudflare API token with KV write permissions
   - Targets the correct KV namespace per environment
-- [ ] On Subscription start: write `_quota::userId` with `maxCodes = 25`
-- [ ] On add-on purchase: read current quota, increment `maxCodes` by purchased amount, write back
-- [ ] On Subscription cancel/downgrade: lower `maxCodes` (existing codes keep working, new creates blocked)
-- [ ] On Subscription reactivation: restore `maxCodes` to plan level
-- [ ] Handle edge cases:
-  - First-time subscriber with no existing quota record
-  - Add-on without active subscription (should this be allowed?)
+- [x] On Subscription start: write `_quota::userId` with `maxCodes = 25`
+- [x] On add-on purchase: compute `maxCodes` from DB state (idempotent, not incremental), write back
+- [x] On Subscription cancel/downgrade: lower `maxCodes` (existing codes keep working, new creates blocked)
+- [x] On Subscription reactivation: restore `maxCodes` to plan level (via idempotent `syncQuota`)
+- [x] Handle edge cases:
+  - First-time subscriber with no existing quota record (defaults `currentCount` to 0)
+  - Add-on without active subscription (computes maxCodes=0, no-op in practice)
   - Downgrade with active codes above new limit (don't delete codes, just block new creates)
-- [ ] Write tests for each quota write scenario
+  - KV write failures are logged but never fail the webhook (best-effort)
+- [x] Write tests for each quota write scenario (14 KV unit tests + 6 webhook integration tests)
 
 **Dependencies:** Worker KV namespace must be accessible via Cloudflare API.
 
-**Exit criteria:** Every purchase/subscription event results in the correct `_quota::` record in Worker KV. The Worker can read these records to enforce limits.
+**Exit criteria:** Every purchase/subscription event results in the correct `_quota::` record in Worker KV. The Worker can read these records to enforce limits. ✅
 
 ---
 
