@@ -71,7 +71,7 @@ shared docs whenever a feature or change is implemented:
 
 | Service | Status |
 |---------|--------|
-| **Worker** | Phases 1-7 automated complete (160 tests), manual deploy/infra pending |
+| **Worker** | Phases 1-7 complete (160 tests), deployed to production at `qrfo.link` |
 | **Billing API** | Phases 1-4 and 6 complete (107 tests), Phase 5 (quota writes) and 7 (deploy) pending |
 | **Desktop App** | Core QR features + platform adapters + UI redesign + auth integration + feature gating complete (451 tests); dynamic codes pending |
 | **Marketing Site** | Phase 1 complete (landing page, dark/light theme, QR generator, pricing, CI/CD); Phases 2-3 pending |
@@ -80,13 +80,13 @@ shared docs whenever a feature or change is implemented:
 
 ## Pricing Model
 
-| Tier | Price | Key Features |
-|------|-------|-------------|
-| Free | $0 | Basic QR generation, PNG export, limited history |
-| Pro Trial | $0 / 7 days | All Pro features for 7 days after signup |
-| Pro | ~$12-15 one-time | Full customization, all exports, batch, templates |
-| Subscription | ~$5-7/month | Pro + dynamic QR codes (25 included), analytics |
-| Add-on | TBD per pack | Extra dynamic code slots |
+All QR generation features are free. You only pay for dynamic QR codes.
+
+| Tier | Monthly | Annual (17% off) | Key Features |
+|------|---------|------------------|-------------|
+| Free | $0 | — | Everything: all QR types, full customization, all exports, batch, templates, unlimited history |
+| Subscription | $6/month | $60/year | Free + 25 dynamic codes, scan analytics |
+| Add-on (+25 codes) | +$3/month | +$30/year | Stackable extra dynamic code slots |
 
 See [`plans/architecture/ARCHITECTURE.md`](plans/architecture/ARCHITECTURE.md) for full pricing
-details, trial rules, and quota mapping.
+details and quota mapping.

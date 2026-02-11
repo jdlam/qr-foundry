@@ -14,19 +14,19 @@ This file is a lightweight index. All planning resources live in this directory.
 
 | Service | Repo | Plan | Status |
 |---------|------|------|--------|
-| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-7 substantially complete, manual deploy/infra steps pending |
+| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-7 complete, deployed to production at `qrfo.link` |
 | **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Core features + platform abstraction + UI redesign + auth integration complete; feature gating/dynamic codes/analytics pending |
 | **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-4 and 6 complete, Phase 5 (quota writes) and 7 (deploy) pending |
 | **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), Phases 2-3 pending |
 
 ## Pricing Model (quick reference)
 
-| Tier | Price | Key Features |
-|------|-------|-------------|
-| Free | $0 | Basic QR generation, PNG export, limited history |
-| Pro Trial | $0 / 7 days | All Pro features for 7 days after signup |
-| Pro | ~$12-15 one-time | Full customization, all exports, batch, templates |
-| Subscription | ~$5-7/month | Pro + dynamic QR codes (25 included), analytics |
-| Add-on | TBD per pack | Extra dynamic code slots |
+All QR generation features are free. You only pay for dynamic QR codes.
 
-See [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) for full pricing details, trial rules, and quota mapping.
+| Tier | Monthly | Annual (17% off) | Key Features |
+|------|---------|------------------|-------------|
+| Free | $0 | — | Everything: all QR types, full customization, all exports, batch, templates |
+| Subscription | $6/month | $60/year | Free + 25 dynamic codes, scan analytics |
+| Add-on (+25 codes) | +$3/month | +$30/year | Stackable extra dynamic code slots |
+
+See [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) for full pricing details and quota mapping.

@@ -64,43 +64,35 @@ QR Foundry is composed of five services. Each has a single responsibility and co
 
 ## Pricing Model
 
-| Tier | Price | Features |
-|------|-------|----------|
-| **Free** | $0 | Basic QR generation, basic customization, PNG export, clipboard copy, limited history |
-| **Pro Trial** | $0 for 7 days | All Pro features unlocked for 7 days after signup. Reverts to Free when trial expires. |
-| **Pro** | ~$12-15 one-time | Full customization (logos, gradients, dot/eye styles), all export formats (PNG, SVG, PDF, EPS), batch CSV generation, QR scanning/import, saved templates, unlimited history |
-| **Subscription** | ~$5-7/month | Everything in Pro + dynamic QR codes (changeable destinations), scan analytics dashboard, code management. Includes 25 active dynamic codes. |
-| **Add-on** | TBD per pack | Additional dynamic code slots (e.g., buy 25 more) |
+All QR generation features are **free with no account required**. The only paid feature is dynamic QR codes (changeable destinations + scan analytics), which requires a subscription.
 
-### 7-Day Pro Trial
+| Tier | Monthly | Annual (17% off) | Features |
+|------|---------|------------------|----------|
+| **Free** | $0 | — | Everything: all QR types, full customization, all export formats, batch, templates, scanner, unlimited history. No account required. |
+| **Subscription** | $6/month | $60/year ($5/mo) | Free + 25 dynamic QR codes, scan analytics dashboard, code management. Requires account. |
+| **Add-on** (+25 codes) | +$3/month | +$30/year ($2.50/mo) | Additional 25 dynamic code slots. Stackable (buy multiple). Requires active subscription. |
 
-Every new user gets a **free 7-day trial of Pro features** on signup. This lets users experience the full customization, export formats, batch generation, and templates before deciding to purchase. After 7 days:
-- User reverts to Free tier (basic customization, PNG only)
-- Any QR codes generated during the trial remain in history but advanced exports are locked
-- App shows a clear "Your trial has ended — upgrade to Pro" prompt
+### Why No Pro Tier?
 
-**Trial does NOT include dynamic QR codes** — those require a separate Subscription purchase.
-
-**Billing API responsibilities for trial:**
-- Track `trialStartedAt` and `trialExpiresAt` per user
-- `GET /api/me/plan` returns `{ tier: "pro_trial", trialDaysRemaining: N }` during trial
-- After expiry, returns `{ tier: "free" }` unless user purchased Pro
-
-**App responsibilities for trial:**
-- Show trial banner with days remaining ("3 days left in your Pro trial")
-- Show upgrade prompt when trial ends
-- Gracefully degrade features (don't delete anything, just lock advanced features)
+The free tier includes all QR generation, customization, and export features. There is no one-time Pro purchase or trial period. This maximizes adoption — users get the full product immediately and only pay when they need dynamic codes with changeable destinations.
 
 ### Pricing → Quota Mapping
 
-The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or pricing. Both pricing models reduce to a single number:
+The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or pricing. Subscriptions reduce to a single number:
 
 | Event | Billing API action |
 |-------|-------------------|
-| User subscribes (25 codes/month) | Write `_quota::userId` with `maxCodes = 25` |
-| User buys add-on code slots | Read current `maxCodes`, add purchased amount, write back |
-| User downgrades or cancels | Lower `maxCodes`. Existing codes keep working but new creates are blocked until user deletes or re-upgrades |
+| User subscribes ($6/month or $60/year) | Write `_quota::userId` with `maxCodes = 25` |
+| User adds add-on ($3/month or $30/year per 25 codes) | Recompute `maxCodes` from active subscriptions, write back |
+| User cancels subscription or add-on | Lower `maxCodes`. Existing codes keep working but new creates are blocked until user is under the new limit |
 | User exceeds quota and tries to create | Worker returns 403 with actionable error: "delete unused codes or upgrade" |
+
+### Stripe Products
+
+| Product | Stripe Mode | Prices |
+|---------|------------|--------|
+| QR Foundry Subscription | `subscription` | $6/month, $60/year |
+| 25 Extra Dynamic Codes | `subscription` | $3/month, $30/year |
 
 ---
 
@@ -175,7 +167,7 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 - **Dependencies at runtime:**
   - Stripe (or equivalent payment processor)
   - Cloudflare KV API (to write quota records to the Worker's namespace)
-  - A database for user accounts and subscription state (Postgres, Turso, D1, etc.)
+  - A database for user accounts and subscription state (Cloudflare D1)
 - **Repo:** `qr-foundry-api` (does not exist yet)
 
 ### 4. Redirect Worker — `qrfo.link`
@@ -380,7 +372,7 @@ All services follow the same CI/CD pattern:
 |---------|----------|-------|--------|
 | **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
-| **Billing API** | Cloudflare Workers + Turso | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
+| **Billing API** | Cloudflare Workers + D1 | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Web App** | TBD | TBD | — |
 
 ### DNS (Cloudflare)

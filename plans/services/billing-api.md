@@ -17,7 +17,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 - [x] Choose framework — **Hono on Cloudflare Workers** with Vite for dev/build
 - [x] Initialize repo with TypeScript, Biome (linting/formatting), Vitest (testing)
-- [x] Design database schema (Drizzle ORM + Turso/SQLite):
+- [x] Design database schema (Drizzle ORM + Cloudflare D1):
   - `users` — id, email, passwordHash, createdAt, updatedAt
   - `subscriptions` — id, userId, stripeSubscriptionId, status, plan, currentPeriodStart, currentPeriodEnd, createdAt
   - `purchases` — id, userId, stripePaymentId, product ("pro" | "addon_25"), createdAt
@@ -40,7 +40,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 - [x] Implement `POST /api/auth/signup`
   - Creates user account
-  - Auto-starts 7-day Pro trial (writes trial record)
+  - ~~Auto-starts 7-day Pro trial (writes trial record)~~ — **trial removed in pricing simplification**
   - Returns JWT
 - [x] Implement `POST /api/auth/login`
   - Validates credentials
@@ -63,21 +63,16 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ---
 
-## Phase 3: Trial Management ✅
+## Phase 3: Trial Management — REMOVED
 
-**Goal:** New users get a 7-day Pro trial. The system tracks trial status and returns correct plan tier.
+> **Note:** The trial and Pro tier have been eliminated in a pricing simplification. All QR generation features are now free. The only paid feature is dynamic QR codes via subscription. Existing trial code and database table can be removed in a cleanup pass.
 
-- [x] On signup, create trial record: `{ userId, startedAt: now, expiresAt: now + 7 days }`
-- [x] Trial status computation:
-  - If `now < expiresAt` -> `pro_trial` with `trialDaysRemaining = ceil((expiresAt - now) / day)`
-  - If `now >= expiresAt` and no Pro purchase -> `free`
-  - If Pro purchased -> `pro` (regardless of trial status)
-  - If Subscription active -> `subscription`
-- [x] Trial does NOT include dynamic QR codes (that requires a Subscription)
-- [x] Trial cannot be restarted (one trial per user, enforced by unique constraint)
-- [x] Write tests: trial active, trial expired, trial with Pro purchase, trial with Subscription
+~~**Goal:** New users get a 7-day Pro trial.~~
 
-**Exit criteria:** New signups get a 7-day trial. Plan tier API correctly reports trial status and days remaining. ✅
+- [x] ~~On signup, create trial record~~ — **no longer needed**
+- [x] ~~Trial status computation~~ — **no longer needed**
+- [ ] **Remove trial logic from signup flow** (stop creating trial records)
+- [ ] **Simplify plan computation** — only two tiers: `free` (no subscription) and `subscription` (active subscription)
 
 ---
 
@@ -87,7 +82,8 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 - [x] Integrate Stripe SDK
 - [x] Implement `POST /api/billing/checkout` — create Stripe Checkout session
-  - Products: `pro` (one-time), `subscription` (recurring), `addon_25` (one-time add-on)
+  - Products: ~~`pro` (one-time),~~ `subscription` (recurring), `addon_25` (~~one-time~~ recurring add-on)
+  - **Update needed:** Remove `pro` product, change `addon_25` from one-time to recurring subscription, add annual price variants
   - Returns Checkout URL for redirect
 - [x] Implement `POST /api/billing/portal` — create Stripe Customer Portal session
   - For managing subscription (upgrade, downgrade, cancel, update payment method)
@@ -97,14 +93,14 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - `customer.subscription.deleted` — handle cancellation
   - `invoice.payment_failed` — log only (Stripe dunning handles retries)
 - [ ] Create Stripe products and prices (in Stripe dashboard or via API) — **manual step**:
-  - Pro: one-time ~$15
-  - Subscription: ~$6/month recurring
-  - Add-on 25 codes: one-time ~TBD
+  - ~~Pro: one-time ~$15~~ — **removed**
+  - Subscription: $6/month or $60/year recurring
+  - Add-on 25 codes: $3/month or $30/year recurring
 - [x] Record purchases in database
 - [x] Record subscription state changes in database
 - [x] Write tests with mocked Stripe events
 - [x] Add `stripeCustomerId` column to users table (nullable, set on first Stripe interaction)
-- [x] Add Stripe price ID env vars (`STRIPE_PRICE_PRO`, `STRIPE_PRICE_SUBSCRIPTION`, `STRIPE_PRICE_ADDON_25`)
+- [x] Add Stripe price ID env vars — **update needed:** replace `STRIPE_PRICE_PRO` with annual variants (`STRIPE_PRICE_SUBSCRIPTION_ANNUAL`, `STRIPE_PRICE_ADDON_25_ANNUAL`)
 - [x] Idempotent webhook handlers (check for existing records before inserting)
 
 **Exit criteria:** Users can purchase Pro, subscribe, and buy add-ons. Webhook handles all lifecycle events. Database reflects current subscription state. ✅ (Stripe product/price creation is a manual step.)
@@ -140,30 +136,21 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 **Goal:** Both apps can call `GET /api/me/plan` to determine what features the user has access to.
 
 - [x] Implement `GET /api/me/plan` (authenticated)
-  - Computes current tier from: trial status, purchases, subscription state
+  - **Update needed:** Simplify to two tiers only (`free` and `subscription`)
   - Returns:
     ```json
     {
-      "tier": "pro_trial | free | pro | subscription",
-      "features": ["advanced_customization", "svg_export", "batch", ...],
+      "tier": "free | subscription",
       "maxCodes": 0,
-      "trialDaysRemaining": 5
+      "features": ["dynamic_codes", "analytics"]
     }
     ```
-  - Tier priority: `subscription` > `pro` > `pro_trial` > `free`
-  - `maxCodes` is 0 for non-subscribers
-  - `trialDaysRemaining` only present during `pro_trial`
-- [x] Define feature keys and which tiers unlock them:
-  - `basic_qr_types` — Free and above
-  - `advanced_qr_types` — Pro and above
-  - `advanced_customization` — Pro and above
-  - `svg_export`, `pdf_export`, `eps_export` — Pro and above
-  - `batch_generation` — Pro and above
-  - `templates` — Pro and above
-  - `unlimited_history` — Pro and above
-  - `web_asset_pack` — Pro and above
-  - `dynamic_codes` — Subscription only
-  - `analytics` — Subscription only
+  - ~~Tier priority: `subscription` > `pro` > `pro_trial` > `free`~~ → just: `subscription` if active subscription, else `free`
+  - `maxCodes` computed from base subscription (25) + active add-on subscriptions (25 each)
+  - ~~`trialDaysRemaining`~~ — removed
+- [ ] **Simplify feature keys:** All features are free except `dynamic_codes` and `analytics` (subscription only)
+  - Remove: `advanced_qr_types`, `advanced_customization`, `svg_export`, `pdf_export`, `eps_export`, `batch_generation`, `templates`, `unlimited_history`, `web_asset_pack`
+  - Keep: `dynamic_codes`, `analytics`
 - [ ] Cache plan computation (avoid re-querying DB on every call) — **deferred: queries are simple indexed lookups, no cache layer yet**
 - [x] Write tests: each tier returns correct features, tier priority is correct
 
@@ -185,7 +172,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - `STRIPE_SECRET_KEY` — for Stripe API calls
   - `STRIPE_WEBHOOK_SECRET` — for webhook signature verification
   - `CLOUDFLARE_KV_API_TOKEN` — for writing quota records to Worker KV
-  - `DATABASE_URL` — database connection string
+  - `DB` — Cloudflare D1 database binding (configured in `wrangler.toml`)
 - [ ] Configure DNS for `api.qr-foundry.com`
 - [x] Set up CORS to allow requests from:
   - `app.qr-foundry.com` (web app)
@@ -197,7 +184,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 ### Manual steps (requires action outside IDE)
 
 - [ ] **Create Stripe account** and configure products/prices
-- [ ] **Set up database** (Postgres, D1, Turso, etc.)
+- [x] **Set up database** (Cloudflare D1)
 - [ ] **Configure DNS** for `api.qr-foundry.com`
 - [ ] **Share JWT signing key** — the Worker needs the public key (or shared secret) to validate JWTs issued by this API
 - [ ] **Set Cloudflare KV API token** — create a token with write permissions to the Worker's KV namespace

@@ -281,8 +281,8 @@ The Billing API (see [`billing-api.md`](billing-api.md)) is responsible for writ
 
 ### Manual steps (requires action outside IDE)
 
-- [ ] **Create Cloudflare API token** with "Account Analytics Read" permission
-- [ ] **Set `ANALYTICS_API_TOKEN` secret** — `wrangler secret put ANALYTICS_API_TOKEN --env production/preview/dev`
+- [x] **Create Cloudflare API token** with "Account Analytics Read" permission
+- [x] **Set `ANALYTICS_API_TOKEN` secret** — `wrangler secret put ANALYTICS_API_TOKEN --env production/preview/dev`
 - [ ] **Replace `<account_id>` placeholder** in `wrangler.toml` with your real Cloudflare account ID
 - [ ] **Generate test scan data** — Hit redirect URLs to populate Analytics Engine with queryable data
 - [ ] **Test endpoints with `wrangler dev`** — Verify analytics responses return correctly
@@ -306,13 +306,13 @@ The Billing API (see [`billing-api.md`](billing-api.md)) is responsible for writ
 
 > **Note:** CI/CD pipeline (GitHub Actions for lint, typecheck, test, deploy) was set up in Phase 1. This phase covers the remaining infrastructure items.
 
-- [ ] Register or configure `qrfo.link` custom domain
-- [ ] Add custom domain route in Cloudflare dashboard pointing to the Worker
-- [ ] Deploy to production: `npm run deploy`
-- [ ] Smoke test production endpoints
-  - [ ] `qrfo.link/health` returns 200
-  - [ ] Create a test code via API, scan it, verify redirect
-  - [ ] Verify branded 404 for nonexistent codes
+- [x] Register or configure `qrfo.link` custom domain
+- [x] Add custom domain route in Cloudflare dashboard pointing to the Worker
+- [x] Deploy to production: `npm run deploy`
+- [x] Smoke test production endpoints
+  - [x] `qrfo.link/health` returns 200
+  - [x] Create a test code via API, scan it, verify redirect
+  - [x] Verify branded 404 for nonexistent codes
 - [ ] Set up basic uptime monitoring (Cloudflare or UptimeRobot on `/health`)
 
 **Exit criteria:** `qrfo.link` serves redirects in production. Uptime monitoring is active.
