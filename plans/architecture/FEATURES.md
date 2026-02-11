@@ -406,9 +406,13 @@ Payment processing for Pro purchases, recurring subscriptions, and add-on code p
 - [x] Stripe Customer Portal for subscription management (Billing API)
 - [x] Stripe webhook handler: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed` (Billing API)
 - [x] Purchase and subscription state tracking in database (Billing API)
-- [ ] Quota writes to Worker KV after purchase/subscription events (Billing API, see billing-api.md Phase 5)
-- [ ] Quota increment on add-on purchase (read current, add purchased amount, write back) (Billing API)
-- [ ] Quota reduction on subscription cancel/downgrade (block new creates, keep existing codes) (Billing API)
+- [x] Quota writes to Worker KV after purchase/subscription events (Billing API, see billing-api.md Phase 5)
+- [x] Quota increment on add-on purchase (read current, add purchased amount, write back) (Billing API)
+- [x] Quota reduction on subscription cancel/downgrade — instant deactivation for base sub, 24h grace period for addon (Billing API)
+- [x] Grace period enforcement via Worker cron — hourly scan of expired grace periods, pauses excess codes (Worker)
+- [x] Instant code deactivation on base subscription cancellation — bulk-writes paused status to Worker KV (Billing API)
+- [x] Grace period on payment failure — 24h deadline before code deactivation (Billing API + Worker cron)
+- [x] Grace period clearing on subscription reactivation (Billing API)
 - [ ] Mac App Store IAP integration (Desktop App, future)
 - [ ] Microsoft Store IAP integration (Desktop App, future)
 - [ ] Gumroad license key validation (Desktop App, future)
@@ -618,7 +622,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Dynamic QR Codes (Worker) | 16 | 0 | 5 | 21 |
 | Scan Analytics (Worker) | 10 | 0 | 6 | 16 |
 | User Accounts & Auth | 12 | 1 | 3 | 16 |
-| Billing & Subscriptions | 4 | 0 | 6 | 10 |
+| Billing & Subscriptions | 11 | 0 | 2 | 13 |
 | Trial Management | 5 | 0 | 3 | 8 |
 | Feature Gating | 5 | 0 | 2 | 7 |
 | Platform & Distribution | 21 | 0 | 8 | 29 |
@@ -626,6 +630,6 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Settings & Preferences | 1 | 0 | 12 | 13 |
 | Native App Features | 0 | 0 | 10 | 10 |
 | Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **123** | **5** | **75** | **203** |
+| **Totals** | **130** | **5** | **71** | **206** |
 
 Core QR generation, customization, validation, and the Worker API backend are substantially complete. The Billing API (auth, trials, Stripe, plan tier) is largely implemented — remaining work is quota writes to Worker KV and production deployment. The desktop app has been redesigned with sidebar navigation, theme support, a full platform abstraction layer for web builds, and app-side auth integration (login/signup modal, JWT token storage, session restore, token refresh). The primary remaining work is feature gating UI, dynamic code and analytics UI, web app deployment, and the marketing site.

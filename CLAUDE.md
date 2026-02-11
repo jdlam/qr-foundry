@@ -76,7 +76,7 @@ shared docs whenever a feature or change is implemented:
 | **Desktop App** | Core QR features + platform adapters + UI redesign + auth integration + feature gating complete (451 tests); dynamic codes pending |
 | **Marketing Site** | Phase 1 complete (landing page, dark/light theme, QR generator, pricing, CI/CD); Phases 2-3 pending |
 
-**Feature totals:** 123 shipped, 5 partial, 75 planned (203 total)
+**Feature totals:** 130 shipped, 5 partial, 68 planned (203 total)
 
 ## Pricing Model
 

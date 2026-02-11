@@ -14,9 +14,9 @@ This file is a lightweight index. All planning resources live in this directory.
 
 | Service | Repo | Plan | Status |
 |---------|------|------|--------|
-| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-7 complete, deployed to production at `qrfo.link`. Phase 8 (grace period cron) pending |
+| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. Grace period cron enforcement implemented |
 | **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Core features + platform abstraction + UI redesign + auth integration complete; dynamic codes UI/analytics pending |
-| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-6 complete. Phase 7 (deploy) and Phase 8 (subscription lifecycle/code deactivation) pending |
+| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-6 and 8 complete. Phase 7 (deploy) pending |
 | **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), pricing simplified (PR #5), Phases 2-3 pending |
 
 ## Pricing Model (quick reference)

@@ -355,31 +355,32 @@ The Billing API handles instant deactivation (subscription cancel) and writes gr
 
 ### Automated (done in IDE)
 
-- [ ] **Add cron trigger to `wrangler.toml`**:
-  ```toml
-  [triggers]
-  crons = ["0 * * * *"]
-  ```
-- [ ] **Implement `scheduled` event handler** in `src/index.ts`:
-  1. List all `_quota::` keys from KV
-  2. For each with a `gracePeriodDeadline` in the past:
-     a. If `targetMaxCodes === 0`: list all codes for that owner, set each active code to `status: "paused"`
-     b. If `targetMaxCodes > 0`: list active codes, sort by `createdAt` descending, pause excess codes until active count <= `targetMaxCodes`
-  3. Update quota record: set `maxCodes = targetMaxCodes`, remove grace period fields (`gracePeriodDeadline`, `targetMaxCodes`, `gracePeriodReason`), update `currentCount`
-  4. Log actions (user, codes paused, reason) for debugging
-- [ ] **Update `UserQuota` type** in `src/types.ts` — add optional `gracePeriodDeadline`, `targetMaxCodes`, `gracePeriodReason` fields
-- [ ] **Handle edge cases:**
+- [x] **Add cron trigger to `wrangler.toml`** — `crons = ["0 * * * *"]` for production, preview, and dev environments
+- [x] **Update `UserQuota` type** in `src/types.ts` — added optional `gracePeriodDeadline`, `targetMaxCodes`, `gracePeriodReason` fields
+- [x] **Implement `scheduled` event handler**:
+  - `handleScheduled(env)` in new `src/scheduled.ts` — called via `ctx.waitUntil` from `scheduled` export in `src/index.ts`
+  - Lists all `_quota::` keys from KV with cursor-based pagination
+  - For each with a `gracePeriodDeadline` in the past:
+    - `targetMaxCodes === 0`: pauses all active codes for that owner
+    - `targetMaxCodes > 0`: sorts active codes by `createdAt` descending, pauses only the newest excess codes
+  - Updates quota record: sets `maxCodes = targetMaxCodes`, removes grace period fields, recounts `currentCount`
+  - Logs actions via `console.error` (user, codes paused, reason)
+- [x] **Handle edge cases:**
   - No quota records with grace periods → cron is a no-op (fast exit)
   - Grace period deadline in the future → skip (not yet expired)
   - User has fewer active codes than `targetMaxCodes` → just update `maxCodes`, no codes to pause
-  - KV write failure on individual code → log error, continue with remaining codes
-- [ ] Write tests for the scheduled handler:
+  - Already-paused/expired codes → skipped during enforcement (only active codes paused)
+  - KV write failure on individual code → logged, continues with remaining codes
+- [x] Write tests for the scheduled handler (8 tests in `src/scheduled.test.ts`):
+  - No-op when no grace periods exist
+  - No-op when grace period not yet expired
   - Grace period expired with `targetMaxCodes: 0` → all codes paused
-  - Grace period expired with excess codes → only newest excess codes paused
-  - Grace period not yet expired → no action
-  - No grace periods → no-op
-  - Mixed: some expired, some not → only expired ones enforced
-- [ ] All tests pass, typecheck clean, lint clean
+  - Grace period expired with excess codes → only newest excess paused
+  - Mixed: some expired, some not → only expired enforced
+  - Grace period fields removed from quota after enforcement
+  - Already-paused/expired codes skipped
+  - Individual code write failure → continues with remaining
+- [x] All 168 tests pass, typecheck clean, lint clean
 
 ### Manual steps (requires action outside IDE)
 
