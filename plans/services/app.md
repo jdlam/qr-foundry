@@ -45,13 +45,19 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 **Goal:** The app checks the user's plan tier and shows/hides features accordingly. Free users see upgrade prompts for locked features.
 
-- [ ] Implement `usePlan` hook — calls Billing API `GET /api/me/plan` on app startup and caches the result
+- [x] Implement `usePlan` hook — calls Billing API `GET /api/me/plan` on app startup and caches the result
   - Returns `{ tier, features, maxCodes, trialDaysRemaining? }`
-- [ ] Build `<FeatureGate>` component — wraps gated features, shows lock icon + upsell for insufficient tier
-- [ ] Gate features by tier:
+  - Implemented via `useAuth` hook + `authStore.fetchPlan()`
+- [x] Build feature gating system — `useFeatureAccess` hook checks `plan.features` array
+  - `FeatureKey` type + `FREE_FEATURES` constant in `src/api/types.ts`
+  - `authModalStore` (Zustand) for cross-component auth modal access
+  - `useFeatureAccess(feature)` returns `{ hasAccess, requireAccess }`
+  - Not logged in → opens auth modal; logged in without access → shows upgrade toast
+- [x] Gate features by tier:
   - **Free:** Basic QR types (URL, text, WiFi, phone), basic colors, PNG export, clipboard, scanner, limited history (10)
   - **Pro:** All QR types, advanced customization, all export formats, batch, templates, unlimited history
   - **Subscription:** Everything in Pro + dynamic codes tab, analytics dashboard
+  - Gated: Sidebar tabs (Batch, Templates), input types (vCard, Email, SMS, Geo), SVG export, style options (non-square dots/eyes, gradient, logo)
 - [ ] Show trial banner during Pro Trial ("X days left in your Pro trial")
 - [ ] Show upgrade prompt when trial expires
 - [ ] Add upgrade/purchase buttons that link to:
