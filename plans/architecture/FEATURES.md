@@ -114,7 +114,7 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Quota writes to Worker KV | -- | -- | -- | [ ] Billing API |
 | **Feature Gating** | | | | |
 | Plan tier API (`GET /api/me/plan`) | -- | -- | -- | [x] Billing API |
-| `<FeatureGate>` component | -- | -- | -- | [ ] App |
+| `<FeatureGate>` component | -- | -- | -- | [x] App |
 | Trial banner / upgrade prompts | -- | -- | -- | [ ] App |
 | **Platform & Distribution** | | | | |
 | macOS desktop app (Tauri) | Yes | Yes | Yes | [x] |
@@ -449,9 +449,10 @@ Plan-based UI gating: show/hide features, display lock icons, and prompt upgrade
 **Features:**
 - [x] Plan tier API: `GET /api/me/plan` returning tier, features list, maxCodes, trialDaysRemaining (Billing API, see billing-api.md Phase 6)
 - [x] Feature key definitions mapped to tiers (basic_qr_types, advanced_customization, svg_export, batch_generation, templates, dynamic_codes, analytics, etc.) (Billing API)
-- [ ] `usePlan` hook: fetch plan on app startup, cache result (App, see app.md Phase 2)
-- [ ] `<FeatureGate>` component: wraps gated features, shows lock icon + upsell for insufficient tier (App)
-- [ ] Tier-based gating rules: Free (basic types, basic colors, PNG, clipboard, scanner, 10 history), Pro (all types, full customization, all exports, batch, templates, unlimited history), Subscription (Pro + dynamic codes + analytics) (App)
+- [x] `usePlan` hook: fetch plan on app startup, cache result (App, via `useAuth` + `authStore.fetchPlan()`)
+- [x] `useFeatureAccess` hook + `authModalStore`: gate actions by checking `plan.features`, open auth modal for logged-out users, show upgrade toast for free tier (App)
+- [x] Tier-based gating rules: Free (basic types, basic colors, PNG, clipboard, scanner, 10 history), Pro (all types, full customization, all exports, batch, templates, unlimited history), Subscription (Pro + dynamic codes + analytics) (App)
+  - Gated: Sidebar tabs (Batch, Templates), input types (vCard, Email, SMS, Geo), SVG export, style options (non-square dots/eyes, gradient, logo)
 - [ ] Upgrade/purchase buttons linking to appropriate store or Stripe checkout (App)
 - [ ] Offline graceful degradation: cache last known tier, fall back to Free if Billing API unreachable (App)
 
@@ -619,12 +620,12 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | User Accounts & Auth | 12 | 1 | 3 | 16 |
 | Billing & Subscriptions | 4 | 0 | 6 | 10 |
 | Trial Management | 5 | 0 | 3 | 8 |
-| Feature Gating | 2 | 0 | 5 | 7 |
+| Feature Gating | 5 | 0 | 2 | 7 |
 | Platform & Distribution | 21 | 0 | 8 | 29 |
 | Marketing Site | 0 | 0 | 12 | 12 |
 | Settings & Preferences | 1 | 0 | 12 | 13 |
 | Native App Features | 0 | 0 | 10 | 10 |
 | Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **120** | **5** | **78** | **203** |
+| **Totals** | **123** | **5** | **75** | **203** |
 
 Core QR generation, customization, validation, and the Worker API backend are substantially complete. The Billing API (auth, trials, Stripe, plan tier) is largely implemented — remaining work is quota writes to Worker KV and production deployment. The desktop app has been redesigned with sidebar navigation, theme support, a full platform abstraction layer for web builds, and app-side auth integration (login/signup modal, JWT token storage, session restore, token refresh). The primary remaining work is feature gating UI, dynamic code and analytics UI, web app deployment, and the marketing site.
