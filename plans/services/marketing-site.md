@@ -61,13 +61,13 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 - [x] **Two-column scroll section** (sticky generator left, content panels right)
   - Scroll-reveal animations via IntersectionObserver
   - Skip animations when `prefers-reduced-motion` is set (show panels immediately)
-  - **Pro panel** — feature list (SVG/PDF export, logos, batch, dot styles, templates), CTAs: "Get the desktop app" + **"Try in browser"** (links to `app.qr-foundry.com`)
-  - **Dynamic panel** — feature list (change destinations, scan analytics, dashboard, 25 codes), CTA: "Start subscription — $6/mo"
+  - **Features panel** — highlight that everything is free (all QR types, SVG/PDF export, logos, batch, templates), CTAs: "Get the desktop app" + **"Try in browser"** (links to `app.qr-foundry.com`)
+  - **Dynamic panel** — feature list (change destinations, scan analytics, dashboard, 25 codes), CTA: "Start subscription — $6/mo or $60/yr"
 - [x] **Social proof section** — between hero and upsell panels
   - "X QR codes generated" counter (placeholder numbers for now)
   - Short testimonial quotes (placeholder)
   - Product Hunt badge / App Store rating (when available)
-- [x] **Compact pricing comparison** — above footer, side-by-side Free / Pro / Subscription tiers so visitors see all options without navigating away
+- [x] **Compact pricing comparison** — above footer, side-by-side Free / Subscription tiers so visitors see all options without navigating away — **needs update for simplified pricing (no Pro tier)**
 - [x] **Blog teasers** — 3 hardcoded blog post cards above footer (placeholder until blog infra in Phase 3)
 - [x] **Footer** — logo, nav links (Pricing, Blog, Download, Legal), copyright
 
@@ -101,11 +101,11 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 **Goal:** Clear pricing comparison that converts visitors to customers.
 
 - [ ] Build dedicated `/pricing` page with full-width pricing comparison table:
-  - **Free** — $0, basic features, CTA: "Get Started" (links to generator on landing page)
-  - **Pro** — ~$15 one-time, full features, CTA: "Try Pro free for 7 days"
-  - **Subscription** — ~$6/month, dynamic codes + analytics, CTA: "Start Subscription"
-- [ ] Highlight the 7-day Pro trial prominently
-- [ ] FAQ section (common questions about tiers, what happens after trial, refund policy, etc.)
+  - **Free** — $0, everything included, CTA: "Get Started Free" (links to generator or app)
+  - **Subscription** — $6/month or $60/year, dynamic codes + analytics, CTA: "Start Subscription"
+  - **Add-on** — +$3/month or +$30/year per 25 extra codes, shown as upgrade option
+- [ ] Monthly/annual toggle on pricing page
+- [ ] FAQ section (common questions about dynamic codes, what happens on cancel, refund policy, etc.)
   - Structured data: `FAQPage` schema for FAQ section
 - [ ] CTAs that link to:
   - Desktop: Mac App Store / Microsoft Store / download pages

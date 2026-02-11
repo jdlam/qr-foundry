@@ -41,33 +41,29 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ---
 
-## Phase 2: Feature Gating
+## Phase 2: Feature Gating — REVISED
 
-**Goal:** The app checks the user's plan tier and shows/hides features accordingly. Free users see upgrade prompts for locked features.
+**Goal:** All QR generation features are free with no account required. The only gated feature is dynamic QR codes, which requires a subscription.
 
-- [x] Implement `usePlan` hook — calls Billing API `GET /api/me/plan` on app startup and caches the result
-  - Returns `{ tier, features, maxCodes, trialDaysRemaining? }`
-  - Implemented via `useAuth` hook + `authStore.fetchPlan()`
-- [x] Build feature gating system — `useFeatureAccess` hook checks `plan.features` array
-  - `FeatureKey` type + `FREE_FEATURES` constant in `src/api/types.ts`
-  - `authModalStore` (Zustand) for cross-component auth modal access
-  - `useFeatureAccess(feature)` returns `{ hasAccess, requireAccess }`
-  - Not logged in → opens auth modal; logged in without access → shows upgrade toast
-- [x] Gate features by tier:
-  - **Free:** Basic QR types (URL, text, WiFi, phone), basic colors, PNG export, clipboard, scanner, limited history (10)
-  - **Pro:** All QR types, advanced customization, all export formats, batch, templates, unlimited history
-  - **Subscription:** Everything in Pro + dynamic codes tab, analytics dashboard
-  - Gated: Sidebar tabs (Batch, Templates), input types (vCard, Email, SMS, Geo), SVG export, style options (non-square dots/eyes, gradient, logo)
-- [ ] Show trial banner during Pro Trial ("X days left in your Pro trial")
-- [ ] Show upgrade prompt when trial expires
-- [ ] Add upgrade/purchase buttons that link to:
-  - Desktop: App Store IAP or Gumroad purchase page
-  - Web: Stripe checkout via Billing API
-- [ ] Handle offline gracefully — cache last known plan tier, degrade to Free if unable to reach Billing API
+> **Note:** The original plan gated Pro features (advanced customization, SVG export, batch, templates) behind a Pro tier with a 7-day trial. This has been simplified — all QR generation features are now free. The existing feature gating code (`useFeatureAccess`, PRO badges, etc.) needs to be removed.
 
-**Dependencies:** Billing API Phase 6 (Plan Tier API) must be deployed.
+- [x] ~~Implement `usePlan` hook~~ — still used for dynamic code access check
+- [x] ~~Build feature gating system~~ — `useFeatureAccess` hook built but **needs to be removed** (all features are now free)
+- [x] ~~Gate features by tier~~ — **needs to be reverted** (remove PRO badges, unlock all features for free users)
+- [ ] **Remove Pro feature gating from app:**
+  - Remove PRO badges from Sidebar tabs (Batch, Templates)
+  - Remove gating from input types (vCard, Email, SMS, Geo)
+  - Remove gating from SVG export
+  - Remove gating from style options (dot styles, eye styles, gradient, logo)
+  - Remove `useFeatureAccess` hook (or repurpose for dynamic codes only)
+  - Remove `FeatureKey` type and `FREE_FEATURES` constant (or simplify)
+  - Keep `authModalStore` (still needed for subscription upsell)
+- [ ] Gate dynamic codes tab — requires active subscription (shown to all users with "Subscribe" prompt)
+- [ ] Handle offline gracefully — app works fully offline for all free features
 
-**Exit criteria:** Free users see lock icons on Pro features. Pro users can access everything except dynamic codes. Subscription users have full access. Trial banner shows correctly.
+**Dependencies:** None for free features. Billing API must be deployed for subscription check.
+
+**Exit criteria:** All QR generation features work without login. Dynamic codes tab prompts for subscription. No PRO badges anywhere in the app.
 
 ---
 

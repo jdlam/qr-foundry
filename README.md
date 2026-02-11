@@ -8,7 +8,7 @@ QR Foundry is a QR code generator that ships as a **desktop app** (macOS, Window
 |---------|------|-------|--------|
 | **Desktop + Web App** | [qr-foundry-app](https://github.com/jdlam/qr-foundry-app) | Tauri + React + TypeScript | downloadable / `app.qr-foundry.com` |
 | **Redirect Worker** | [qr-foundry-worker](https://github.com/jdlam/qr-foundry-worker) | Cloudflare Worker + KV + Analytics Engine | `qrfo.link` |
-| **Billing API** | [qr-foundry-api](https://github.com/jdlam/qr-foundry-api) | Hono + Drizzle + Turso | `api.qr-foundry.com` |
+| **Billing API** | [qr-foundry-api](https://github.com/jdlam/qr-foundry-api) | Hono + Drizzle + D1 | `api.qr-foundry.com` |
 | **Marketing Site** | [qr-foundry-site](https://github.com/jdlam/qr-foundry-site) | Astro + React + Tailwind CSS v4 | `qr-foundry.com` |
 | **Shared Plans** | [qr-foundry-plans](https://github.com/jdlam/qr-foundry-plans) (this repo) | Markdown | — |
 
@@ -37,12 +37,13 @@ QR Foundry is a QR code generator that ships as a **desktop app** (macOS, Window
 
 ## Pricing
 
+All QR generation features are free. You only pay for dynamic QR codes.
+
 | Tier | Price | Key Features |
 |------|-------|-------------|
-| **Free** | $0 | Basic QR types, PNG export, clipboard, scanner, limited history |
-| **Pro Trial** | $0 / 7 days | All Pro features free for 7 days after signup |
-| **Pro** | ~$12-15 one-time | Full customization, all export formats, batch, templates, unlimited history |
-| **Subscription** | ~$5-7/month | Everything in Pro + dynamic QR codes (25 active), scan analytics |
+| **Free** | $0 | Everything — all QR types, full customization, all exports, batch, templates, unlimited history |
+| **Subscription** | $6/month or $60/year | Free + 25 dynamic QR codes, scan analytics |
+| **Add-on** | +$3/month or +$30/year | Additional 25 dynamic code slots (stackable) |
 
 ## Features
 
