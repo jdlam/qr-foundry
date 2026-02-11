@@ -347,6 +347,49 @@ The Billing API (see [`billing-api.md`](billing-api.md)) is responsible for writ
 
 ---
 
+## Phase 8: Grace Period Enforcement (Cron)
+
+**Goal:** A scheduled cron job enforces grace period deadlines — pausing dynamic codes after the 24-hour grace period expires. See [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) § "Subscription Lifecycle & Dynamic Code Deactivation" for the full design.
+
+The Billing API handles instant deactivation (subscription cancel) and writes grace period records. The Worker cron handles deferred enforcement.
+
+### Automated (done in IDE)
+
+- [ ] **Add cron trigger to `wrangler.toml`**:
+  ```toml
+  [triggers]
+  crons = ["0 * * * *"]
+  ```
+- [ ] **Implement `scheduled` event handler** in `src/index.ts`:
+  1. List all `_quota::` keys from KV
+  2. For each with a `gracePeriodDeadline` in the past:
+     a. If `targetMaxCodes === 0`: list all codes for that owner, set each active code to `status: "paused"`
+     b. If `targetMaxCodes > 0`: list active codes, sort by `createdAt` descending, pause excess codes until active count <= `targetMaxCodes`
+  3. Update quota record: set `maxCodes = targetMaxCodes`, remove grace period fields (`gracePeriodDeadline`, `targetMaxCodes`, `gracePeriodReason`), update `currentCount`
+  4. Log actions (user, codes paused, reason) for debugging
+- [ ] **Update `UserQuota` type** in `src/types.ts` — add optional `gracePeriodDeadline`, `targetMaxCodes`, `gracePeriodReason` fields
+- [ ] **Handle edge cases:**
+  - No quota records with grace periods → cron is a no-op (fast exit)
+  - Grace period deadline in the future → skip (not yet expired)
+  - User has fewer active codes than `targetMaxCodes` → just update `maxCodes`, no codes to pause
+  - KV write failure on individual code → log error, continue with remaining codes
+- [ ] Write tests for the scheduled handler:
+  - Grace period expired with `targetMaxCodes: 0` → all codes paused
+  - Grace period expired with excess codes → only newest excess codes paused
+  - Grace period not yet expired → no action
+  - No grace periods → no-op
+  - Mixed: some expired, some not → only expired ones enforced
+- [ ] All tests pass, typecheck clean, lint clean
+
+### Manual steps (requires action outside IDE)
+
+- [ ] Verify cron trigger is registered after deploy (`wrangler deployments list` or Cloudflare dashboard → Workers → Triggers)
+- [ ] Test with a manually-set grace period deadline in the past → verify codes are paused
+
+**Exit criteria:** The hourly cron enforces grace periods. After 24 hours, excess codes are paused. The redirect path is completely unaffected — no additional logic in the redirect handler.
+
+---
+
 ## Future (Post-Launch)
 
 These are not blockers for launch but are planned for future iterations:

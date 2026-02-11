@@ -190,3 +190,33 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [ ] **Set Cloudflare KV API token** — create a token with write permissions to the Worker's KV namespace
 
 **Exit criteria:** `api.qr-foundry.com` is live. Users can sign up, log in, purchase, and the correct quota records appear in Worker KV.
+
+---
+
+## Phase 8: Subscription Lifecycle & Code Deactivation
+
+**Goal:** When a subscription is canceled or payment fails, dynamic QR codes are deactivated — either instantly or after a 24-hour grace period. See [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) § "Subscription Lifecycle & Dynamic Code Deactivation" for the full design.
+
+- [ ] **Extend quota record format** — Add optional `gracePeriodDeadline`, `targetMaxCodes`, `gracePeriodReason` fields to `UserQuota` type
+- [ ] **Instant deactivation on subscription cancel** (`customer.subscription.deleted` for base subscription):
+  - Set `maxCodes = 0` in `_quota::userId` KV record
+  - List all user's dynamic codes from Worker KV (by `ownerId` metadata)
+  - Set each active code to `status: "paused"` in KV
+  - Requires KV write access to individual code keys (currently only writes `_quota::` keys)
+- [ ] **Grace period on payment failure** (`invoice.payment_failed`):
+  - Write `gracePeriodDeadline` (now + 24h), `targetMaxCodes: 0`, `gracePeriodReason: "payment_failed"` to quota record
+  - Do NOT deactivate codes yet (Worker cron handles enforcement after deadline)
+- [ ] **Grace period on add-on cancellation** (`customer.subscription.deleted` for add-on):
+  - Recompute `maxCodes` from remaining active subscriptions
+  - If active codes > new `maxCodes`, write `gracePeriodDeadline` (now + 24h) and `targetMaxCodes`
+  - If active codes <= new `maxCodes`, just update `maxCodes` directly (no grace needed)
+- [ ] **Clear grace period on reactivation** (`customer.subscription.updated` with status → `active`):
+  - Recompute `maxCodes`, write to quota, clear `gracePeriodDeadline`/`targetMaxCodes`/`gracePeriodReason`
+  - Do NOT reactivate paused codes (user manually reactivates from dashboard)
+- [ ] **KV code listing helper** — Implement function to list all codes for a user via KV list API (filter by `ownerId` metadata, skip `_quota::` keys)
+- [ ] **KV code update helper** — Implement function to set `status: "paused"` on individual code keys
+- [ ] Write tests for each webhook scenario (instant deactivation, grace period write, grace period clear on reactivation)
+
+**Dependencies:** Worker KV must be accessible for both `_quota::` writes and individual code key writes. May require a broader API token scope.
+
+**Exit criteria:** Subscription cancellation instantly pauses all dynamic codes. Payment failure writes a 24h grace period. Add-on cancellation writes a grace period for excess codes. Reactivation restores `maxCodes` without auto-reactivating codes.

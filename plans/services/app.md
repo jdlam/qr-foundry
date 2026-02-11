@@ -50,14 +50,14 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [x] ~~Implement `usePlan` hook~~ — still used for dynamic code access check
 - [x] ~~Build feature gating system~~ — `useFeatureAccess` hook built but **needs to be removed** (all features are now free)
 - [x] ~~Gate features by tier~~ — **needs to be reverted** (remove PRO badges, unlock all features for free users)
-- [ ] **Remove Pro feature gating from app:**
-  - Remove PRO badges from Sidebar tabs (Batch, Templates)
-  - Remove gating from input types (vCard, Email, SMS, Geo)
-  - Remove gating from SVG export
-  - Remove gating from style options (dot styles, eye styles, gradient, logo)
-  - Remove `useFeatureAccess` hook (or repurpose for dynamic codes only)
-  - Remove `FeatureKey` type and `FREE_FEATURES` constant (or simplify)
-  - Keep `authModalStore` (still needed for subscription upsell)
+- [x] **Remove Pro feature gating from app:**
+  - [x] Remove PRO badges from Sidebar tabs (Batch, Templates)
+  - [x] Remove gating from input types (vCard, Email, SMS, Geo)
+  - [x] Remove gating from SVG export
+  - [x] Remove gating from style options (dot styles, eye styles, gradient, logo)
+  - [x] Repurpose `useFeatureAccess` hook for dynamic codes only
+  - [x] Expand `FREE_FEATURES` to include all QR generation features
+  - [x] Keep `authModalStore` (still needed for subscription upsell)
 - [ ] Gate dynamic codes tab — requires active subscription (shown to all users with "Subscribe" prompt)
 - [ ] Handle offline gracefully — app works fully offline for all free features
 

@@ -14,10 +14,10 @@ This file is a lightweight index. All planning resources live in this directory.
 
 | Service | Repo | Plan | Status |
 |---------|------|------|--------|
-| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-7 complete, deployed to production at `qrfo.link` |
-| **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Core features + platform abstraction + UI redesign + auth integration complete; feature gating/dynamic codes/analytics pending |
-| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-4 and 6 complete, Phase 5 (quota writes) and 7 (deploy) pending |
-| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), Phases 2-3 pending |
+| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-7 complete, deployed to production at `qrfo.link`. Phase 8 (grace period cron) pending |
+| **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Core features + platform abstraction + UI redesign + auth integration complete; dynamic codes UI/analytics pending |
+| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-6 complete. Phase 7 (deploy) and Phase 8 (subscription lifecycle/code deactivation) pending |
+| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), pricing simplified (PR #5), Phases 2-3 pending |
 
 ## Pricing Model (quick reference)
 

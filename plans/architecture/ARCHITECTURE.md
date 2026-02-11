@@ -47,9 +47,8 @@ QR Foundry is composed of five services. Each has a single responsibility and co
 |---|---|
 | User authentication (signup, login, JWT issuance) | Billing API |
 | Subscription lifecycle (create, upgrade, downgrade, cancel) | Billing API |
-| One-time purchases (Pro unlock) | Billing API |
 | Add-on purchases (extra dynamic code slots) | Billing API |
-| Trial management (7-day Pro trial tracking) | Billing API |
+| Subscription lifecycle (cancel, payment failure, grace periods, code deactivation) | Billing API (webhooks) + Worker (cron) |
 | Plan tier API (`GET /api/me/plan` — what features a user has) | Billing API |
 | Quota management (setting `maxCodes` per user) | Billing API (writes to Worker KV) |
 | Dynamic code CRUD (create, list, update, delete) | Worker |
@@ -84,7 +83,9 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 |-------|-------------------|
 | User subscribes ($6/month or $60/year) | Write `_quota::userId` with `maxCodes = 25` |
 | User adds add-on ($3/month or $30/year per 25 codes) | Recompute `maxCodes` from active subscriptions, write back |
-| User cancels subscription or add-on | Lower `maxCodes`. Existing codes keep working but new creates are blocked until user is under the new limit |
+| User cancels subscription | Set `maxCodes = 0`, **instantly deactivate all dynamic codes** (set status to `"paused"` in Worker KV) |
+| Payment fails (past_due) | Set `maxCodes = 0`, write grace period deadline (now + 24h). After 24h, deactivate all codes |
+| User cancels add-on (base still active) | Lower `maxCodes`. Write grace period deadline (now + 24h). After 24h, auto-pause newest excess codes |
 | User exceeds quota and tries to create | Worker returns 403 with actionable error: "delete unused codes or upgrade" |
 
 ### Stripe Products
@@ -104,7 +105,7 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 
 - **Stack:** Static site (Astro, Next.js, or similar). Deployed on Vercel or Cloudflare Pages.
 - **Responsibilities:**
-  - Explain the product and pricing tiers (Free, Pro, Subscription)
+  - Explain the product and pricing tiers (Free, Subscription)
   - Host download links for the desktop app and link to the web app
   - SEO and social presence
 - **Dependencies:** None at runtime. Purely static.
@@ -157,11 +158,10 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 
 - **Stack:** TBD. Options: Cloudflare Worker, a small Node/Bun server, or a serverless function platform. Must integrate with Stripe (or similar) for payments.
 - **Responsibilities:**
-  - User authentication (signup with auto 7-day Pro trial, login, JWT issuance, password reset)
-  - Trial management (track `trialStartedAt`/`trialExpiresAt`, compute trial status)
-  - One-time Pro purchase (unlock Pro features permanently)
-  - Subscription lifecycle (create, upgrade, downgrade, cancel — for dynamic QR codes)
+  - User authentication (signup, login, JWT issuance, password reset)
+  - Subscription lifecycle (create, cancel, payment failure handling, code deactivation)
   - Add-on purchases (extra dynamic code slots)
+  - Grace period management (write deadlines to Worker KV for deferred enforcement)
   - **Quota management** — the source of truth for how many active dynamic codes a user is allowed. Writes `UserQuota` records to the Worker's KV store after purchase/subscription events.
   - Plan tier API (`GET /api/me/plan`) — returns the user's current entitlements for feature gating
 - **Dependencies at runtime:**
@@ -196,8 +196,7 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 Desktop App / Web App       Billing API              Worker
     │                           │                       │
     │──── signup ──────────────►│                       │
-    │     (auto-starts 7-day    │                       │
-    │      Pro trial)           │                       │
+    │                           │                       │
     │◄─── JWT token ───────────│                       │
     │                           │                       │
     │──── login ──────────────►│                       │
@@ -205,8 +204,7 @@ Desktop App / Web App       Billing API              Worker
     │                           │                       │
     │──── GET /api/me/plan ───►│                       │
     │◄─── { tier, features,    │                       │
-    │       maxCodes,           │                       │
-    │       trialDaysRemaining }│                       │
+    │       maxCodes }          │                       │
     │                           │                       │
     │──── API call + JWT ─────────────────────────────►│
     │                           │    (Worker validates   │
@@ -226,14 +224,14 @@ For launch, the Worker uses a single shared bearer token (simple, single-user). 
 Desktop App / Web App       Billing API              Worker
     │                           │                       │
     │──── GET /api/me/plan ───►│                       │
-    │◄─── { tier: "pro",       │                       │
+    │◄─── { tier: "free",      │                       │
     │       features: [...],    │                       │
-    │       maxCodes: 25 }      │                       │
+    │       maxCodes: 0 }       │                       │
     │                           │                       │
-    │  (App shows/hides UI      │                       │
-    │   based on tier. Free     │                       │
-    │   users see lock icons    │                       │
-    │   on Pro features.)       │                       │
+    │  (App checks features.    │                       │
+    │   All QR features are     │                       │
+    │   free. Dynamic codes     │                       │
+    │   require subscription.)  │                       │
     │                           │                       │
     │──── POST /api/codes ────────────────────────────►│
     │                           │    (Worker independently│
@@ -269,6 +267,74 @@ Key design decisions:
 - **Quota records use a `_quota::` key prefix** in the same KV namespace. Safe because short codes can never start with `_` or contain `:`.
 - **Only active codes count against the quota.** Pausing a code frees a slot. Reactivating consumes one (and can be rejected at the limit).
 
+### Subscription Lifecycle & Dynamic Code Deactivation
+
+When a user's subscription state changes, their dynamic QR codes must be managed accordingly. The Billing API handles instant actions in webhooks; the Worker handles grace-period enforcement via a cron job.
+
+#### Deactivation Rules
+
+| Scenario | Action | Timing |
+|----------|--------|--------|
+| **Subscription canceled** (`customer.subscription.deleted`) | Deactivate all dynamic codes | **Instant** — webhook sets all codes to `status: "paused"` |
+| **Payment failure** (`invoice.payment_failed`, status → `past_due`) | Deactivate all dynamic codes | **24h grace period** — webhook writes `gracePeriodDeadline` to quota; Worker cron enforces |
+| **Add-on canceled** (base subscription still active) | Pause newest excess codes | **24h grace period** — webhook writes `gracePeriodDeadline` and `targetMaxCodes`; Worker cron pauses excess |
+| **Base canceled but add-on still exists** | Deactivate all codes | **Instant** — no base = `maxCodes: 0`, same as subscription canceled |
+
+#### Reactivation Rules
+
+| Scenario | Action |
+|----------|--------|
+| **User re-subscribes** after cancellation | Codes stay paused. User **manually reactivates** from the Dynamic Codes dashboard (up to new `maxCodes`). This lets users choose which codes to restore if they have more codes than their new limit allows. |
+| **Payment resolved** (past_due → active) | Same as re-subscribe — codes stay paused, user manually reactivates. |
+| **Add-on re-added** | `maxCodes` increases. Excess-paused codes stay paused; user manually reactivates. |
+
+#### Implementation: Quota Record Extension
+
+The `_quota::userId` KV record is extended with optional grace period fields:
+
+```json
+{
+  "ownerId": "user123",
+  "maxCodes": 25,
+  "currentCount": 30,
+  "updatedAt": "2025-01-15T00:00:00Z",
+  "gracePeriodDeadline": "2025-01-16T00:00:00Z",
+  "targetMaxCodes": 25,
+  "gracePeriodReason": "addon_canceled"
+}
+```
+
+- `gracePeriodDeadline` — ISO timestamp. If set and in the future, codes over `targetMaxCodes` are not yet paused.
+- `targetMaxCodes` — The new `maxCodes` that takes effect after the grace period. For full cancellation/payment failure, this is `0`.
+- `gracePeriodReason` — `"payment_failed"` | `"addon_canceled"` (for logging/debugging).
+
+When there is no grace period (instant deactivation or grace expired), these fields are absent.
+
+#### Implementation: Worker Cron
+
+The Worker runs a **hourly cron trigger** (`0 * * * *`) via a `scheduled` event handler:
+
+1. List all `_quota::` keys from KV
+2. For each with a `gracePeriodDeadline` that has passed:
+   a. If `targetMaxCodes` is `0`: pause all codes for that owner
+   b. If `targetMaxCodes` > `0`: count active codes; pause the newest excess codes (by `createdAt`) until active count <= `targetMaxCodes`
+3. Update quota record: set `maxCodes = targetMaxCodes`, remove grace period fields, update `currentCount`
+
+This keeps the redirect path completely untouched — redirects never check quota or grace periods.
+
+#### Implementation: Billing API Webhook Actions
+
+| Webhook Event | Billing API Action |
+|---------------|-------------------|
+| `customer.subscription.deleted` (base) | Set `maxCodes = 0` in quota. List all user's codes via KV, set each to `status: "paused"`. |
+| `customer.subscription.deleted` (add-on) | Recompute `maxCodes`. If active codes > new max, write `gracePeriodDeadline` (now + 24h) and `targetMaxCodes`. |
+| `invoice.payment_failed` | Write `gracePeriodDeadline` (now + 24h), `targetMaxCodes: 0`, `gracePeriodReason: "payment_failed"`. |
+| `customer.subscription.updated` (reactivation) | Recompute and write `maxCodes`. Clear any `gracePeriodDeadline`. Do NOT reactivate paused codes. |
+
+#### Why Manual Reactivation?
+
+When a user re-subscribes, they may have fewer code slots than before (e.g., had base + add-on = 50, re-subscribed with base only = 25). Auto-reactivating would require arbitrarily choosing which codes to restore. Manual reactivation lets users pick the codes that matter most to them.
+
 ### Scan Flow
 
 ```
@@ -290,8 +356,7 @@ Someone scans QR            Worker                   Analytics Engine
 |------|-------|---------|
 | User accounts, emails, passwords | Billing API | Database |
 | Subscription state, payment history | Billing API | Database + Stripe |
-| Trial tracking (`trialStartedAt`, `trialExpiresAt`) | Billing API | Database |
-| Pro purchase records | Billing API | Database + Stripe |
+| Grace period deadlines (deactivation scheduling) | Billing API (writes) / Worker cron (enforces) | Cloudflare KV (`_quota::` keys) |
 | Add-on purchase records | Billing API | Database + Stripe |
 | Quota limits (`maxCodes` per user) | Billing API (writes) / Worker (reads) | Cloudflare KV (`_quota::` keys) |
 | Dynamic QR code records | Worker | Cloudflare KV |
