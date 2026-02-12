@@ -294,6 +294,14 @@ describe('qrStore', () => {
       useQrStore.getState().setContent('https://new.com');
       expect(useQrStore.getState().dynamicShortCode).toBeNull();
     });
+
+    it('setInputType resets isDynamic and dynamicShortCode', () => {
+      useQrStore.getState().setIsDynamic(true);
+      useQrStore.getState().setDynamicShortCode('abc123');
+      useQrStore.getState().setInputType('wifi');
+      expect(useQrStore.getState().isDynamic).toBe(false);
+      expect(useQrStore.getState().dynamicShortCode).toBeNull();
+    });
   });
 
   describe('reset', () => {

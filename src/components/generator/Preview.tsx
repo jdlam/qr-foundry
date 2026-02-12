@@ -33,11 +33,13 @@ export function Preview() {
 
   const [copySuccess, setCopySuccess] = useState(false);
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
+  const [isCreatingDynamic, setIsCreatingDynamic] = useState(false);
 
   const createDynamicCodeIfNeeded = useCallback(async (): Promise<string | null> => {
-    const { isDynamic, dynamicShortCode, content, dynamicLabel } = useQrStore.getState();
-    if (!isDynamic) return content;
+    const { isDynamic, dynamicShortCode, content, dynamicLabel, inputType } = useQrStore.getState();
+    if (!isDynamic || inputType !== 'url') return content;
     if (dynamicShortCode) return `https://qrfo.link/${dynamicShortCode}`;
+    if (isCreatingDynamic) return null;
 
     const token = useAuthStore.getState().token;
     if (!token) {
@@ -45,6 +47,7 @@ export function Preview() {
       return null;
     }
 
+    setIsCreatingDynamic(true);
     try {
       const record = await workerApi.createCode(token, {
         destinationUrl: content,
@@ -56,8 +59,10 @@ export function Preview() {
     } catch {
       toast.error('Failed to create dynamic code');
       return null;
+    } finally {
+      setIsCreatingDynamic(false);
     }
-  }, []);
+  }, [isCreatingDynamic]);
 
   // Save to history
   const saveToHistory = useCallback(
@@ -109,7 +114,9 @@ export function Preview() {
     if (needsSwap) {
       useQrStore.setState({ content: dynamicUrl });
       // Allow QR to re-render with new content
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
     }
 
     try {

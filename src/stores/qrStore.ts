@@ -167,7 +167,7 @@ export const useQrStore = create<QrState>((set, get) => ({
   // Actions
   setContent: (content) => set({ content, validationState: 'idle', dynamicShortCode: null }),
 
-  setInputType: (inputType) => set({ inputType, content: '', validationState: 'idle' }),
+  setInputType: (inputType) => set({ inputType, content: '', validationState: 'idle', isDynamic: false, dynamicShortCode: null }),
 
   setWifiConfig: (config) => set((state) => ({
     wifiConfig: { ...state.wifiConfig, ...config },
