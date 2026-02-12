@@ -434,9 +434,9 @@ Free 7-day trial of Pro features for every new user.
 - [x] Trial does NOT include dynamic QR codes (Billing API)
 - [x] One trial per user, enforced by unique constraint (Billing API)
 - [x] Trial days remaining in plan tier response (Billing API)
-- [ ] Trial banner in app: "X days left in your Pro trial" (App, see app.md Phase 2)
-- [ ] Upgrade prompt when trial expires (App)
-- [ ] Graceful feature degradation: lock advanced features, preserve history (App)
+- N/A ~~Trial banner in app~~ — not needed; all QR features are free, trial only affects dynamic codes which are gated separately
+- N/A ~~Upgrade prompt when trial expires~~ — not needed; same reason
+- N/A ~~Graceful feature degradation~~ — not needed; no features to lock on trial expiry
 
 **Services:** Billing API, Desktop App, Web App
 
