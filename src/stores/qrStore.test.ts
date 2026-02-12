@@ -279,6 +279,12 @@ describe('qrStore', () => {
       expect(useQrStore.getState().dynamicShortCode).toBeNull();
     });
 
+    it('setIsDynamic(true) preserves existing dynamicShortCode', () => {
+      useQrStore.getState().setDynamicShortCode('abc123');
+      useQrStore.getState().setIsDynamic(true);
+      expect(useQrStore.getState().dynamicShortCode).toBe('abc123');
+    });
+
     it('setDynamicShortCode sets short code', () => {
       useQrStore.getState().setDynamicShortCode('abc123');
       expect(useQrStore.getState().dynamicShortCode).toBe('abc123');
@@ -295,12 +301,14 @@ describe('qrStore', () => {
       expect(useQrStore.getState().dynamicShortCode).toBeNull();
     });
 
-    it('setInputType resets isDynamic and dynamicShortCode', () => {
+    it('setInputType resets isDynamic, dynamicShortCode, and dynamicLabel', () => {
       useQrStore.getState().setIsDynamic(true);
       useQrStore.getState().setDynamicShortCode('abc123');
+      useQrStore.getState().setDynamicLabel('My Link');
       useQrStore.getState().setInputType('wifi');
       expect(useQrStore.getState().isDynamic).toBe(false);
       expect(useQrStore.getState().dynamicShortCode).toBeNull();
+      expect(useQrStore.getState().dynamicLabel).toBe('');
     });
   });
 
