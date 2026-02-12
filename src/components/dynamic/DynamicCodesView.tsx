@@ -96,10 +96,12 @@ export function DynamicCodesView() {
 
   const handleSaveChanges = useCallback(async () => {
     if (!selectedCode) return;
+    const trimmedUrl = editingUrl.trim();
+    const trimmedLabel = editingLabel.trim();
     const changes: UpdateCodeRequest = {};
-    if (editingUrl !== selectedCode.destinationUrl) changes.destinationUrl = editingUrl;
-    if ((editingLabel || '') !== (selectedCode.label || '')) {
-      changes.label = editingLabel || null;
+    if (trimmedUrl !== selectedCode.destinationUrl) changes.destinationUrl = trimmedUrl;
+    if (trimmedLabel !== (selectedCode.label || '')) {
+      changes.label = trimmedLabel || null;
     }
     if (Object.keys(changes).length === 0) return;
     await updateCode(selectedCode.shortCode, changes);
@@ -171,8 +173,8 @@ export function DynamicCodesView() {
   }
 
   const hasChanges = selectedCode && (
-    editingUrl !== selectedCode.destinationUrl ||
-    (editingLabel || '') !== (selectedCode.label || '')
+    editingUrl.trim() !== selectedCode.destinationUrl ||
+    editingLabel.trim() !== (selectedCode.label || '')
   );
 
   return (

@@ -77,19 +77,23 @@ export function useDynamicCodes() {
     if (!token) return false;
 
     useDynamicCodesStore.setState({ isUpdating: true });
+    let success = false;
     try {
       const updated = await workerApi.updateCode(token, shortCode, body);
       useDynamicCodesStore.getState().updateCodeInList(shortCode, updated);
       toast.success('Code updated');
-      return true;
+      success = true;
     } catch (err) {
       const message = err instanceof WorkerApiError ? err.message : 'Failed to update code';
       toast.error(message);
-      return false;
     } finally {
       useDynamicCodesStore.setState({ isUpdating: false });
     }
-  }, []);
+    if (success && body.status) {
+      fetchUsage().catch(() => {});
+    }
+    return success;
+  }, [fetchUsage]);
 
   const deleteCode = useCallback(async (shortCode: string): Promise<boolean> => {
     const token = getToken();
