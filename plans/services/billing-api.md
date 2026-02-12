@@ -166,7 +166,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [ ] Configure environments:
   - Production: `api.qr-foundry.com`
   - Preview: TBD
-  - Dev: `localhost:8788`
+  - Dev: `localhost:8787`
 - [ ] Set up secrets management:
   - `JWT_SIGNING_KEY` — for JWT issuance/validation
   - `STRIPE_SECRET_KEY` — for Stripe API calls
