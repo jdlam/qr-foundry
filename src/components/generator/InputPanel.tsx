@@ -445,6 +445,7 @@ export function InputPanel() {
               }}
               role="switch"
               aria-checked={isDynamic}
+              aria-label="Enable dynamic code"
             >
               <span
                 className="absolute top-0.5 w-4 h-4 rounded-full transition-transform"

@@ -315,7 +315,7 @@ export function Preview() {
         {/* PNG - Primary */}
         <button
           onClick={handleExportPng}
-          disabled={!content || isExporting}
+          disabled={!content || isExporting || isCreatingDynamic}
           className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-sm border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: exportSuccess === 'PNG saved!' ? 'var(--success-bg)' : 'var(--accent)',
@@ -334,7 +334,7 @@ export function Preview() {
         {/* SVG */}
         <button
           onClick={handleExportSvg}
-          disabled={!content || isExporting}
+          disabled={!content || isExporting || isCreatingDynamic}
           className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-sm border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: exportSuccess === 'SVG saved!' ? 'var(--success-bg)' : 'var(--input-bg)',
@@ -375,7 +375,7 @@ export function Preview() {
         {/* Copy */}
         <button
           onClick={handleCopy}
-          disabled={!content || isExporting}
+          disabled={!content || isExporting || isCreatingDynamic}
           className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-2 rounded-sm border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: copySuccess ? 'var(--success-bg)' : 'var(--input-bg)',
