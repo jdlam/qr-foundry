@@ -30,10 +30,12 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - Both export `{ getToken, setToken, clearToken }` via `AuthAdapter` interface
 - [x] Add auth state to app store (Zustand `authStore` with user, plan, token, loading states)
 - [x] Add login/signup UI (`AuthModal` using `@radix-ui/react-dialog`)
-- [~] Handle session expiry gracefully (redirect to login, show message)
+- [x] Handle session expiry gracefully (redirect to login, show message)
   - Proactive token refresh scheduling works (5min before expiry via `setTimeout`)
   - Token expiry check on app startup (clears expired tokens)
-  - Missing: reactive 401 interceptor on API calls, user-facing "session expired" message
+  - 401 interceptor on all authenticated API calls → "Session expired" toast + auto-logout
+  - Deduplication prevents toast spam on concurrent failures
+  - Hook catch blocks suppress redundant error toasts via `isSessionExpired()` guard
 - [~] Add "Account" section in settings (email, plan tier, logout)
   - Sidebar bottom section shows email, plan tier badge, and Sign Out when logged in
   - No dedicated settings screen yet

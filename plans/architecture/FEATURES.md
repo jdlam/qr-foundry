@@ -385,7 +385,7 @@ Account system for Pro purchases, subscriptions, and cross-device access.
 - [x] Token storage: `localStorage` with key `qr-foundry-token` (Web App)
 - [x] Shared `AuthAdapter` interface with `{ getToken, setToken, clearToken }` (App)
 - [x] Auth state in Zustand `authStore` (user, plan, token, loading states) (App)
-- [ ] Session expiry handling (redirect to login, show message) (App) — partial: 401 during refresh triggers logout
+- [x] Session expiry handling (401 interceptor + "Session expired" toast + auto-logout) (App)
 - [~] Account section in sidebar (email, plan tier badge, Sign Out button) (App) — no dedicated settings screen yet
 - [x] Token refresh scheduled 5 minutes before JWT `exp` via `setTimeout` (App)
 
@@ -622,7 +622,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | History & Templates | 7 | 1 | 1 | 9 |
 | Dynamic QR Codes (Worker + App) | 21 | 0 | 0 | 21 |
 | Scan Analytics (Worker + App) | 16 | 0 | 0 | 16 |
-| User Accounts & Auth | 12 | 1 | 3 | 16 |
+| User Accounts & Auth | 13 | 0 | 3 | 16 |
 | Billing & Subscriptions | 11 | 0 | 2 | 13 |
 | Trial Management | 5 | 0 | 3 | 8 |
 | Feature Gating | 6 | 0 | 1 | 7 |
@@ -631,6 +631,6 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Settings & Preferences | 1 | 0 | 12 | 13 |
 | Native App Features | 0 | 0 | 10 | 10 |
 | Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **142** | **5** | **59** | **206** |
+| **Totals** | **143** | **4** | **59** | **206** |
 
 Core QR generation, customization, validation, Worker API, dynamic codes CRUD UI, analytics dashboard, and "Make Dynamic" generator toggle are all complete. The Billing API (auth, Stripe, plan tier, quota writes, subscription lifecycle) is implemented — remaining work is production deployment. The desktop app has all dynamic code features (management, analytics, generator toggle), feature gating, and auth integration. The primary remaining work is web app deployment, Billing API deployment, and the marketing site.
