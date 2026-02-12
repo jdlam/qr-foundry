@@ -37,7 +37,7 @@ function truncateUrl(url: string, max = 30): string {
 }
 
 export function DynamicCodesView() {
-  const { hasAccess } = useFeatureAccess('dynamic_codes');
+  const { hasAccess, requireAccess } = useFeatureAccess('dynamic_codes');
   const { isLoggedIn } = useAuth();
   const openAuthModal = useAuthModalStore((s) => s.open);
 
@@ -78,9 +78,8 @@ export function DynamicCodesView() {
   }, [selectCode]);
 
   const handleShowCreate = useCallback(() => {
-    selectCode(null);
     setRightPanel('create');
-  }, [selectCode]);
+  }, []);
 
   const handleCancelCreate = useCallback(() => {
     setRightPanel(selectedCode ? 'detail' : 'empty');
@@ -156,7 +155,7 @@ export function DynamicCodesView() {
           Create QR codes with changeable destinations. Track scans, manage redirects, and view analytics.
         </div>
         <button
-          onClick={isLoggedIn ? undefined : openAuthModal}
+          onClick={isLoggedIn ? requireAccess : openAuthModal}
           className="px-6 py-2.5 rounded-sm text-sm font-semibold transition-all"
           style={{
             background: 'var(--accent)',
@@ -235,10 +234,11 @@ export function DynamicCodesView() {
             </div>
           ) : (
             codes.map((code) => (
-              <div
+              <button
+                type="button"
                 key={code.shortCode}
                 onClick={() => handleSelectCode(code)}
-                className="p-3 rounded-sm border cursor-pointer transition-all"
+                className="w-full text-left p-3 rounded-sm border cursor-pointer transition-all"
                 style={{
                   background: selectedCode?.shortCode === code.shortCode ? 'var(--active-bg)' : 'var(--input-bg)',
                   borderColor: selectedCode?.shortCode === code.shortCode ? 'var(--accent)' : 'var(--border)',
@@ -273,7 +273,7 @@ export function DynamicCodesView() {
                   ) : <span />}
                   <span className="text-[10px]" style={{ color: 'var(--text-faint)' }}>{formatTime(code.createdAt)}</span>
                 </div>
-              </div>
+              </button>
             ))
           )}
         </div>
