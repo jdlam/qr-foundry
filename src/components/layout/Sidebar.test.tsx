@@ -199,6 +199,7 @@ describe('Sidebar', () => {
 
       fireEvent.click(screen.getByTitle('Collapse sidebar'));
 
+      expect(screen.queryByText('SOON')).not.toBeInTheDocument();
       expect(screen.queryByText('PRO')).not.toBeInTheDocument();
     });
 
