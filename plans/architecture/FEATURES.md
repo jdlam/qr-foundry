@@ -6,13 +6,13 @@ QR Foundry is a cross-platform QR code generator shipping as a Tauri desktop app
 
 ## Pricing Tiers
 
-| Tier | Price | Summary |
-|------|-------|---------|
-| **Free** | $0 | Basic QR types, basic colors, PNG export, clipboard, scanner, limited history (10 codes). No account required. |
-| **Pro Trial** | $0 / 7 days | All Pro features for 7 days after signup. Reverts to Free on expiry. No dynamic codes. |
-| **Pro** | ~$12-15 one-time | Full customization, all export formats, batch CSV, templates, unlimited history, web asset pack. |
-| **Subscription** | ~$5-7/month | Everything in Pro + dynamic QR codes (25 active), scan analytics dashboard, code management. |
-| **Add-on** | TBD per pack | Additional dynamic code slots (e.g., 25 more). Requires active subscription. |
+All QR generation features are free. You only pay for dynamic QR codes.
+
+| Tier | Monthly | Annual (17% off) | Summary |
+|------|---------|------------------|---------|
+| **Free** | $0 | — | Everything: all QR types, full customization, all export formats, batch, templates, scanner, unlimited history. No account required. |
+| **Subscription** | $6/month | $60/year ($5/mo) | Free + 25 dynamic QR codes, scan analytics dashboard, code management. Requires account. |
+| **Add-on** (+25 codes) | +$3/month | +$30/year ($2.50/mo) | Additional 25 dynamic code slots. Stackable (buy multiple). Requires active subscription. |
 
 Full pricing breakdown, revenue per channel, and quota mapping in [ARCHITECTURE.md](ARCHITECTURE.md).
 
