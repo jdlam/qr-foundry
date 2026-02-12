@@ -169,7 +169,7 @@ The Worker-side analytics endpoints (`GET /api/analytics/:code` and `GET /api/an
 - [ ] Add `npm run dev:web` and `npm run build:web` scripts
 - [ ] Implement web auth flow (login/signup form, token storage in cookies/localStorage)
 - [ ] Handle session expiry and refresh in browser context
-- [ ] CORS configuration — ensure Worker allows `app.qr-foundry.com` origin
+- [x] CORS configuration — Worker already uses `Access-Control-Allow-Origin: *` on all API responses and preflight
 - [ ] Deploy web app to Vercel or Cloudflare Pages
 - [ ] Configure `app.qr-foundry.com` DNS
 - [ ] Set up CI/CD for web builds
