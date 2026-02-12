@@ -5,6 +5,9 @@ import { useQrGenerator } from '../../hooks/useQrGenerator';
 import { useValidation } from '../../hooks/useValidation';
 import { useExport } from '../../hooks/useExport';
 import { useQrStore } from '../../stores/qrStore';
+import { useAuthStore } from '../../stores/authStore';
+import { useAuthModalStore } from '../../stores/authModalStore';
+import { workerApi } from '../../api/worker';
 import { ValidationBadge } from './ValidationBadge';
 
 // Checkerboard pattern for showing transparency
@@ -26,10 +29,35 @@ export function Preview() {
   const { validate, isValidating, result } = useValidation();
   const { exportPng, exportSvg, copyToClipboard, isExporting } = useExport();
   const store = useQrStore();
-  const { exportSize, inputType, errorCorrection, content, validationState, transparentBg } = store;
+  const { exportSize, inputType, errorCorrection, content, validationState, transparentBg, isDynamic, dynamicShortCode } = store;
 
   const [copySuccess, setCopySuccess] = useState(false);
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
+
+  const createDynamicCodeIfNeeded = useCallback(async (): Promise<string | null> => {
+    const { isDynamic, dynamicShortCode, content, dynamicLabel } = useQrStore.getState();
+    if (!isDynamic) return content;
+    if (dynamicShortCode) return `https://qrfo.link/${dynamicShortCode}`;
+
+    const token = useAuthStore.getState().token;
+    if (!token) {
+      useAuthModalStore.getState().open();
+      return null;
+    }
+
+    try {
+      const record = await workerApi.createCode(token, {
+        destinationUrl: content,
+        label: dynamicLabel || undefined,
+      });
+      useQrStore.getState().setDynamicShortCode(record.shortCode);
+      toast.success(`Dynamic code created: qrfo.link/${record.shortCode}`);
+      return `https://qrfo.link/${record.shortCode}`;
+    } catch {
+      toast.error('Failed to create dynamic code');
+      return null;
+    }
+  }, []);
 
   // Save to history
   const saveToHistory = useCallback(
@@ -71,92 +99,123 @@ export function Preview() {
     }
   }, [getValidationDataUrl, validate]);
 
-  const handleCopy = useCallback(async () => {
-    const dataUrl = await getDataUrl();
-    if (dataUrl) {
-      try {
-        const success = await copyToClipboard(dataUrl);
-        if (success) {
-          setCopySuccess(true);
-          setTimeout(() => setCopySuccess(false), 2000);
-          saveToHistory(dataUrl);
-          return;
-        }
-      } catch {
-        // Fall back to browser clipboard
-      }
+  const withDynamicContent = useCallback(async <T,>(fn: () => Promise<T>): Promise<T | null> => {
+    const dynamicUrl = await createDynamicCodeIfNeeded();
+    if (dynamicUrl === null) return null;
 
-      const blob = await getBlob('png');
-      if (blob) {
-        try {
-          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-          setCopySuccess(true);
-          setTimeout(() => setCopySuccess(false), 2000);
-          saveToHistory(dataUrl);
-        } catch (error) {
-          console.error('Clipboard fallback failed:', error);
-          toast.error('Failed to copy to clipboard');
-        }
+    const originalContent = useQrStore.getState().content;
+    const needsSwap = dynamicUrl !== originalContent;
+
+    if (needsSwap) {
+      useQrStore.setState({ content: dynamicUrl });
+      // Allow QR to re-render with new content
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
+    try {
+      return await fn();
+    } finally {
+      if (needsSwap) {
+        useQrStore.setState({ content: originalContent });
       }
     }
-  }, [getDataUrl, getBlob, copyToClipboard, saveToHistory]);
+  }, [createDynamicCodeIfNeeded]);
 
-  const handleExportPng = useCallback(async () => {
-    const dataUrl = await getDataUrl();
-    if (dataUrl) {
-      try {
-        const result = await exportPng(dataUrl, 'qr-code.png');
-        if (result.success) {
-          setExportSuccess('PNG saved!');
-          setTimeout(() => setExportSuccess(null), 2000);
-          saveToHistory(dataUrl);
-        } else if (result.error) {
-          toast.error('Failed to export PNG');
+  const handleCopy = useCallback(async () => {
+    const result = await withDynamicContent(async () => {
+      const dataUrl = await getDataUrl();
+      if (dataUrl) {
+        try {
+          const success = await copyToClipboard(dataUrl);
+          if (success) {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+            saveToHistory(dataUrl);
+            return true;
+          }
+        } catch {
+          // Fall back to browser clipboard
         }
-      } catch {
+
         const blob = await getBlob('png');
         if (blob) {
+          try {
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+            saveToHistory(dataUrl);
+            return true;
+          } catch (error) {
+            console.error('Clipboard fallback failed:', error);
+            toast.error('Failed to copy to clipboard');
+          }
+        }
+      }
+      return false;
+    });
+    return result;
+  }, [withDynamicContent, getDataUrl, getBlob, copyToClipboard, saveToHistory]);
+
+  const handleExportPng = useCallback(async () => {
+    await withDynamicContent(async () => {
+      const dataUrl = await getDataUrl();
+      if (dataUrl) {
+        try {
+          const result = await exportPng(dataUrl, 'qr-code.png');
+          if (result.success) {
+            setExportSuccess('PNG saved!');
+            setTimeout(() => setExportSuccess(null), 2000);
+            saveToHistory(dataUrl);
+          } else if (result.error) {
+            toast.error('Failed to export PNG');
+          }
+        } catch {
+          const blob = await getBlob('png');
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'qr-code.png';
+            a.click();
+            URL.revokeObjectURL(url);
+            setExportSuccess('PNG downloaded!');
+            setTimeout(() => setExportSuccess(null), 2000);
+            saveToHistory(dataUrl);
+          }
+        }
+      }
+    });
+  }, [withDynamicContent, getDataUrl, getBlob, exportPng, saveToHistory]);
+
+  const handleExportSvg = useCallback(async () => {
+    await withDynamicContent(async () => {
+      const dataUrl = await getDataUrl();
+      const blob = await getBlob('svg');
+      if (blob) {
+        const svgText = await blob.text();
+        try {
+          const result = await exportSvg(svgText, 'qr-code.svg');
+          if (result.success) {
+            setExportSuccess('SVG saved!');
+            setTimeout(() => setExportSuccess(null), 2000);
+            saveToHistory(dataUrl || undefined);
+          } else if (result.error) {
+            toast.error('Failed to export SVG');
+          }
+        } catch {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'qr-code.png';
+          a.download = 'qr-code.svg';
           a.click();
           URL.revokeObjectURL(url);
-          setExportSuccess('PNG downloaded!');
-          setTimeout(() => setExportSuccess(null), 2000);
-          saveToHistory(dataUrl);
-        }
-      }
-    }
-  }, [getDataUrl, getBlob, exportPng, saveToHistory]);
-
-  const handleExportSvg = useCallback(async () => {
-    const dataUrl = await getDataUrl();
-    const blob = await getBlob('svg');
-    if (blob) {
-      const svgText = await blob.text();
-      try {
-        const result = await exportSvg(svgText, 'qr-code.svg');
-        if (result.success) {
-          setExportSuccess('SVG saved!');
+          setExportSuccess('SVG downloaded!');
           setTimeout(() => setExportSuccess(null), 2000);
           saveToHistory(dataUrl || undefined);
-        } else if (result.error) {
-          toast.error('Failed to export SVG');
         }
-      } catch {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'qr-code.svg';
-        a.click();
-        URL.revokeObjectURL(url);
-        setExportSuccess('SVG downloaded!');
-        setTimeout(() => setExportSuccess(null), 2000);
-        saveToHistory(dataUrl || undefined);
       }
-    }
-  }, [getBlob, getDataUrl, exportSvg, saveToHistory]);
+    });
+  }, [withDynamicContent, getBlob, getDataUrl, exportSvg, saveToHistory]);
 
   const ecPercent = {
     L: '7%',
@@ -221,6 +280,19 @@ export function Preview() {
           {inputType.toUpperCase()}
         </span>
       </div>
+
+      {/* Dynamic Code Badge */}
+      {isDynamic && dynamicShortCode && (
+        <div
+          className="font-mono text-[11px] font-medium px-2.5 py-1 rounded-sm"
+          style={{
+            background: 'var(--accent-bg-tint)',
+            color: 'var(--accent)',
+          }}
+        >
+          Dynamic: qrfo.link/{dynamicShortCode}
+        </div>
+      )}
 
       {/* Validation Badge */}
       <ValidationBadge
