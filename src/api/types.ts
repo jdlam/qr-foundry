@@ -56,3 +56,81 @@ export interface JwtClaims {
   iat: number;
   exp: number;
 }
+
+// Worker API types
+
+export type CodeStatus = 'active' | 'paused' | 'expired';
+
+export interface DynamicQRRecord {
+  shortCode: string;
+  destinationUrl: string;
+  createdAt: string;
+  updatedAt: string;
+  status: CodeStatus;
+  expiresAt?: string;
+  password?: string;
+  label?: string;
+  ownerId: string;
+}
+
+export interface CreateCodeRequest {
+  destinationUrl: string;
+  label?: string;
+  expiresAt?: string;
+  password?: string;
+  customCode?: string;
+}
+
+export interface UpdateCodeRequest {
+  destinationUrl?: string;
+  status?: 'active' | 'paused';
+  label?: string | null;
+  expiresAt?: string | null;
+  password?: string | null;
+}
+
+export interface UsageResponse {
+  ownerId: string;
+  limit: number;
+  total: number;
+  active: number;
+  paused: number;
+  expired: number;
+  remaining: number;
+}
+
+export type Granularity = 'hour' | 'day' | 'week';
+
+export interface AnalyticsParams {
+  start?: string;
+  end?: string;
+  granularity?: Granularity;
+}
+
+export interface TimeSeriesPoint {
+  date: string;
+  count: number;
+}
+
+export interface RankedItem {
+  name: string;
+  count: number;
+}
+
+export interface ScanAnalyticsResponse {
+  shortCode: string;
+  period: { start: string; end: string };
+  totalScans: number;
+  scansOverTime: TimeSeriesPoint[];
+  topCountries: RankedItem[];
+  topCities: RankedItem[];
+  topReferers: RankedItem[];
+}
+
+export interface ScanAnalyticsSummary {
+  period: { start: string; end: string };
+  totalScans: number;
+  scansOverTime: TimeSeriesPoint[];
+  topCodes: (RankedItem & { label?: string })[];
+  topCountries: RankedItem[];
+}
