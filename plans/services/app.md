@@ -30,7 +30,10 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - Both export `{ getToken, setToken, clearToken }` via `AuthAdapter` interface
 - [x] Add auth state to app store (Zustand `authStore` with user, plan, token, loading states)
 - [x] Add login/signup UI (`AuthModal` using `@radix-ui/react-dialog`)
-- [ ] Handle session expiry gracefully (redirect to login, show message)
+- [~] Handle session expiry gracefully (redirect to login, show message)
+  - Proactive token refresh scheduling works (5min before expiry via `setTimeout`)
+  - Token expiry check on app startup (clears expired tokens)
+  - Missing: reactive 401 interceptor on API calls, user-facing "session expired" message
 - [~] Add "Account" section in settings (email, plan tier, logout)
   - Sidebar bottom section shows email, plan tier badge, and Sign Out when logged in
   - No dedicated settings screen yet
@@ -58,8 +61,10 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - [x] Repurpose `useFeatureAccess` hook for dynamic codes only
   - [x] Expand `FREE_FEATURES` to include all QR generation features
   - [x] Keep `authModalStore` (still needed for subscription upsell)
-- [ ] Gate dynamic codes tab — requires active subscription (shown to all users with "Subscribe" prompt)
-- [ ] Handle offline gracefully — app works fully offline for all free features
+- [x] Gate dynamic codes tab — requires active subscription (shown to all users with "Subscribe" prompt)
+  - `useFeatureAccess('dynamic_codes')` in DynamicCodesView with upsell screen for free users, sign-in prompt for logged-out users
+- [x] Handle offline gracefully — app works fully offline for all free features
+  - Free features have zero network dependencies: client-side QR generation (`qr-code-styling`), localStorage/SQLite storage, browser clipboard/download APIs
 
 **Dependencies:** None for free features. Billing API must be deployed for subscription check.
 
@@ -71,35 +76,29 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 **Goal:** Subscription users can create, view, edit, pause/resume, and delete dynamic QR codes from the app.
 
-- [ ] Build Worker API client module (`api/worker.ts`)
-  - `createDynamicCode(destinationUrl, label?, customCode?)` -> `DynamicQRRecord`
-  - `listDynamicCodes(status?)` -> `DynamicQRRecord[]`
-  - `getDynamicCode(shortCode)` -> `DynamicQRRecord`
-  - `updateDynamicCode(shortCode, updates)` -> `DynamicQRRecord`
-  - `deleteDynamicCode(shortCode)` -> void
-  - `getUsage()` -> `UsageResponse`
+- [x] Build Worker API client module (`api/worker.ts`)
+  - `createCode`, `listCodes`, `getCode`, `updateCode`, `deleteCode`, `getUsage`, `getCodeAnalytics`, `getAnalyticsOverview`
   - All methods send JWT as Bearer token
-  - Error handling: 401 -> redirect to login, 403 -> show quota message, network errors -> retry with backoff
-- [ ] "Make Dynamic" option in the generator
+  - `WorkerApiError` class with status codes, `ApiResponse<T>` envelope unwrapping
+- [x] "Make Dynamic" option in the generator
   - When creating a QR code, Subscription users see a "Make Dynamic" toggle
   - When enabled, QR encodes `qrfo.link/:shortCode` instead of the raw URL
   - Calls `POST /api/codes` on the Worker API
   - Shows the generated short code and current destination
-- [ ] Dynamic Codes list view (new tab in navigation)
-  - Lists all dynamic codes with label, short code, destination, status, scan count
+- [x] Dynamic Codes list view (new tab in navigation)
+  - Two-panel layout: left panel with scrollable code list, right panel with detail/create/analytics
   - Status filter (All / Active / Paused / Expired)
-  - Usage bar showing "X of Y codes used"
-- [ ] Code detail view
+  - Usage bar showing "X of Y codes used" (QuotaBar component)
+- [x] Code detail view
   - Edit destination URL inline
   - Edit label
-  - Pause/resume toggle with confirmation
+  - Pause/resume toggle with confirmation (`window.confirm`)
   - Delete with confirmation dialog
   - Copy short URL to clipboard
-  - Link to analytics view
-- [ ] Handle quota limits in UI
-  - Show "X of Y codes remaining" in the codes list header
-  - Disable "Make Dynamic" when at quota limit with upgrade prompt
-  - Show quota error message from Worker 403 responses
+  - Link to analytics view (per-code + overview)
+- [x] Handle quota limits in UI
+  - Show "X / Y used" in quota bar on code detail
+  - Show quota error message from Worker 403 responses via toast
 
 **Dependencies:** Worker Phase 3 (CRUD API) and Phase 4 (Quota) must be deployed.
 
@@ -113,24 +112,21 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 The Worker-side analytics endpoints (`GET /api/analytics/:code` and `GET /api/analytics`) are built in the Worker plan Phase 5.
 
-- [ ] Add analytics API methods to Worker client (`api/worker.ts`)
+- [x] Add analytics API methods to Worker client (`api/worker.ts`)
   - `getCodeAnalytics(shortCode, start?, end?, granularity?)` -> `ScanAnalyticsResponse`
   - `getAnalyticsOverview(start?, end?, granularity?)` -> `ScanAnalyticsSummary`
-- [ ] Per-code analytics view (accessible from code detail view)
-  - Scan count summary (total scans, scans today/this week)
-  - Line/bar chart: scans over time (hourly, daily, weekly granularity toggle)
-  - Top countries list with counts
-  - Top cities list with counts
-  - Top referers (direct, social, other sites)
-  - Recent scans table with timestamp, country, city, referer
-  - Date range picker for filtering
-- [ ] Overview dashboard (accessible from dynamic codes tab)
+- [x] Per-code analytics view (`AnalyticsView` component, accessible from code detail "View Analytics" button)
+  - Total scans display
+  - CSS horizontal bar charts: scans over time, top countries, top cities, top referrers (no charting library needed)
+  - Date range picker with quick presets (7d/30d/90d) and granularity toggle (hour/day/week)
+  - Back button returns to code detail
+- [x] Overview dashboard (`AnalyticsOverview` component, accessible via codes/analytics toggle in left panel)
   - Total scans across all codes for selected time range
-  - Most-scanned codes ranking
+  - Most-scanned codes ranking (with labels)
   - Aggregate country breakdown
   - Scans over time chart (aggregate)
-- [ ] Charting library integration (e.g., recharts, chart.js, or lightweight alternative)
-- [ ] Loading states and empty states for analytics views
+- [x] Charting: CSS horizontal bar charts (`BarChart` component) — no external charting library needed
+- [x] Loading states and empty states for analytics views
 
 **Dependencies:** Worker Phase 5 (Scan Analytics API) must be deployed.
 

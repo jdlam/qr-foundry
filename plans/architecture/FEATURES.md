@@ -88,14 +88,14 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Usage endpoint (active/paused/expired counts) | -- | -- | Yes | [x] Worker |
 | Public 302 redirect | -- | -- | Yes | [x] Worker |
 | Branded 404 page (not found/paused/expired) | -- | -- | Yes | [x] Worker |
-| Dynamic code management UI (app) | -- | -- | Yes | [ ] App |
-| "Make Dynamic" toggle in generator | -- | -- | Yes | [ ] App |
+| Dynamic code management UI (app) | -- | -- | Yes | [x] App |
+| "Make Dynamic" toggle in generator | -- | -- | Yes | [x] App |
 | **Scan Analytics** | | | | |
 | Scan event logging (Analytics Engine) | -- | -- | Yes | [x] Worker |
 | Per-code analytics API | -- | -- | Yes | [x] Worker |
 | Overview analytics API | -- | -- | Yes | [x] Worker |
-| Analytics dashboard UI (app) | -- | -- | Yes | [ ] App |
-| Per-code analytics view (app) | -- | -- | Yes | [ ] App |
+| Analytics dashboard UI (app) | -- | -- | Yes | [x] App |
+| Per-code analytics view (app) | -- | -- | Yes | [x] App |
 | Date range filtering | -- | -- | Yes | [x] Worker |
 | Granularity toggle (hourly/daily/weekly) | -- | -- | Yes | [x] Worker |
 | Response caching (5-10 min) | -- | -- | Yes | [x] Worker |
@@ -319,12 +319,12 @@ Create QR codes whose destination URL can be changed after printing. The QR enco
 - [x] Usage endpoint: returns active/paused/expired counts and remaining quota (Worker)
 - [x] Input sanitization: label, password, expiration date validators (Worker, see worker.md Phase 7)
 
-**Features (App UI — planned):**
-- [ ] Worker API client module with error handling (401 -> login, 403 -> quota message) (App, see app.md Phase 3)
-- [ ] "Make Dynamic" toggle in the generator (App)
-- [ ] Dynamic Codes list view with status filter and usage bar (App)
-- [ ] Code detail view: inline edit destination, label, pause/resume, delete, copy short URL (App)
-- [ ] Quota limit display and upgrade prompt when at capacity (App)
+**Features (App UI — shipped):**
+- [x] Worker API client module (`api/worker.ts`) with `WorkerApiError` and typed methods (App)
+- [x] "Make Dynamic" toggle in the generator (App)
+- [x] Dynamic Codes list view with status filter and usage bar (App)
+- [x] Code detail view: inline edit destination, label, pause/resume, delete, copy short URL (App)
+- [x] Quota limit display in code detail (App)
 
 **Services:** Worker (API + redirect), Desktop App (UI), Web App (UI)
 
@@ -350,13 +350,13 @@ Track how dynamic QR codes are scanned: counts, geographic data, traffic sources
 - [x] Response caching: 5 min per-code, 10 min overview (Worker)
 - [x] Labels from KV records attached to top codes in overview (Worker)
 
-**Features (App UI — planned):**
-- [ ] Analytics API client methods (App, see app.md Phase 4)
-- [ ] Per-code analytics view: scan count, time series chart, top countries/cities/referers (App)
-- [ ] Overview dashboard: total scans, most-scanned codes, aggregate country breakdown, time chart (App)
-- [ ] Charting library integration (recharts, chart.js, or lightweight alternative) (App)
-- [ ] Date range picker (App)
-- [ ] Loading and empty states (App)
+**Features (App UI — shipped):**
+- [x] Analytics API client methods in `api/worker.ts` (App)
+- [x] Per-code analytics view (`AnalyticsView`): total scans, CSS bar charts for time series/countries/cities/referrers (App)
+- [x] Overview dashboard (`AnalyticsOverview`): total scans, most-scanned codes, aggregate country breakdown, time chart (App)
+- [x] CSS horizontal bar charts (`BarChart` component) — no external charting library needed (App)
+- [x] Date range picker with quick presets (7d/30d/90d) and granularity toggle (`DateRangeSelector`) (App)
+- [x] Loading and empty states (App)
 
 **Services:** Worker (event logging + query API), Desktop App (dashboard UI), Web App (dashboard UI)
 
@@ -455,10 +455,11 @@ Plan-based UI gating: show/hide features, display lock icons, and prompt upgrade
 - [x] Feature key definitions mapped to tiers (basic_qr_types, advanced_customization, svg_export, batch_generation, templates, dynamic_codes, analytics, etc.) (Billing API)
 - [x] `usePlan` hook: fetch plan on app startup, cache result (App, via `useAuth` + `authStore.fetchPlan()`)
 - [x] `useFeatureAccess` hook + `authModalStore`: gate actions by checking `plan.features`, open auth modal for logged-out users, show upgrade toast for free tier (App)
-- [x] Tier-based gating rules: Free (basic types, basic colors, PNG, clipboard, scanner, 10 history), Pro (all types, full customization, all exports, batch, templates, unlimited history), Subscription (Pro + dynamic codes + analytics) (App)
-  - Gated: Sidebar tabs (Batch, Templates), input types (vCard, Email, SMS, Geo), SVG export, style options (non-square dots/eyes, gradient, logo)
+- [x] Tier-based gating rules: Free (all QR features), Subscription (Free + dynamic codes + analytics) (App)
+  - All Pro-era gating removed (Sidebar badges, input type locks, SVG export lock, style option locks)
+  - Only `dynamic_codes` and `analytics` gated behind subscription
 - [ ] Upgrade/purchase buttons linking to appropriate store or Stripe checkout (App)
-- [ ] Offline graceful degradation: cache last known tier, fall back to Free if Billing API unreachable (App)
+- [x] Offline graceful degradation: free features work fully offline by design (no network dependencies for QR generation, export, history, templates) (App)
 
 **Services:** Billing API (tier computation), Desktop App (UI gating), Web App (UI gating)
 
@@ -619,17 +620,17 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Batch Generation | 6 | 1 | 0 | 7 |
 | QR Scanner | 5 | 1 | 0 | 6 |
 | History & Templates | 7 | 1 | 1 | 9 |
-| Dynamic QR Codes (Worker) | 16 | 0 | 5 | 21 |
-| Scan Analytics (Worker) | 10 | 0 | 6 | 16 |
+| Dynamic QR Codes (Worker + App) | 21 | 0 | 0 | 21 |
+| Scan Analytics (Worker + App) | 16 | 0 | 0 | 16 |
 | User Accounts & Auth | 12 | 1 | 3 | 16 |
 | Billing & Subscriptions | 11 | 0 | 2 | 13 |
 | Trial Management | 5 | 0 | 3 | 8 |
-| Feature Gating | 5 | 0 | 2 | 7 |
+| Feature Gating | 6 | 0 | 1 | 7 |
 | Platform & Distribution | 21 | 0 | 8 | 29 |
 | Marketing Site | 0 | 0 | 12 | 12 |
 | Settings & Preferences | 1 | 0 | 12 | 13 |
 | Native App Features | 0 | 0 | 10 | 10 |
 | Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **130** | **5** | **71** | **206** |
+| **Totals** | **142** | **5** | **59** | **206** |
 
-Core QR generation, customization, validation, and the Worker API backend are substantially complete. The Billing API (auth, trials, Stripe, plan tier) is largely implemented — remaining work is quota writes to Worker KV and production deployment. The desktop app has been redesigned with sidebar navigation, theme support, a full platform abstraction layer for web builds, and app-side auth integration (login/signup modal, JWT token storage, session restore, token refresh). The primary remaining work is feature gating UI, dynamic code and analytics UI, web app deployment, and the marketing site.
+Core QR generation, customization, validation, Worker API, dynamic codes CRUD UI, analytics dashboard, and "Make Dynamic" generator toggle are all complete. The Billing API (auth, Stripe, plan tier, quota writes, subscription lifecycle) is implemented — remaining work is production deployment. The desktop app has all dynamic code features (management, analytics, generator toggle), feature gating, and auth integration. The primary remaining work is web app deployment, Billing API deployment, and the marketing site.
