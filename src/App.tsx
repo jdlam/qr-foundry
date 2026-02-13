@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Toaster } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { TitleBar } from './components/layout/TitleBar';
 import { Sidebar, type TabId } from './components/layout/Sidebar';
 import { StatusBar } from './components/layout/StatusBar';
@@ -15,6 +15,7 @@ import { DynamicCodesView } from './components/dynamic/DynamicCodesView';
 import './stores/themeStore';
 import { useAuthStore } from './stores/authStore';
 import { useAuthModalStore } from './stores/authModalStore';
+import { useUpdateCheck } from './hooks/useUpdateCheck';
 
 // Dev-only: expose auth simulation helpers in browser console
 if (import.meta.env.DEV) {
@@ -46,10 +47,26 @@ if (import.meta.env.DEV) {
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('generator');
   const authModalOpen = useAuthModalStore((s) => s.isOpen);
+  const { updateAvailable, installing, install, dismiss } = useUpdateCheck();
 
   useEffect(() => {
     useAuthStore.getState().initialize();
   }, []);
+
+  useEffect(() => {
+    if (!updateAvailable) return;
+    toast('A new version is available', {
+      duration: Infinity,
+      action: {
+        label: installing ? 'Installing...' : 'Install & restart',
+        onClick: install,
+      },
+      cancel: {
+        label: 'Later',
+        onClick: dismiss,
+      },
+    });
+  }, [updateAvailable, installing, install, dismiss]);
 
   const renderContent = () => {
     switch (activeTab) {
