@@ -231,6 +231,60 @@ docs: update platform adapter docs
 - Include a description of what changed and why.
 - Update tests and documentation as part of the same PR, not separately.
 
+## CI/CD
+
+Two GitHub Actions workflows:
+
+- **`ci.yml`** — Runs on PRs and pushes to `main`. Lint, typecheck, frontend tests
+  (Ubuntu), then build matrix (macOS arm64, macOS x86_64, Ubuntu, Windows) on pushes
+  to main only.
+- **`deploy.yml`** — Runs on `release: published` and `workflow_dispatch`. Builds
+  platform binaries via `tauri-apps/tauri-action` and attaches them to the GitHub
+  Release (.dmg, .AppImage, .msi, .sig files, `latest.json`).
+
+### Required GitHub Secrets (deploy.yml)
+
+- `TAURI_SIGNING_PRIVATE_KEY` — Tauri updater signing private key
+- `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` — Private key password (if set)
+
+## Releasing
+
+Releases are managed via the shared release script in the plans repo:
+
+```bash
+# From the plans repo root:
+./scripts/release.sh app v0.2.0          # production release
+./scripts/release.sh app v0.2.0 --dry-run # preview what would happen
+```
+
+The script:
+
+1. Validates clean working tree on `main`
+2. Extracts release notes from `CHANGELOG.md`
+3. Bumps version in **3 files**: `package.json`, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`
+4. Commits, pushes, and creates a GitHub Release
+5. The `deploy.yml` workflow triggers automatically, building and attaching platform binaries
+
+## Version Policy
+
+The app version lives in **3 files** that must stay in sync:
+
+- `package.json` → `"version"`
+- `src-tauri/tauri.conf.json` → `"version"`
+- `src-tauri/Cargo.toml` → `version` (under `[package]`)
+
+**Never edit these manually.** Always use the release script which updates all three atomically.
+
+## Auto-Updater
+
+The desktop app checks for updates on startup via the Tauri updater plugin.
+
+- **Endpoint:** `https://github.com/jdlam/qr-foundry-app/releases/latest/download/latest.json`
+- **Public key:** Stored in `src-tauri/tauri.conf.json` → `plugins.updater.pubkey`
+- **Private key:** `~/.tauri/qr-foundry.key` (local) and `TAURI_SIGNING_PRIVATE_KEY` GitHub secret
+- **Behavior:** On startup, checks for a newer version. If found, shows a toast with "Install & restart" / "Later" actions.
+- **Web builds:** The updater is tree-shaken out (dynamic import guarded by `isTauri()` check).
+
 ## Testing
 
 **IMPORTANT: Always maintain test coverage when making changes.**
