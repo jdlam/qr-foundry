@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { isTauri } from '../lib/platform';
 
 interface UpdateCheckResult {
@@ -11,6 +11,7 @@ interface UpdateCheckResult {
 export function useUpdateCheck(): UpdateCheckResult {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const installingRef = useRef(false);
   // Store the update object so we can install later
   const [pendingUpdate, setPendingUpdate] = useState<{
     downloadAndInstall: () => Promise<void>;
@@ -42,14 +43,15 @@ export function useUpdateCheck(): UpdateCheckResult {
   }, []);
 
   const install = useCallback(async () => {
-    if (!pendingUpdate) return;
+    if (!pendingUpdate || installingRef.current) return;
+    installingRef.current = true;
     setInstalling(true);
     try {
       await pendingUpdate.downloadAndInstall();
-      // Tauri will restart the app after install
       const { relaunch } = await import('@tauri-apps/plugin-process');
       await relaunch();
     } catch {
+      installingRef.current = false;
       setInstalling(false);
     }
   }, [pendingUpdate]);

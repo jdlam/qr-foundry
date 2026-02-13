@@ -56,6 +56,7 @@ function App() {
   useEffect(() => {
     if (!updateAvailable) return;
     toast('A new version is available', {
+      id: 'app-update',
       duration: Infinity,
       action: {
         label: installing ? 'Installing...' : 'Install & restart',
