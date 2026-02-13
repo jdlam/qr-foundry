@@ -191,3 +191,21 @@ The Worker-side analytics endpoints (`GET /api/analytics/:code` and `GET /api/an
 - [ ] **Update marketing site** — Add "Use in browser" option alongside desktop download links
 
 **Exit criteria:** `app.qr-foundry.com` serves a fully functional QR code management UI. Users can create, customize, and export QR codes; manage dynamic codes; and view analytics — all in the browser.
+
+---
+
+## Infrastructure: Release Pipeline & Auto-Updater
+
+**Goal:** Automated release process for the desktop app with in-app update notifications.
+
+- [x] Add `app` target to shared release script (`scripts/release.sh`)
+  - Bumps version in 3 files: `package.json`, `tauri.conf.json`, `Cargo.toml`
+- [x] Deploy workflow (`.github/workflows/deploy.yml`)
+  - Triggers on GitHub Release publish
+  - Builds macOS (arm64 + x86_64), Linux, Windows via `tauri-apps/tauri-action`
+  - Attaches binaries, signatures, and `latest.json` to the release
+- [x] Tauri auto-updater plugin
+  - Checks for updates on startup (desktop only)
+  - Shows toast notification with "Install & restart" / "Later" actions
+  - Signing key pair generated, public key in `tauri.conf.json`
+- [x] `@tauri-apps/plugin-process` for relaunch after update install

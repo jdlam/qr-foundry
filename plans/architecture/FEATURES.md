@@ -576,7 +576,7 @@ Desktop-specific features leveraging Tauri and OS capabilities. (Backlog — see
 - [ ] View menu: Toggle sidebar, Zoom controls (Desktop App)
 - [ ] QR menu: Validate, Copy to Clipboard, Save to History (Desktop App)
 - [ ] Keyboard shortcuts customization (Desktop App)
-- [ ] Auto-updater via Tauri (Desktop App)
+- [x] Auto-updater via Tauri (Desktop App)
 - [ ] System tray quick-generate mode (Desktop App)
 - [ ] iCloud sync for templates and history (Desktop App, macOS)
 - [ ] Quick Actions / Shortcuts integration (Desktop App, macOS)
@@ -631,8 +631,8 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Platform & Distribution | 21 | 0 | 8 | 29 |
 | Marketing Site | 0 | 0 | 12 | 12 |
 | Settings & Preferences | 1 | 0 | 12 | 13 |
-| Native App Features | 0 | 0 | 10 | 10 |
+| Native App Features | 1 | 0 | 9 | 10 |
 | Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **146** | **4** | **58** | **208** |
+| **Totals** | **147** | **4** | **57** | **208** |
 
 Core QR generation, customization, validation, Worker API, dynamic codes CRUD UI, analytics dashboard, and "Make Dynamic" generator toggle are all complete. The Billing API (auth, Stripe, plan tier, quota writes, subscription lifecycle) is implemented — remaining work is production deployment. The desktop app has all dynamic code features (management, analytics, generator toggle), feature gating, and auth integration. The primary remaining work is web app deployment, Billing API deployment, and the marketing site.

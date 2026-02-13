@@ -21,11 +21,12 @@ service_dir() {
     api)    echo "qr-foundry-api" ;;
     worker) echo "qr-foundry-worker" ;;
     site)   echo "qr-foundry-site" ;;
+    app)    echo "qr-foundry-app" ;;
     *)      return 1 ;;
   esac
 }
 
-ALL_SERVICES="api worker site"
+ALL_SERVICES="api worker site app"
 
 usage() {
   cat <<EOF
@@ -35,6 +36,7 @@ Services:
   api       qr-foundry-api/
   worker    qr-foundry-worker/
   site      qr-foundry-site/
+  app       qr-foundry-app/
   all       Release all services that have a matching changelog section
 
 Options:
@@ -176,6 +178,41 @@ extract_changelog() {
   echo "$result"
 }
 
+# Bump version in tauri.conf.json and Cargo.toml (app-specific)
+bump_app_versions() {
+  local repo_path="$1"
+  local version_num="$2"
+
+  # Update src-tauri/tauri.conf.json
+  local tauri_conf="$repo_path/src-tauri/tauri.conf.json"
+  if [[ -f "$tauri_conf" ]]; then
+    if $DRY_RUN; then
+      info "[app] (dry-run) Would update tauri.conf.json version to $version_num"
+    else
+      node -e "
+        const fs = require('fs');
+        const p = '$tauri_conf';
+        const conf = JSON.parse(fs.readFileSync(p, 'utf8'));
+        conf.version = '$version_num';
+        fs.writeFileSync(p, JSON.stringify(conf, null, 2) + '\n');
+      "
+      info "[app] Updated tauri.conf.json version to $version_num"
+    fi
+  fi
+
+  # Update src-tauri/Cargo.toml (version under [package])
+  local cargo_toml="$repo_path/src-tauri/Cargo.toml"
+  if [[ -f "$cargo_toml" ]]; then
+    if $DRY_RUN; then
+      info "[app] (dry-run) Would update Cargo.toml version to $version_num"
+    else
+      sed -i.bak '/^\[package\]/,/^\[/{s/^version = ".*"/version = "'"$version_num"'"/;}' "$cargo_toml"
+      rm -f "$cargo_toml.bak"
+      info "[app] Updated Cargo.toml version to $version_num"
+    fi
+  fi
+}
+
 # Release a single service
 release_service() {
   local service="$1"
@@ -247,6 +284,11 @@ release_service() {
       "
       info "[$service] Updated package.json version to $version_num"
     fi
+  fi
+
+  # App-specific: also bump tauri.conf.json and Cargo.toml
+  if [[ "$service" == "app" ]]; then
+    bump_app_versions "$repo_path" "$version_num"
   fi
 
   # Commit
@@ -331,7 +373,7 @@ if [[ "$SERVICE" == "all" ]]; then
 elif service_dir "$SERVICE" > /dev/null 2>&1; then
   release_service "$SERVICE" "$VERSION" "false"
 else
-  die "Unknown service: $SERVICE. Valid services: api, worker, site, all"
+  die "Unknown service: $SERVICE. Valid services: api, worker, site, app, all"
 fi
 
 info "Done."

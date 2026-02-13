@@ -440,6 +440,7 @@ All services follow the same CI/CD pattern:
 | **Marketing Site** | Cloudflare Workers (static assets) | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Billing API** | Cloudflare Workers + D1 | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
+| **Desktop App** | GitHub Releases (direct download) | GitHub Actions: production→release | `tauri.conf.json` + `.github/workflows/{ci,deploy}.yml` |
 | **Web App** | TBD | TBD | — |
 
 ### DNS (Cloudflare)
