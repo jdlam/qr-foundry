@@ -6,6 +6,7 @@ set -euo pipefail
 #
 # Usage:
 #   ./scripts/release.sh <service|all> <version> [--dry-run]
+#   ./scripts/release.sh --list
 #   ./scripts/release.sh --help
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,10 +37,12 @@ Services:
   all       Release all services that have a matching changelog section
 
 Options:
+  --list      Show the latest version for each service
   --dry-run   Show what would happen without committing, pushing, or creating a release
   --help      Show this help message
 
 Examples:
+  ./scripts/release.sh --list
   ./scripts/release.sh api v0.2.0
   ./scripts/release.sh all v0.2.0 --dry-run
 EOF
@@ -57,6 +60,38 @@ info() {
 
 warn() {
   echo "Warning: $1" >&2
+}
+
+# Print the latest released version from a CHANGELOG.md (first ## [X.Y.Z] that isn't Unreleased).
+latest_version() {
+  local changelog_file="$1"
+  if [[ ! -f "$changelog_file" ]]; then
+    echo "(no CHANGELOG.md)"
+    return
+  fi
+  local ver
+  ver="$(awk '
+    /^## \[/ {
+      s = $0
+      gsub(/^## \[/, "", s)
+      gsub(/\].*$/, "", s)
+      if (s != "Unreleased") { print s; exit }
+    }
+  ' "$changelog_file")"
+  if [[ -n "$ver" ]]; then
+    echo "v$ver"
+  else
+    echo "(no releases)"
+  fi
+}
+
+list_versions() {
+  local dir changelog
+  for svc in $ALL_SERVICES; do
+    dir="$(service_dir "$svc")"
+    changelog="$ROOT_DIR/$dir/CHANGELOG.md"
+    printf "  %-8s %s\n" "$svc" "$(latest_version "$changelog")"
+  done
 }
 
 # Extract the changelog section for a given version from CHANGELOG.md.
@@ -205,10 +240,14 @@ if [[ $# -lt 1 ]]; then
   usage
 fi
 
-# Check for --help anywhere in args
+# Check for --help and --list anywhere in args
 for arg in "$@"; do
   if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
     usage
+  fi
+  if [[ "$arg" == "--list" || "$arg" == "-l" ]]; then
+    list_versions
+    exit 0
   fi
 done
 
