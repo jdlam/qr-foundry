@@ -52,8 +52,8 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - Claims: `sub` (user ID), `email`, `iat`, `exp`
   - Signing key managed as secret
   - Expiry: 7 days (configurable)
-- [ ] Implement `POST /api/auth/forgot-password` (send reset email) — deferred, requires email service
-- [ ] Implement `POST /api/auth/reset-password` (validate token, update password) — deferred
+- [x] Implement `POST /api/auth/forgot-password` (send reset email via Resend)
+- [x] Implement `POST /api/auth/reset-password` (validate token, update password)
 - [x] Implement `GET /api/me` (return current user info)
 - [x] Password hashing (PBKDF2-SHA256 via Web Crypto API)
 - [ ] Email verification flow (optional for launch, but schema should support it) — deferred
@@ -176,8 +176,8 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - `app.qr-foundry.com` (web app)
   - `localhost:5173` (local dev)
   - `tauri://localhost` (desktop app)
-- [ ] Smoke test all endpoints in production
-- [ ] Set up uptime monitoring on `/health`
+- [x] Smoke test all endpoints in production — automated script at `scripts/smoke-test.sh`
+- [x] Set up uptime monitoring on `/health` — UptimeRobot, 5-min checks, email + Discord alerts
 
 ### Manual steps (requires action outside IDE)
 

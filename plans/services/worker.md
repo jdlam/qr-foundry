@@ -313,7 +313,7 @@ The Billing API (see [`billing-api.md`](billing-api.md)) is responsible for writ
   - [x] `qrfo.link/health` returns 200
   - [x] Create a test code via API, scan it, verify redirect
   - [x] Verify branded 404 for nonexistent codes
-- [ ] Set up basic uptime monitoring (Cloudflare or UptimeRobot on `/health`)
+- [x] Set up basic uptime monitoring — UptimeRobot, 5-min checks, email + Discord alerts
 
 **Exit criteria:** `qrfo.link` serves redirects in production. Uptime monitoring is active.
 

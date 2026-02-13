@@ -104,7 +104,7 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Login | -- | -- | -- | [x] Billing API |
 | JWT issuance and validation | -- | -- | -- | [x] Billing API |
 | Token refresh | -- | -- | -- | [x] Billing API |
-| Password reset | -- | -- | -- | [ ] Billing API |
+| Password reset | -- | -- | -- | [x] Billing API |
 | Login/signup UI | -- | -- | -- | [x] App |
 | Token storage (LazyStore / localStorage) | -- | -- | -- | [x] App |
 | **Billing & Subscriptions** | | | | |
@@ -375,7 +375,7 @@ Account system for Pro purchases, subscriptions, and cross-device access.
 - [x] Login with credential validation (Billing API)
 - [x] JWT issuance with claims: `sub` (user ID), `email`, `iat`, `exp` (7-day expiry) (Billing API)
 - [x] Token refresh endpoint (Billing API)
-- [ ] Password reset flow: forgot password email + reset token + password update (Billing API) — deferred, requires email service
+- [x] Password reset flow: forgot password email (Resend) + reset token + password update (Billing API, PR #15)
 - [ ] Email verification (optional for launch, schema supports it) (Billing API) — deferred
 - [x] User info endpoint: `GET /api/me` (Billing API)
 - [x] Password hashing: PBKDF2-SHA256 via Web Crypto API (Billing API)
@@ -624,7 +624,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | History & Templates | 7 | 1 | 1 | 9 |
 | Dynamic QR Codes (Worker + App) | 21 | 0 | 0 | 21 |
 | Scan Analytics (Worker + App) | 16 | 0 | 0 | 16 |
-| User Accounts & Auth | 13 | 0 | 3 | 16 |
+| User Accounts & Auth | 14 | 0 | 2 | 16 |
 | Billing & Subscriptions | 13 | 0 | 2 | 15 |
 | Trial Management | 5 | 0 | 3 | 8 |
 | Feature Gating | 6 | 0 | 1 | 7 |
@@ -633,6 +633,6 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Settings & Preferences | 1 | 0 | 12 | 13 |
 | Native App Features | 0 | 0 | 10 | 10 |
 | Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **145** | **4** | **59** | **208** |
+| **Totals** | **146** | **4** | **58** | **208** |
 
 Core QR generation, customization, validation, Worker API, dynamic codes CRUD UI, analytics dashboard, and "Make Dynamic" generator toggle are all complete. The Billing API (auth, Stripe, plan tier, quota writes, subscription lifecycle) is implemented — remaining work is production deployment. The desktop app has all dynamic code features (management, analytics, generator toggle), feature gating, and auth integration. The primary remaining work is web app deployment, Billing API deployment, and the marketing site.

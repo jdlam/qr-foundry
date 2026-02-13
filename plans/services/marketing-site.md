@@ -67,7 +67,7 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
   - "X QR codes generated" counter (placeholder numbers for now)
   - Short testimonial quotes (placeholder)
   - Product Hunt badge / App Store rating (when available)
-- [x] **Compact pricing comparison** — above footer, side-by-side Free / Subscription tiers so visitors see all options without navigating away — **needs update for simplified pricing (no Pro tier)**
+- [x] **Compact pricing comparison** — above footer, side-by-side Free / Subscription tiers (Pro tier removed, pricing simplified)
 - [x] **Blog teasers** — 3 hardcoded blog post cards above footer (placeholder until blog infra in Phase 3)
 - [x] **Footer** — logo, nav links (Pricing, Blog, Download, Legal), copyright
 
