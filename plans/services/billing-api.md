@@ -184,8 +184,8 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [ ] **Create Stripe account** and configure products/prices
 - [x] **Set up database** (Cloudflare D1)
 - [ ] **Configure DNS** for `api.qr-foundry.com`
-- [ ] **Share JWT signing key** — the Worker needs the public key (or shared secret) to validate JWTs issued by this API
-- [ ] **Set Cloudflare KV API token** — create a token with write permissions to the Worker's KV namespace
+- [x] **Share JWT signing key** — the Worker needs the public key (or shared secret) to validate JWTs issued by this API
+- [x] **Set Cloudflare KV API token** — create a token with write permissions to the Worker's KV namespace
 
 **Exit criteria:** `api.qr-foundry.com` is live. Users can sign up, log in, purchase, and the correct quota records appear in Worker KV.
 
