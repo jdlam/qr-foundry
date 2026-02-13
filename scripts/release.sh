@@ -13,6 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 DRY_RUN=false
+VERBOSE=false
 
 # Service name → directory mapping (bash 3 compatible)
 service_dir() {
@@ -37,12 +38,13 @@ Services:
   all       Release all services that have a matching changelog section
 
 Options:
-  --list      Show the latest version for each service
+  --list [-v] Show the latest version for each service (-v for date, package.json version, commits since)
   --dry-run   Show what would happen without committing, pushing, or creating a release
   --help      Show this help message
 
 Examples:
   ./scripts/release.sh --list
+  ./scripts/release.sh --list -v
   ./scripts/release.sh api v0.2.0
   ./scripts/release.sh all v0.2.0 --dry-run
 EOF
@@ -62,35 +64,79 @@ warn() {
   echo "Warning: $1" >&2
 }
 
-# Print the latest released version from a CHANGELOG.md (first ## [X.Y.Z] that isn't Unreleased).
-latest_version() {
+# Parse the latest released version and date from CHANGELOG.md.
+# Sets _ver and _date variables (caller must declare them with local).
+parse_latest_release() {
   local changelog_file="$1"
+  _ver=""
+  _date=""
   if [[ ! -f "$changelog_file" ]]; then
-    echo "(no CHANGELOG.md)"
-    return
+    return 1
   fi
-  local ver
-  ver="$(awk '
+  local line
+  line="$(awk '
     /^## \[/ {
       s = $0
       gsub(/^## \[/, "", s)
       gsub(/\].*$/, "", s)
-      if (s != "Unreleased") { print s; exit }
+      if (s != "Unreleased") { print $0; exit }
     }
   ' "$changelog_file")"
-  if [[ -n "$ver" ]]; then
-    echo "v$ver"
+  if [[ -z "$line" ]]; then
+    return 1
+  fi
+  # Extract version
+  _ver="$(echo "$line" | sed 's/^## \[//; s/\].*//')"
+  # Extract date if present (## [X.Y.Z] - YYYY-MM-DD)
+  if echo "$line" | grep -q ' - [0-9]'; then
+    _date="$(echo "$line" | sed 's/.*] - //')"
+  fi
+}
+
+# Get the version field from package.json
+pkg_version() {
+  local pkg_file="$1"
+  if [[ ! -f "$pkg_file" ]]; then
+    echo "-"
+    return
+  fi
+  node -e "console.log(JSON.parse(require('fs').readFileSync('$pkg_file','utf8')).version || '-')"
+}
+
+# Count commits on main since a given tag
+commits_since_tag() {
+  local repo_path="$1"
+  local tag="$2"
+  # Check if the tag exists in this repo
+  if git -C "$repo_path" rev-parse "$tag" >/dev/null 2>&1; then
+    git -C "$repo_path" rev-list "$tag"..HEAD --count 2>/dev/null
   else
-    echo "(no releases)"
+    echo "-"
   fi
 }
 
 list_versions() {
-  local dir changelog
+  local dir changelog _ver _date
   for svc in $ALL_SERVICES; do
     dir="$(service_dir "$svc")"
     changelog="$ROOT_DIR/$dir/CHANGELOG.md"
-    printf "  %-8s %s\n" "$svc" "$(latest_version "$changelog")"
+    if parse_latest_release "$changelog"; then
+      if $VERBOSE; then
+        local pkg_ver commits date_str
+        pkg_ver="$(pkg_version "$ROOT_DIR/$dir/package.json")"
+        commits="$(commits_since_tag "$ROOT_DIR/$dir" "v$_ver")"
+        date_str="${_date:-(no date)}"
+        printf "  %-8s v%-10s  %s  pkg=%s  commits_since=%s\n" "$svc" "$_ver" "$date_str" "$pkg_ver" "$commits"
+      else
+        printf "  %-8s v%s\n" "$svc" "$_ver"
+      fi
+    else
+      if [[ ! -f "$changelog" ]]; then
+        printf "  %-8s (no CHANGELOG.md)\n" "$svc"
+      else
+        printf "  %-8s (no releases)\n" "$svc"
+      fi
+    fi
   done
 }
 
@@ -240,16 +286,24 @@ if [[ $# -lt 1 ]]; then
   usage
 fi
 
-# Check for --help and --list anywhere in args
+# Check for --help, --list, and --verbose/-v anywhere in args
+LIST=false
 for arg in "$@"; do
   if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
     usage
   fi
   if [[ "$arg" == "--list" || "$arg" == "-l" ]]; then
-    list_versions
-    exit 0
+    LIST=true
+  fi
+  if [[ "$arg" == "--verbose" || "$arg" == "-v" ]]; then
+    VERBOSE=true
   fi
 done
+
+if $LIST; then
+  list_versions
+  exit 0
+fi
 
 SERVICE="$1"
 VERSION="${2:-}"
