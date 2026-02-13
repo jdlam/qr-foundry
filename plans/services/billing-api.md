@@ -165,11 +165,11 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - Production: `api.qr-foundry.com` (custom domain route)
   - Preview: configured with own D1 database
   - Dev: `localhost:8787`
-- [ ] Set up secrets management:
-  - `JWT_SIGNING_KEY` — for JWT issuance/validation
-  - `STRIPE_SECRET_KEY` — for Stripe API calls
-  - `STRIPE_WEBHOOK_SECRET` — for webhook signature verification
-  - `CLOUDFLARE_KV_API_TOKEN` — for writing quota records to Worker KV
+- [~] Set up secrets management:
+  - [x] `JWT_SIGNING_KEY` — for JWT issuance/validation
+  - [ ] `STRIPE_SECRET_KEY` — for Stripe API calls
+  - [ ] `STRIPE_WEBHOOK_SECRET` — for webhook signature verification
+  - [x] `CLOUDFLARE_KV_API_TOKEN` — for writing quota records to Worker KV
   - `DB` — Cloudflare D1 database binding (configured in `wrangler.toml`)
 - [ ] Configure DNS for `api.qr-foundry.com`
 - [x] Set up CORS to allow requests from:
