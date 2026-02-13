@@ -47,7 +47,7 @@ QR Foundry is composed of five services. Each has a single responsibility and co
 |---|---|
 | User authentication (signup, login, JWT issuance) | Billing API |
 | Subscription lifecycle (create, upgrade, downgrade, cancel) | Billing API |
-| Add-on purchases (extra dynamic code slots) | Billing API |
+| Add-on management (`POST /api/billing/addon` — add/remove dynamic code slot packs) | Billing API |
 | Subscription lifecycle (cancel, payment failure, grace periods, code deactivation) | Billing API (webhooks) + Worker (cron) |
 | Plan tier API (`GET /api/me/plan` — what features a user has) | Billing API |
 | Quota management (setting `maxCodes` per user) | Billing API (writes to Worker KV) |
@@ -82,10 +82,10 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 | Event | Billing API action |
 |-------|-------------------|
 | User subscribes ($6/month or $60/year) | Write `_quota::userId` with `maxCodes = 25` |
-| User adds add-on ($3/month or $30/year per 25 codes) | Recompute `maxCodes` from active subscriptions, write back |
+| User adds add-on via `POST /api/billing/addon` | Recompute `maxCodes` from subscription base + `addon_count` (25 + 25×N), update Worker KV |
 | User cancels subscription | Set `maxCodes = 0`, **instantly deactivate all dynamic codes** (set status to `"paused"` in Worker KV) |
 | Payment fails (past_due) | Set `maxCodes = 0`, write grace period deadline (now + 24h). After 24h, deactivate all codes |
-| User cancels add-on (base still active) | Lower `maxCodes`. Write grace period deadline (now + 24h). After 24h, auto-pause newest excess codes |
+| User removes add-on via `POST /api/billing/addon` (base still active) | Lower `maxCodes`. Write grace period deadline (now + 24h) if active codes exceed new limit. After 24h, auto-pause newest excess codes |
 | User exceeds quota and tries to create | Worker returns 403 with actionable error: "delete unused codes or upgrade" |
 
 ### Stripe Products
@@ -277,7 +277,7 @@ When a user's subscription state changes, their dynamic QR codes must be managed
 |----------|--------|--------|
 | **Subscription canceled** (`customer.subscription.deleted`) | Deactivate all dynamic codes | **Instant** — webhook sets all codes to `status: "paused"` |
 | **Payment failure** (`invoice.payment_failed`, status → `past_due`) | Deactivate all dynamic codes | **24h grace period** — webhook writes `gracePeriodDeadline` to quota; Worker cron enforces |
-| **Add-on canceled** (base subscription still active) | Pause newest excess codes | **24h grace period** — webhook writes `gracePeriodDeadline` and `targetMaxCodes`; Worker cron pauses excess |
+| **Add-on count reduced** (via `POST /api/billing/addon`, base subscription still active) | Pause newest excess codes | **24h grace period** — `customer.subscription.updated` webhook writes `gracePeriodDeadline` and `targetMaxCodes`; Worker cron pauses excess |
 | **Base canceled but add-on still exists** | Deactivate all codes | **Instant** — no base = `maxCodes: 0`, same as subscription canceled |
 
 #### Reactivation Rules
@@ -326,10 +326,12 @@ This keeps the redirect path completely untouched — redirects never check quot
 
 | Webhook Event | Billing API Action |
 |---------------|-------------------|
-| `customer.subscription.deleted` (base) | Set `maxCodes = 0` in quota. List all user's codes via KV, set each to `status: "paused"`. |
-| `customer.subscription.deleted` (add-on) | Recompute `maxCodes`. If active codes > new max, write `gracePeriodDeadline` (now + 24h) and `targetMaxCodes`. |
+| `customer.subscription.deleted` | Set `maxCodes = 0` in quota. List all user's codes via KV, set each to `status: "paused"`. |
+| `customer.subscription.updated` (addon count reduced) | Recompute `maxCodes` from `addon_count`. If active codes > new max, write `gracePeriodDeadline` (now + 24h) and `targetMaxCodes`. |
 | `invoice.payment_failed` | Write `gracePeriodDeadline` (now + 24h), `targetMaxCodes: 0`, `gracePeriodReason: "payment_failed"`. |
 | `customer.subscription.updated` (reactivation) | Recompute and write `maxCodes`. Clear any `gracePeriodDeadline`. Do NOT reactivate paused codes. |
+
+**Note:** Add-on management uses a single Stripe subscription with multiple line items (1 base + N addon items). The `POST /api/billing/addon` endpoint adds/removes addon line items, which triggers a `customer.subscription.updated` webhook to sync the local `addon_count` and quota.
 
 #### Why Manual Reactivation?
 

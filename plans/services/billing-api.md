@@ -71,8 +71,8 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 - [x] ~~On signup, create trial record~~ — **no longer needed**
 - [x] ~~Trial status computation~~ — **no longer needed**
-- [ ] **Remove trial logic from signup flow** (stop creating trial records)
-- [ ] **Simplify plan computation** — only two tiers: `free` (no subscription) and `subscription` (active subscription)
+- [x] **Remove trial logic from signup flow** (no trial records created, `trials` table removed from schema)
+- [x] **Simplify plan computation** — only two tiers: `free` (no subscription) and `subscription` (active subscription)
 
 ---
 
@@ -82,8 +82,8 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 - [x] Integrate Stripe SDK
 - [x] Implement `POST /api/billing/checkout` — create Stripe Checkout session
-  - Products: ~~`pro` (one-time),~~ `subscription` (recurring), `addon_25` (~~one-time~~ recurring add-on)
-  - **Update needed:** Remove `pro` product, change `addon_25` from one-time to recurring subscription, add annual price variants
+  - Products: `subscription` (recurring only — `addon_25` product type removed; add-ons managed via `POST /api/billing/addon`)
+  - Annual price variants: `STRIPE_PRICE_SUBSCRIPTION`, `STRIPE_PRICE_SUBSCRIPTION_ANNUAL`
   - Returns Checkout URL for redirect
 - [x] Implement `POST /api/billing/portal` — create Stripe Customer Portal session
   - For managing subscription (upgrade, downgrade, cancel, update payment method)
@@ -100,7 +100,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [x] Record subscription state changes in database
 - [x] Write tests with mocked Stripe events
 - [x] Add `stripeCustomerId` column to users table (nullable, set on first Stripe interaction)
-- [x] Add Stripe price ID env vars — **update needed:** replace `STRIPE_PRICE_PRO` with annual variants (`STRIPE_PRICE_SUBSCRIPTION_ANNUAL`, `STRIPE_PRICE_ADDON_25_ANNUAL`)
+- [x] Add Stripe price ID env vars — `STRIPE_PRICE_SUBSCRIPTION`, `STRIPE_PRICE_SUBSCRIPTION_ANNUAL`, `STRIPE_PRICE_ADDON_25`, `STRIPE_PRICE_ADDON_25_ANNUAL`
 - [x] Idempotent webhook handlers (check for existing records before inserting)
 
 **Exit criteria:** Users can purchase Pro, subscribe, and buy add-ons. Webhook handles all lifecycle events. Database reflects current subscription state. ✅ (Stripe product/price creation is a manual step.)
@@ -115,7 +115,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - Uses Cloudflare API token with KV write permissions
   - Targets the correct KV namespace per environment
 - [x] On Subscription start: write `_quota::userId` with `maxCodes = 25`
-- [x] On add-on purchase: compute `maxCodes` from DB state (idempotent, not incremental), write back
+- [x] On add-on line item change (via `customer.subscription.updated` webhook): recompute `maxCodes` from single subscription row's `addon_count` (25 base + 25 per addon), write back
 - [x] On Subscription cancel/downgrade: lower `maxCodes` (existing codes keep working, new creates blocked)
 - [x] On Subscription reactivation: restore `maxCodes` to plan level (via idempotent `syncQuota`)
 - [x] Handle edge cases:
@@ -136,7 +136,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 **Goal:** Both apps can call `GET /api/me/plan` to determine what features the user has access to.
 
 - [x] Implement `GET /api/me/plan` (authenticated)
-  - **Update needed:** Simplify to two tiers only (`free` and `subscription`)
+  - Simplified to two tiers only (`free` and `subscription`)
   - Returns:
     ```json
     {
@@ -146,11 +146,9 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
     }
     ```
   - ~~Tier priority: `subscription` > `pro` > `pro_trial` > `free`~~ → just: `subscription` if active subscription, else `free`
-  - `maxCodes` computed from base subscription (25) + active add-on subscriptions (25 each)
+  - `maxCodes` computed from base subscription (25) + `addon_count` on single subscription row (25 each)
   - ~~`trialDaysRemaining`~~ — removed
-- [ ] **Simplify feature keys:** All features are free except `dynamic_codes` and `analytics` (subscription only)
-  - Remove: `advanced_qr_types`, `advanced_customization`, `svg_export`, `pdf_export`, `eps_export`, `batch_generation`, `templates`, `unlimited_history`, `web_asset_pack`
-  - Keep: `dynamic_codes`, `analytics`
+- [x] **Simplify feature keys:** FREE_FEATURES includes all 10 QR generation features; subscription adds `dynamic_codes` and `analytics`
 - [ ] Cache plan computation (avoid re-querying DB on every call) — **deferred: queries are simple indexed lookups, no cache layer yet**
 - [x] Write tests: each tier returns correct features, tier priority is correct
 
@@ -163,9 +161,9 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 **Goal:** Billing API is deployed and accessible at `api.qr-foundry.com`.
 
 - [x] Set up deployment pipeline (CI/CD) — `ci.yml` and `deploy.yml` GitHub Actions workflows
-- [ ] Configure environments:
-  - Production: `api.qr-foundry.com`
-  - Preview: TBD
+- [x] Configure environments in `wrangler.toml`:
+  - Production: `api.qr-foundry.com` (custom domain route)
+  - Preview: configured with own D1 database
   - Dev: `localhost:8787`
 - [ ] Set up secrets management:
   - `JWT_SIGNING_KEY` — for JWT issuance/validation
@@ -209,16 +207,21 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - Updates subscription status to `past_due` in DB
   - Writes `gracePeriodDeadline` (now + 24h), `targetMaxCodes: 0`, `gracePeriodReason: "payment_failed"` to quota record
   - Uses `invoice.parent.subscription_details.subscription` (Stripe SDK v2 structure)
-- [x] **Grace period on add-on cancellation** (`customer.subscription.deleted` for `addon_25`):
-  - Recomputes `maxCodes` from remaining active subscriptions via `computeMaxCodes`
+- [x] **Grace period on add-on count reduction** (via `customer.subscription.updated` when addon items removed):
+  - Recomputes `maxCodes` from subscription base + new `addon_count` via `computeMaxCodes`
   - If active codes > new `maxCodes`, writes grace period with `targetMaxCodes` and `reason: "addon_canceled"`
   - If active codes <= new `maxCodes`, just calls `syncQuota` (no grace needed)
 - [x] **Clear grace period on reactivation** (`customer.subscription.updated` with status → `active`):
   - Calls `syncQuota`, then reads quota and clears `gracePeriodDeadline`/`targetMaxCodes`/`gracePeriodReason`
   - Does NOT reactivate paused codes (user manually reactivates from dashboard)
-- [x] Write tests for each webhook scenario — 24 new tests (131 total):
+- [x] Implement `POST /api/billing/addon` (authenticated) — manage add-on line items on single Stripe subscription
+  - Actions: `add` (creates new addon subscription item with proration) or `remove` (deletes one addon item with proration)
+  - Finds base subscription item to determine billing interval (monthly/annual) for addon price
+  - Returns current `addonCount` after mutation
+- [x] Write tests for each scenario — 149 tests total:
   - KV helpers: `listUserCodes` (with pagination), `readCode`, `bulkWriteCodes`, `deactivateAllCodes`, `writeGracePeriod`
-  - Webhook handlers: base subscription deletion, addon deletion (over/under limit), payment failure, grace period clearing on reactivation
+  - Webhook handlers: base subscription deletion, addon count change (over/under limit), payment failure, grace period clearing on reactivation
+  - Addon endpoint: add/remove addon items, missing subscription, no addons to remove
 
 **Dependencies:** Worker KV must be accessible for both `_quota::` writes and individual code key writes. Requires Cloudflare API token with KV read/write permissions.
 

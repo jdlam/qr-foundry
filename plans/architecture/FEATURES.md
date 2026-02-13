@@ -108,7 +108,8 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Login/signup UI | -- | -- | -- | [x] App |
 | Token storage (LazyStore / localStorage) | -- | -- | -- | [x] App |
 | **Billing & Subscriptions** | | | | |
-| Stripe Checkout (Pro, Subscription, Add-on) | -- | -- | -- | [x] Billing API |
+| Stripe Checkout (Subscription) | -- | -- | -- | [x] Billing API |
+| Add-on management (`POST /api/billing/addon`) | -- | -- | -- | [x] Billing API |
 | Stripe Customer Portal | -- | -- | -- | [x] Billing API |
 | Stripe webhook handler | -- | -- | -- | [x] Billing API |
 | Quota writes to Worker KV | -- | -- | -- | [ ] Billing API |
@@ -402,12 +403,13 @@ Payment processing for Pro purchases, recurring subscriptions, and add-on code p
 - As a subscriber, I want to manage my subscription (upgrade, downgrade, cancel, update payment) through a self-service portal.
 
 **Features:**
-- [x] Stripe Checkout sessions for Pro, Subscription, and Add-on products (Billing API, see billing-api.md Phase 4)
+- [x] Stripe Checkout sessions for Subscription product (Billing API, see billing-api.md Phase 4)
 - [x] Stripe Customer Portal for subscription management (Billing API)
 - [x] Stripe webhook handler: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed` (Billing API)
 - [x] Purchase and subscription state tracking in database (Billing API)
 - [x] Quota writes to Worker KV after purchase/subscription events (Billing API, see billing-api.md Phase 5)
-- [x] Quota increment on add-on purchase (read current, add purchased amount, write back) (Billing API)
+- [x] Add-on management via `POST /api/billing/addon` — add/remove line items on single Stripe subscription, updates `addon_count` (Billing API)
+- [x] Quota recomputation on add-on count change (25 base + 25 per addon from single subscription row) (Billing API)
 - [x] Quota reduction on subscription cancel/downgrade — instant deactivation for base sub, 24h grace period for addon (Billing API)
 - [x] Grace period enforcement via Worker cron — hourly scan of expired grace periods, pauses excess codes (Worker)
 - [x] Instant code deactivation on base subscription cancellation — bulk-writes paused status to Worker KV (Billing API)
@@ -623,7 +625,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Dynamic QR Codes (Worker + App) | 21 | 0 | 0 | 21 |
 | Scan Analytics (Worker + App) | 16 | 0 | 0 | 16 |
 | User Accounts & Auth | 13 | 0 | 3 | 16 |
-| Billing & Subscriptions | 11 | 0 | 2 | 13 |
+| Billing & Subscriptions | 13 | 0 | 2 | 15 |
 | Trial Management | 5 | 0 | 3 | 8 |
 | Feature Gating | 6 | 0 | 1 | 7 |
 | Platform & Distribution | 21 | 0 | 8 | 29 |
@@ -631,6 +633,6 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Settings & Preferences | 1 | 0 | 12 | 13 |
 | Native App Features | 0 | 0 | 10 | 10 |
 | Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **143** | **4** | **59** | **206** |
+| **Totals** | **145** | **4** | **59** | **208** |
 
 Core QR generation, customization, validation, Worker API, dynamic codes CRUD UI, analytics dashboard, and "Make Dynamic" generator toggle are all complete. The Billing API (auth, Stripe, plan tier, quota writes, subscription lifecycle) is implemented — remaining work is production deployment. The desktop app has all dynamic code features (management, analytics, generator toggle), feature gating, and auth integration. The primary remaining work is web app deployment, Billing API deployment, and the marketing site.
