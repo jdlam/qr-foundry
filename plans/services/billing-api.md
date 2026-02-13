@@ -92,7 +92,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - `customer.subscription.updated` — handle upgrade/downgrade
   - `customer.subscription.deleted` — handle cancellation
   - `invoice.payment_failed` — log only (Stripe dunning handles retries)
-- [ ] Create Stripe products and prices (in Stripe dashboard or via API) — **manual step**:
+- [x] Create Stripe products and prices (in Stripe dashboard) — **manual step**:
   - ~~Pro: one-time ~$15~~ — **removed**
   - Subscription: $6/month or $60/year recurring
   - Add-on 25 codes: $3/month or $30/year recurring
@@ -165,13 +165,13 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
   - Production: `api.qr-foundry.com` (custom domain route)
   - Preview: configured with own D1 database
   - Dev: `localhost:8787`
-- [~] Set up secrets management:
+- [x] Set up secrets management:
   - [x] `JWT_SIGNING_KEY` — for JWT issuance/validation
-  - [ ] `STRIPE_SECRET_KEY` — for Stripe API calls
-  - [ ] `STRIPE_WEBHOOK_SECRET` — for webhook signature verification
+  - [x] `STRIPE_SECRET_KEY` — for Stripe API calls
+  - [x] `STRIPE_WEBHOOK_SECRET` — for webhook signature verification
   - [x] `CLOUDFLARE_KV_API_TOKEN` — for writing quota records to Worker KV
   - `DB` — Cloudflare D1 database binding (configured in `wrangler.toml`)
-- [ ] Configure DNS for `api.qr-foundry.com`
+- [x] Configure DNS for `api.qr-foundry.com`
 - [x] Set up CORS to allow requests from:
   - `app.qr-foundry.com` (web app)
   - `localhost:5173` (local dev)
@@ -181,9 +181,9 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ### Manual steps (requires action outside IDE)
 
-- [ ] **Create Stripe account** and configure products/prices
+- [x] **Create Stripe account** and configure products/prices
 - [x] **Set up database** (Cloudflare D1)
-- [ ] **Configure DNS** for `api.qr-foundry.com`
+- [x] **Configure DNS** for `api.qr-foundry.com`
 - [x] **Share JWT signing key** — the Worker needs the public key (or shared secret) to validate JWTs issued by this API
 - [x] **Set Cloudflare KV API token** — create a token with write permissions to the Worker's KV namespace
 
