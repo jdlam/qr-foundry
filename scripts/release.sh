@@ -200,13 +200,17 @@ release_service() {
     bump_app_versions "$repo_path" "$version_num"
   fi
 
-  # Commit
+  # Commit (skip if versions were already correct)
   if $DRY_RUN; then
     info "[$service] (dry-run) Would commit: chore: release $version"
   else
     git -C "$repo_path" add -A
-    git -C "$repo_path" commit -m "chore: release $version"
-    info "[$service] Committed: chore: release $version"
+    if [[ -n "$(git -C "$repo_path" diff --cached --name-only)" ]]; then
+      git -C "$repo_path" commit -m "chore: release $version"
+      info "[$service] Committed: chore: release $version"
+    else
+      info "[$service] Version files already up to date — skipping commit."
+    fi
   fi
 
   # Push
