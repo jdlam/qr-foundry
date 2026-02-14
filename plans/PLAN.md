@@ -19,6 +19,15 @@ This file is a lightweight index. All planning resources live in this directory.
 | **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-6 and 8 complete. Phase 7 (deploy) pending |
 | **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), pricing simplified (PR #5), Phases 2-3 pending |
 
+## Current Releases
+
+| Service | Version | Date | Domain |
+|---------|---------|------|--------|
+| **Redirect Worker** | v0.1.0 | 2026-02-13 | `qrfo.link` |
+| **Billing API** | v0.1.1 | 2026-02-13 | `api.qr-foundry.com` |
+| **Desktop + Web App** | v0.1.0 | 2026-02-13 | downloadable / `app.qr-foundry.com` |
+| **Marketing Site** | v0.1.0 | 2026-02-13 | `qr-foundry.com` |
+
 ## Pricing Model (quick reference)
 
 All QR generation features are free. You only pay for dynamic QR codes.

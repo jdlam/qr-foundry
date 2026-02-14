@@ -69,12 +69,12 @@ shared docs whenever a feature or change is implemented:
 
 ## Current Status
 
-| Service | Status |
-|---------|--------|
-| **Worker** | Phases 1-8 complete (168 tests), deployed to production at `qrfo.link` |
-| **Billing API** | Phases 1-6 and 8 complete (179 tests), Phase 7 (deploy) in progress |
-| **Desktop App** | Phases 1-5 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, "Make Dynamic" toggle, session expiry interceptor (534 tests); Phase 6 (web deploy) pending |
-| **Marketing Site** | Phase 1 complete (landing page, dark/light theme, QR generator, pricing, CI/CD); Phases 2-3 pending |
+| Service | Version | Status |
+|---------|---------|--------|
+| **Worker** | v0.1.0 | Phases 1-8 complete (168 tests), deployed to production at `qrfo.link` |
+| **Billing API** | v0.1.1 | Phases 1-6 and 8 complete (179 tests), Phase 7 (deploy) in progress |
+| **Desktop App** | v0.1.0 | Phases 1-5 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, "Make Dynamic" toggle, session expiry interceptor (534 tests); Phase 6 (web deploy) pending |
+| **Marketing Site** | v0.1.0 | Phase 1 complete (landing page, dark/light theme, QR generator, pricing, CI/CD); Phases 2-3 pending |
 
 **Feature totals:** 147 shipped, 4 partial, 57 planned (208 total)
 
