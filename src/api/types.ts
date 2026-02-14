@@ -57,11 +57,9 @@ export interface JwtClaims {
   exp: number;
 }
 
-export interface ImpersonateResponse {
-  token: string;
-  user: AuthUser;
+export type ImpersonateResponse = AuthResponse & {
   plan: UserPlan;
-}
+};
 
 // Worker API types
 

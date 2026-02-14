@@ -177,8 +177,8 @@ function DevPersonaSwitcher() {
     setSwitching(label);
     try {
       await useAuthStore.getState().impersonate(tier, addonCount);
-    } catch {
-      // Silently ignore — dev tool
+    } catch (error) {
+      console.error('[DevPersonaSwitcher]', error);
     } finally {
       setSwitching(null);
     }
