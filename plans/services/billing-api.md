@@ -226,3 +226,37 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 **Dependencies:** Worker KV must be accessible for both `_quota::` writes and individual code key writes. Requires Cloudflare API token with KV read/write permissions.
 
 **Exit criteria:** Subscription cancellation instantly pauses all dynamic codes. Payment failure writes a 24h grace period. Add-on cancellation writes a grace period for excess codes. Reactivation restores `maxCodes` without auto-reactivating codes. ✅
+
+---
+
+## Phase 9: Test Personas (Dev/Preview)
+
+**Goal:** Enable quick testing as different user personas in non-production environments. Two complementary mechanisms: pre-seeded test users for end-to-end auth testing, and an impersonation endpoint for instant tier switching.
+
+### Impersonation endpoint
+
+- [ ] Implement `POST /api/dev/impersonate` (dev and preview environments only, disabled in production)
+  - Accepts `{ "tier": "free" | "subscription", "addonCount": 0 }` (or a userId to impersonate an existing user)
+  - Issues a real JWT with the requested tier baked into claims (or for an existing user, returns their real JWT)
+  - Optionally writes a matching `_quota::` record to Worker KV so dynamic code operations work
+  - Returns `{ token, user: { id, email, tier, maxCodes } }`
+- [ ] Guard with environment check — `die()` or 404 in production (never expose this endpoint in prod)
+- [ ] Write tests for the endpoint (including production guard)
+
+### Pre-seeded test users
+
+- [ ] Create a seed script (`scripts/seed-test-users.sh` or `src/db/seed.ts`) for dev/preview D1 databases
+  - `free@test.qr-foundry.com` — no subscription (free tier)
+  - `sub@test.qr-foundry.com` — active subscription, 25 dynamic code slots
+  - `addon@test.qr-foundry.com` — active subscription + 1 add-on (50 dynamic code slots)
+- [ ] Track test credentials in a non-committed `.env.test` or document in CLAUDE.md (never commit passwords)
+- [ ] Seed script should be idempotent (skip if users already exist)
+- [ ] Optionally write matching `_quota::` records to Worker KV for each seeded user
+
+### App integration
+
+- [ ] Add a dev-only "Switch persona" dropdown in the app (visible only in dev/preview builds)
+  - Calls `/api/dev/impersonate` and stores the returned JWT
+  - Shows current persona in the status bar
+
+**Exit criteria:** Developers can instantly test any tier in dev/preview by either logging in as a seeded user or using the impersonation endpoint. Production is never affected.
