@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '../../hooks/useAuth';
 import { useAuthModalStore } from '../../stores/authModalStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -179,6 +180,7 @@ function DevPersonaSwitcher() {
       await useAuthStore.getState().impersonate(tier, addonCount);
     } catch (error) {
       console.error('[DevPersonaSwitcher]', error);
+      toast.error('Impersonate failed — is the API running?');
     } finally {
       setSwitching(null);
     }
