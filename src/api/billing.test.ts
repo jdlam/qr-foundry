@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { billingApi, ApiError } from './billing';
 import { handleSessionExpired } from './session';
 
@@ -21,6 +21,10 @@ function jsonResponse(body: object, status = 200) {
 beforeEach(() => {
   mockFetch.mockReset();
   vi.mocked(handleSessionExpired).mockReset();
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe('billingApi', () => {
@@ -123,6 +127,45 @@ describe('billingApi', () => {
           headers: expect.objectContaining({ Authorization: 'Bearer tok' }),
         }),
       );
+    });
+  });
+
+  describe('impersonate', () => {
+    it('posts tier and addonCount and returns impersonation payload', async () => {
+      const data = {
+        token: 'imp-token',
+        user: { id: 'imp-1', email: 'free@test.qr-foundry.com', createdAt: '2025-01-01' },
+        plan: { tier: 'free', features: ['basic_qr_types'], maxCodes: 0 },
+      };
+      mockFetch.mockResolvedValue(jsonResponse({ success: true, data }));
+
+      const result = await billingApi.impersonate('subscription', 1);
+
+      expect(result).toEqual(data);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/dev/impersonate'),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ tier: 'subscription', addonCount: 1 }),
+        }),
+      );
+    });
+
+    it('does NOT call session expired handler on 401 (no auth header)', async () => {
+      mockFetch.mockResolvedValue(jsonResponse({ success: false, error: 'Unauthorized' }, 401));
+
+      await expect(billingApi.impersonate('free')).rejects.toBeInstanceOf(ApiError);
+      expect(handleSessionExpired).not.toHaveBeenCalled();
+    });
+
+    it('throws in non-dev mode before making a network request', async () => {
+      vi.stubEnv('DEV', false);
+
+      await expect(billingApi.impersonate('free')).rejects.toMatchObject({
+        message: 'Impersonation is only available in development mode',
+        status: 403,
+      });
+      expect(mockFetch).not.toHaveBeenCalled();
     });
   });
 

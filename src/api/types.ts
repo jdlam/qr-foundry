@@ -57,6 +57,10 @@ export interface JwtClaims {
   exp: number;
 }
 
+export type ImpersonateResponse = AuthResponse & {
+  plan: UserPlan;
+};
+
 // Worker API types
 
 export type CodeStatus = 'active' | 'paused' | 'expired';

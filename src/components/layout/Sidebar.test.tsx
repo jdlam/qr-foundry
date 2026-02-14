@@ -1,11 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Sidebar } from './Sidebar';
 import type { TabId } from './Sidebar';
 import { useAuthModalStore } from '../../stores/authModalStore';
 
+const { mockToastError } = vi.hoisted(() => ({
+  mockToastError: vi.fn(),
+}));
+
+vi.mock('sonner', () => ({
+  toast: {
+    error: mockToastError,
+  },
+}));
+
 // Mock useAuth hook
 const mockLogout = vi.fn();
+const mockImpersonate = vi.fn();
 let mockAuthState: Record<string, unknown> = {
   user: null,
   plan: null,
@@ -19,6 +30,12 @@ let mockAuthState: Record<string, unknown> = {
 
 vi.mock('../../hooks/useAuth', () => ({
   useAuth: () => mockAuthState,
+}));
+
+vi.mock('../../stores/authStore', () => ({
+  useAuthStore: {
+    getState: () => ({ impersonate: mockImpersonate }),
+  },
 }));
 
 describe('Sidebar', () => {
@@ -39,6 +56,9 @@ describe('Sidebar', () => {
       logout: mockLogout,
     };
     mockLogout.mockReset();
+    mockImpersonate.mockReset();
+    mockImpersonate.mockResolvedValue(undefined);
+    mockToastError.mockReset();
     useAuthModalStore.getState().close();
   });
 
@@ -118,6 +138,25 @@ describe('Sidebar', () => {
 
       expect(useAuthModalStore.getState().isOpen).toBe(true);
     });
+
+    it('shows dev persona switcher when logged out', () => {
+      render(<Sidebar {...defaultProps} />);
+
+      expect(screen.getByRole('button', { name: 'Free' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Sub' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Sub+Add' })).toBeInTheDocument();
+    });
+
+    it('calls impersonate from logged-out persona switcher', async () => {
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sub+Add' }));
+
+      expect(mockImpersonate).toHaveBeenCalledWith('subscription', 1);
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Sub+Add' })).toBeEnabled();
+      });
+    });
   });
 
   describe('Bottom section — logged in', () => {
@@ -171,6 +210,30 @@ describe('Sidebar', () => {
 
       // Should show the user initial
       expect(screen.getByText('t')).toBeInTheDocument();
+    });
+
+    it('shows dev persona switcher and calls impersonate', async () => {
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sub' }));
+
+      expect(mockImpersonate).toHaveBeenCalledWith('subscription', 0);
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Sub' })).toBeEnabled();
+      });
+    });
+  });
+
+  describe('Dev persona switcher errors', () => {
+    it('shows a toast when impersonation fails', async () => {
+      mockImpersonate.mockRejectedValueOnce(new Error('API unavailable'));
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Free' }));
+
+      await waitFor(() => {
+        expect(mockToastError).toHaveBeenCalledWith('Impersonate failed — is the API running?');
+      });
     });
   });
 

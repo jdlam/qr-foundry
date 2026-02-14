@@ -1,4 +1,4 @@
-import type { ApiResponse, AuthResponse, AuthUser, UserPlan } from './types';
+import type { ApiResponse, AuthResponse, AuthUser, ImpersonateResponse, PlanTier, UserPlan } from './types';
 import { handleSessionExpired } from './session';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://api.qr-foundry.com';
@@ -73,6 +73,17 @@ export const billingApi = {
   async plan(token: string): Promise<UserPlan> {
     return request<UserPlan>('/api/me/plan', {
       headers: authHeaders(token),
+    });
+  },
+
+  async impersonate(tier: PlanTier, addonCount = 0): Promise<ImpersonateResponse> {
+    if (!import.meta.env.DEV) {
+      throw new ApiError('Impersonation is only available in development mode', 403);
+    }
+
+    return request<ImpersonateResponse>('/api/dev/impersonate', {
+      method: 'POST',
+      body: JSON.stringify({ tier, addonCount }),
     });
   },
 };
