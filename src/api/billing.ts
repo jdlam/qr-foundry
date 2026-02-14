@@ -77,6 +77,10 @@ export const billingApi = {
   },
 
   async impersonate(tier: PlanTier, addonCount = 0): Promise<ImpersonateResponse> {
+    if (!import.meta.env.DEV) {
+      throw new ApiError('Impersonation is only available in development mode', 403);
+    }
+
     return request<ImpersonateResponse>('/api/dev/impersonate', {
       method: 'POST',
       body: JSON.stringify({ tier, addonCount }),

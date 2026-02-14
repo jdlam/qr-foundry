@@ -4,6 +4,16 @@ import { Sidebar } from './Sidebar';
 import type { TabId } from './Sidebar';
 import { useAuthModalStore } from '../../stores/authModalStore';
 
+const { mockToastError } = vi.hoisted(() => ({
+  mockToastError: vi.fn(),
+}));
+
+vi.mock('sonner', () => ({
+  toast: {
+    error: mockToastError,
+  },
+}));
+
 // Mock useAuth hook
 const mockLogout = vi.fn();
 const mockImpersonate = vi.fn();
@@ -48,6 +58,7 @@ describe('Sidebar', () => {
     mockLogout.mockReset();
     mockImpersonate.mockReset();
     mockImpersonate.mockResolvedValue(undefined);
+    mockToastError.mockReset();
     useAuthModalStore.getState().close();
   });
 
@@ -199,6 +210,30 @@ describe('Sidebar', () => {
 
       // Should show the user initial
       expect(screen.getByText('t')).toBeInTheDocument();
+    });
+
+    it('shows dev persona switcher and calls impersonate', async () => {
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Sub' }));
+
+      expect(mockImpersonate).toHaveBeenCalledWith('subscription', 0);
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Sub' })).toBeEnabled();
+      });
+    });
+  });
+
+  describe('Dev persona switcher errors', () => {
+    it('shows a toast when impersonation fails', async () => {
+      mockImpersonate.mockRejectedValueOnce(new Error('API unavailable'));
+      render(<Sidebar {...defaultProps} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Free' }));
+
+      await waitFor(() => {
+        expect(mockToastError).toHaveBeenCalledWith('Impersonate failed — is the API running?');
+      });
     });
   });
 

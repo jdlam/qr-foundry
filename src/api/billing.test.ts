@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { billingApi, ApiError } from './billing';
 import { handleSessionExpired } from './session';
 
@@ -21,6 +21,10 @@ function jsonResponse(body: object, status = 200) {
 beforeEach(() => {
   mockFetch.mockReset();
   vi.mocked(handleSessionExpired).mockReset();
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe('billingApi', () => {
@@ -152,6 +156,16 @@ describe('billingApi', () => {
 
       await expect(billingApi.impersonate('free')).rejects.toBeInstanceOf(ApiError);
       expect(handleSessionExpired).not.toHaveBeenCalled();
+    });
+
+    it('throws in non-dev mode before making a network request', async () => {
+      vi.stubEnv('DEV', false);
+
+      await expect(billingApi.impersonate('free')).rejects.toMatchObject({
+        message: 'Impersonation is only available in development mode',
+        status: 403,
+      });
+      expect(mockFetch).not.toHaveBeenCalled();
     });
   });
 

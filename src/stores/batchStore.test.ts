@@ -8,8 +8,8 @@ describe('batchStore', () => {
     useBatchStore.getState().setExportFormat('png');
   });
 
-  describe('initial state', () => {
-    it('has correct default values', () => {
+  describe('baseline state', () => {
+    it('has expected reset values', () => {
       const state = useBatchStore.getState();
 
       expect(state.items).toEqual([]);
