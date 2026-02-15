@@ -195,6 +195,16 @@ release_service() {
     fi
   fi
 
+  # Update package-lock.json version (if it exists and uses npm)
+  if [[ -f "$repo_path/package-lock.json" ]]; then
+    if $DRY_RUN; then
+      info "[$service] (dry-run) Would update package-lock.json version to $version_num"
+    else
+      (cd "$repo_path" && npm install --package-lock-only --ignore-scripts > /dev/null 2>&1)
+      info "[$service] Updated package-lock.json version to $version_num"
+    fi
+  fi
+
   # App-specific: also bump tauri.conf.json and Cargo.toml
   if [[ "$service" == "app" ]]; then
     bump_app_versions "$repo_path" "$version_num"
