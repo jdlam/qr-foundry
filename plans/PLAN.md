@@ -16,7 +16,7 @@ This file is a lightweight index. All planning resources live in this directory.
 | Service | Repo | Plan | Status |
 |---------|------|------|--------|
 | **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. Grace period cron enforcement implemented |
-| **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-5 complete (auth, gating, dynamic codes CRUD, analytics, "Make Dynamic" toggle, platform abstraction); release pipeline + auto-updater added; Phase 6 (web deploy) pending |
+| **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-6 complete (auth, gating, dynamic codes CRUD, analytics, platform abstraction, web deploy to `app.qr-foundry.com`); release pipeline + auto-updater added |
 | **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-9 complete, deployed to production at `api.qr-foundry.com` |
 | **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), pricing simplified (PR #5), Phases 2-3 pending |
 
@@ -25,8 +25,8 @@ This file is a lightweight index. All planning resources live in this directory.
 | Service | Version | Date | Domain |
 |---------|---------|------|--------|
 | **Redirect Worker** | v0.1.0 | 2026-02-13 | `qrfo.link` |
-| **Billing API** | v0.1.1 | 2026-02-13 | `api.qr-foundry.com` |
-| **Desktop + Web App** | v0.1.0 | 2026-02-13 | downloadable / `app.qr-foundry.com` |
+| **Billing API** | v0.1.2 | 2026-02-14 | `api.qr-foundry.com` |
+| **Desktop + Web App** | v0.2.0 | 2026-02-14 | downloadable / `app.qr-foundry.com` |
 | **Marketing Site** | v0.1.0 | 2026-02-13 | `qr-foundry.com` |
 
 ## Pricing Model (quick reference)

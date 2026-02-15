@@ -121,7 +121,7 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | macOS desktop app (Tauri) | Yes | Yes | Yes | [x] |
 | Windows desktop app (Tauri) | Yes | Yes | Yes | [x] |
 | Linux desktop app (Tauri) | Yes | Yes | Yes | [x] |
-| Web app (`app.qr-foundry.com`) | Yes | Yes | Yes | [ ] |
+| Web app (`app.qr-foundry.com`) | Yes | Yes | Yes | [x] |
 | Platform adapters (8 adapters including auth) | -- | -- | -- | [x] App |
 | Sidebar navigation | Yes | Yes | Yes | [x] App |
 | Title bar with theme toggle | Yes | Yes | Yes | [x] App |
@@ -499,11 +499,11 @@ Ship the same React codebase on desktop (Tauri) and web, with platform-specific 
 - [x] Shared adapter interfaces in `src/platform/types.ts` (App)
 - [x] Vite path aliases (`@platform/*`) for build-time platform resolution via `VITE_PLATFORM` env var (App)
 - [x] Platform detection helpers: `isTauri()`, `isWeb()`, `platformName()` (App)
-- [ ] Web build config (`vite.config.web.ts`) and entry point (App, see app.md Phase 6)
+- [x] Web build config (shared `vite.config.ts` with `VITE_PLATFORM=web` env var) and entry point (App)
 - [x] `npm run dev:web` and `npm run build:web` scripts (App)
-- [ ] Web app deployment to Vercel or Cloudflare Pages (App)
-- [ ] DNS configuration: `app.qr-foundry.com` (App)
-- [ ] Web app CI/CD pipeline (App)
+- [x] Web app deployment to Cloudflare Workers with SPA routing (App)
+- [x] DNS configuration: `app.qr-foundry.com` via custom domain route (App)
+- [x] Web app CI/CD pipeline (`deploy-web.yml`: PR → dev, merge → preview, release → production) (App)
 - [ ] Browser QR scanning via `MediaDevices` API (App, future)
 - [ ] Mac App Store submission with IAP (Desktop App, future)
 - [ ] Microsoft Store submission with IAP (Desktop App, future)
@@ -622,7 +622,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Scan analytics (event logging + APIs + UI) | Shipped in Worker + App |
 | Billing API (auth, Stripe, quotas, lifecycle, personas) | Shipped and deployed |
 | Platform adapters and desktop distribution | Shipped |
-| Web app deployment (`app.qr-foundry.com`) | Pending (build exists, deployment/config pending) |
+| Web app deployment (`app.qr-foundry.com`) | Shipped (Cloudflare Workers, 3-env deploy pipeline) |
 | Marketing site | Phase 1 shipped, Phase 2-3 pending |
 | Deferred backlog (settings/native advanced features/rate limiting) | Planned |
 

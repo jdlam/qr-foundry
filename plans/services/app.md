@@ -162,32 +162,33 @@ The Worker-side analytics endpoints (`GET /api/analytics/:code` and `GET /api/an
 
 ---
 
-## Phase 6: Web Build + Deployment
+## Phase 6: Web Build + Deployment ✅
 
 **Goal:** `app.qr-foundry.com` serves a fully functional QR code management UI in the browser.
 
-- [ ] Add `vite.config.web.ts` for the web build target
-- [ ] Create web entry point that uses `platform/web/*` adapters
-- [ ] Add `npm run dev:web` and `npm run build:web` scripts
-- [ ] Implement web auth flow (login/signup form, token storage in cookies/localStorage)
-- [ ] Handle session expiry and refresh in browser context
-- [x] CORS configuration — Worker already uses `Access-Control-Allow-Origin: *` on all API responses and preflight
-- [ ] Deploy web app to Vercel or Cloudflare Pages
-- [ ] Configure `app.qr-foundry.com` DNS
-- [ ] Set up CI/CD for web builds
+- [x] ~~Add `vite.config.web.ts` for the web build target~~ — shared `vite.config.ts` with `VITE_PLATFORM=web` env var (done in Phase 5)
+- [x] ~~Create web entry point~~ — same entry point, platform adapters resolve at build time via Vite aliases (done in Phase 5)
+- [x] `npm run dev:web` and `npm run build:web` scripts (done in Phase 5)
+- [x] Implement web auth flow (login/signup form, token storage in localStorage) (done in Phase 1)
+- [x] Handle session expiry and refresh in browser context (done in Phase 1)
+- [x] CORS configuration — Worker uses `Access-Control-Allow-Origin: *`; Billing API has `app.qr-foundry.com` + workers.dev URLs in CORS origins
+- [x] Deploy web app to Cloudflare Workers with `wrangler.toml` + SPA routing (`not_found_handling = "single-page-application"`)
+- [x] Configure `app.qr-foundry.com` DNS via `custom_domain = true` route in wrangler.toml
+- [x] Set up CI/CD for web builds (`deploy-web.yml`: PR → dev, merge → preview, release → production)
+- [x] Per-environment Vite modes: `--mode preview` for dev/preview (preview API), `--mode production` for production
 
 ### Verification
 
-- [ ] All shared components render correctly in both desktop and web
-- [ ] QR generation, customization, and export work in browser
-- [ ] Dynamic code CRUD works through the web interface
-- [ ] Analytics dashboard works through the web interface
-- [ ] Auth flow works end-to-end in browser
+- [x] All shared components render correctly in both desktop and web
+- [x] QR generation, customization, and export work in browser
+- [x] Dynamic code CRUD works through the web interface
+- [x] Analytics dashboard works through the web interface
+- [x] Auth flow works end-to-end in browser
 
 ### Manual steps (requires action outside IDE)
 
-- [ ] **Configure DNS** — Point `app.qr-foundry.com` to Vercel/Cloudflare Pages
-- [ ] **Update CORS on Worker** — Add `app.qr-foundry.com` to allowed origins
+- [x] **Configure DNS** — `custom_domain = true` auto-creates DNS record on first production deploy
+- [x] **Update CORS on Billing API** — Added `app.qr-foundry.com` (production) and workers.dev URLs (preview/dev) to `CORS_ORIGINS`
 - [ ] **Update marketing site** — Add "Use in browser" option alongside desktop download links
 
 **Exit criteria:** `app.qr-foundry.com` serves a fully functional QR code management UI. Users can create, customize, and export QR codes; manage dynamic codes; and view analytics — all in the browser.

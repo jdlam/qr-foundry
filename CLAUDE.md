@@ -88,8 +88,8 @@ Never merge strategy or implementation changes with stale shared docs.
 | Service | Version | Status |
 |---------|---------|--------|
 | **Worker** | v0.1.0 | Phases 1-8 complete (172 tests), deployed to production at `qrfo.link` |
-| **Billing API** | v0.1.1 | Phases 1-9 complete (201 tests), deployed to production at `api.qr-foundry.com` |
-| **Desktop App** | v0.1.0 | Phases 1-5 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, "Make Dynamic" toggle, session expiry interceptor (553 tests); Phase 6 (web deploy) pending |
+| **Billing API** | v0.1.2 | Phases 1-9 complete (201 tests), deployed to production at `api.qr-foundry.com` |
+| **Desktop + Web App** | v0.2.0 | Phases 1-6 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, web deploy to `app.qr-foundry.com` (553 tests) |
 | **Marketing Site** | v0.1.0 | Phase 1 complete (landing page, dark/light theme, QR generator, pricing, CI/CD); Phases 2-3 pending |
 
 **Feature totals:** maintain counts in `plans/architecture/FEATURES.md` as part of the Documentation Sync Gate.
