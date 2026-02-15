@@ -120,6 +120,19 @@ bump_app_versions() {
       info "[app] Updated Cargo.toml version to $version_num"
     fi
   fi
+
+  # Update src-tauri/Cargo.lock to match Cargo.toml version
+  local cargo_lock="$repo_path/src-tauri/Cargo.lock"
+  if [[ -f "$cargo_lock" && -f "$cargo_toml" ]]; then
+    if $DRY_RUN; then
+      info "[app] (dry-run) Would update Cargo.lock version to $version_num"
+    else
+      (cd "$repo_path/src-tauri" && cargo update --package qr-foundry --precise "$version_num" > /dev/null 2>&1) \
+        || sed -i.bak '/^name = "qr-foundry"/{n;s/^version = ".*"/version = "'"$version_num"'"/;}' "$cargo_lock"
+      rm -f "$cargo_lock.bak"
+      info "[app] Updated Cargo.lock version to $version_num"
+    fi
+  fi
 }
 
 # Release a single service
