@@ -19,7 +19,7 @@ on:
           - production
 
 concurrency:
-  group: deploy-web-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -65,6 +65,7 @@ jobs:
         with:
           name: dist
           path: dist/
+          retention-days: 1
 
   deploy:
     name: Deploy to Cloudflare Workers
