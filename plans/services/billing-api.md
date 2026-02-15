@@ -156,7 +156,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ---
 
-## Phase 7: Deployment
+## Phase 7: Deployment ✅
 
 **Goal:** Billing API is deployed and accessible at `api.qr-foundry.com`.
 
@@ -164,7 +164,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [x] Configure environments in `wrangler.toml`:
   - Production: `api.qr-foundry.com` (custom domain route)
   - Preview: configured with own D1 database
-  - Dev: `localhost:8787`
+  - Dev: deployed at `qr-foundry-api-dev.<account>.workers.dev` (local runtime options: `bun run dev` on `localhost:5173`, `bun run preview` on `localhost:8787`)
 - [x] Set up secrets management:
   - [x] `JWT_SIGNING_KEY` — for JWT issuance/validation
   - [x] `STRIPE_SECRET_KEY` — for Stripe API calls
@@ -229,34 +229,41 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ---
 
-## Phase 9: Test Personas (Dev/Preview)
+## Phase 9: Test Personas (Dev/Preview) ✅
 
-**Goal:** Enable quick testing as different user personas in non-production environments. Two complementary mechanisms: pre-seeded test users for end-to-end auth testing, and an impersonation endpoint for instant tier switching.
+**Goal:** Enable quick testing as different user personas in non-production environments via an impersonation endpoint that issues real JWTs and manages real DB/KV state.
 
 ### Impersonation endpoint
 
-- [ ] Implement `POST /api/dev/impersonate` (dev and preview environments only, disabled in production)
-  - Accepts `{ "tier": "free" | "subscription", "addonCount": 0 }` (or a userId to impersonate an existing user)
-  - Issues a real JWT with the requested tier baked into claims (or for an existing user, returns their real JWT)
-  - Optionally writes a matching `_quota::` record to Worker KV so dynamic code operations work
-  - Returns `{ token, user: { id, email, tier, maxCodes } }`
-- [ ] Guard with environment check — `die()` or 404 in production (never expose this endpoint in prod)
-- [ ] Write tests for the endpoint (including production guard)
+- [x] Implement `POST /api/dev/impersonate` (dev and preview environments only, disabled in production)
+  - Accepts `{ "tier": "free" | "subscription", "addonCount": 0 }`
+  - Three isolated test personas with deterministic UUIDs:
+    - `free@test.qr-foundry.com` — free tier (no subscription)
+    - `sub@test.qr-foundry.com` — subscription base (addonCount=0)
+    - `sub-add@test.qr-foundry.com` — subscription with addons (addonCount>0)
+  - Issues a real JWT via `issueToken()`, computes plan via `computeUserPlan()`, syncs quota via `syncQuota()`
+  - Upserts user in DB (idempotent), manages subscription records (upsert for subscription tier, delete for free)
+  - Returns `{ token, user: { id, email, createdAt }, plan: { tier, features, maxCodes } }`
+- [x] Guard with environment allowlist — only `"dev"` and `"preview"` allowed, with localhost fallback when `ENVIRONMENT` is unset (for `wrangler dev`). Returns 404 otherwise (production, unknown envs)
+- [x] Add `ENVIRONMENT` var to all three wrangler.toml envs (dev, preview, production)
+- [x] Add `ImpersonateRequest`/`ImpersonateResponse` types to `src/types.ts`
+- [x] Write tests for the endpoint — 19 tests covering environment guard, validation, all tiers, persona isolation, and idempotency
 
-### Pre-seeded test users
+### Seed script
 
-- [ ] Create a seed script (`scripts/seed-test-users.sh` or `src/db/seed.ts`) for dev/preview D1 databases
-  - `free@test.qr-foundry.com` — no subscription (free tier)
-  - `sub@test.qr-foundry.com` — active subscription, 25 dynamic code slots
-  - `addon@test.qr-foundry.com` — active subscription + 1 add-on (50 dynamic code slots)
-- [ ] Track test credentials in a non-committed `.env.test` or document in CLAUDE.md (never commit passwords)
-- [ ] Seed script should be idempotent (skip if users already exist)
-- [ ] Optionally write matching `_quota::` records to Worker KV for each seeded user
+- [x] Create `scripts/seed-test-users.sh` — convenience wrapper that calls `/api/dev/impersonate` for each persona
+  - Seeds free, subscription base, and subscription+addon personas
+  - Prints email, tier, and JWT for each persona for manual testing
+  - Idempotent — safe to run multiple times
+  - Accepts optional base URL argument (defaults to `http://localhost:8787`)
 
 ### App integration
 
-- [ ] Add a dev-only "Switch persona" dropdown in the app (visible only in dev/preview builds)
-  - Calls `/api/dev/impersonate` and stores the returned JWT
-  - Shows current persona in the status bar
+- [x] Add `impersonate()` method to billing API client (`src/api/billing.ts`)
+- [x] Add `impersonate()` action to auth store (`src/stores/authStore.ts`) — calls API, stores JWT, sets user/plan state
+- [x] Add dev-only `DevPersonaSwitcher` component in sidebar (Free | Sub | Sub+Add buttons), guarded by `import.meta.env.DEV`
+  - Visible in both logged-in and logged-out states for easy testing
+- [x] Update `__dev` console helpers in `App.tsx` to call real impersonation API
+- [x] Fix flaky tests: enable `sequence.shuffle` in vitest config, fix `useUpdateCheck` async draining, fix `batchStore` state leak
 
-**Exit criteria:** Developers can instantly test any tier in dev/preview by either logging in as a seeded user or using the impersonation endpoint. Production is never affected.
+**Exit criteria:** Developers can instantly test any tier in dev/preview using the persona switcher in the sidebar or the impersonation endpoint. Real JWTs are issued so API calls (dynamic codes, analytics) work correctly. Production is never affected. ✅

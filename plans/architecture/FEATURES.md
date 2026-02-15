@@ -100,7 +100,7 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Granularity toggle (hourly/daily/weekly) | -- | -- | Yes | [x] Worker |
 | Response caching (5-10 min) | -- | -- | Yes | [x] Worker |
 | **User Accounts & Auth** | | | | |
-| Signup (with auto Pro trial) | -- | -- | -- | [x] Billing API |
+| Signup | -- | -- | -- | [x] Billing API |
 | Login | -- | -- | -- | [x] Billing API |
 | JWT issuance and validation | -- | -- | -- | [x] Billing API |
 | Token refresh | -- | -- | -- | [x] Billing API |
@@ -112,11 +112,11 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Add-on management (`POST /api/billing/addon`) | -- | -- | -- | [x] Billing API |
 | Stripe Customer Portal | -- | -- | -- | [x] Billing API |
 | Stripe webhook handler | -- | -- | -- | [x] Billing API |
-| Quota writes to Worker KV | -- | -- | -- | [ ] Billing API |
+| Quota writes to Worker KV | -- | -- | -- | [x] Billing API |
 | **Feature Gating** | | | | |
 | Plan tier API (`GET /api/me/plan`) | -- | -- | -- | [x] Billing API |
 | `<FeatureGate>` component | -- | -- | -- | [x] App |
-| Trial banner / upgrade prompts | -- | -- | -- | [ ] App |
+| Subscription upsell prompts | -- | -- | -- | [x] App |
 | **Platform & Distribution** | | | | |
 | macOS desktop app (Tauri) | Yes | Yes | Yes | [x] |
 | Windows desktop app (Tauri) | Yes | Yes | Yes | [x] |
@@ -129,7 +129,7 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Dark/light/system theme | Yes | Yes | Yes | [x] App |
 | Design token system (60+ CSS variables) | Yes | Yes | Yes | [x] App |
 | **Marketing Site** | | | | |
-| Landing page with embedded QR generator | -- | -- | -- | [ ] Site |
+| Landing page with embedded QR generator | -- | -- | -- | [x] Site |
 | Pricing comparison page | -- | -- | -- | [ ] Site |
 | Blog/SEO content | -- | -- | -- | [ ] Site |
 | **Infrastructure** | | | | |
@@ -137,8 +137,8 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Worker deploy workflow (Releases -> production) | -- | -- | -- | [x] Worker |
 | Billing API CI/CD (lint, typecheck, test on PR) | -- | -- | -- | [x] Billing API |
 | Billing API deploy workflow | -- | -- | -- | [x] Billing API |
-| Custom domain `qrfo.link` | -- | -- | -- | [ ] Worker |
-| Custom domain `api.qr-foundry.com` | -- | -- | -- | [ ] Billing API |
+| Custom domain `qrfo.link` | -- | -- | -- | [x] Worker |
+| Custom domain `api.qr-foundry.com` | -- | -- | -- | [x] Billing API |
 | Rate limiting on redirect path | -- | -- | -- | [ ] Worker |
 
 ## Feature Details
@@ -447,20 +447,22 @@ Free 7-day trial of Pro features for every new user.
 Plan-based UI gating: show/hide features, display lock icons, and prompt upgrades.
 
 **User stories:**
-- As a free user, I want to see lock icons on Pro features so that I understand what I would get by upgrading.
-- As a free user, I want to click a locked feature and see a clear upgrade prompt with pricing so that the upgrade path is obvious.
-- As a Pro user, I want the dynamic codes tab to show a subscription upsell so that I know how to access dynamic QR codes.
-- As a user offline, I want the app to use my last known plan tier so that I can still work without an internet connection.
+- As a free user, I want all QR generation features available without signup so I can use the full product immediately.
+- As a free/logged-out user, I want clear prompts when I open dynamic code features so I understand subscription requirements.
+- As a subscription user, I want dynamic code and analytics access to unlock automatically after login.
+- As a user offline, I want free features to keep working so I can continue generating and exporting codes.
 
 **Features:**
-- [x] Plan tier API: `GET /api/me/plan` returning tier, features list, maxCodes, trialDaysRemaining (Billing API, see billing-api.md Phase 6)
+- [x] Plan tier API: `GET /api/me/plan` returning tier, features list, and maxCodes (Billing API, see billing-api.md Phase 6)
 - [x] Feature key definitions mapped to tiers (basic_qr_types, advanced_customization, svg_export, batch_generation, templates, dynamic_codes, analytics, etc.) (Billing API)
 - [x] `usePlan` hook: fetch plan on app startup, cache result (App, via `useAuth` + `authStore.fetchPlan()`)
 - [x] `useFeatureAccess` hook + `authModalStore`: gate actions by checking `plan.features`, open auth modal for logged-out users, show upgrade toast for free tier (App)
 - [x] Tier-based gating rules: Free (all QR features), Subscription (Free + dynamic codes + analytics) (App)
   - All Pro-era gating removed (Sidebar badges, input type locks, SVG export lock, style option locks)
   - Only `dynamic_codes` and `analytics` gated behind subscription
-- [ ] Upgrade/purchase buttons linking to appropriate store or Stripe checkout (App)
+- [~] Upgrade/purchase prompts in app (App)
+  - Dynamic codes gate shows sign-in/upgrade prompts
+  - Direct checkout deep-links are not fully wired in all surfaces yet
 - [x] Offline graceful degradation: free features work fully offline by design (no network dependencies for QR generation, export, history, templates) (App)
 
 **Services:** Billing API (tier computation), Desktop App (UI gating), Web App (UI gating)
@@ -479,7 +481,7 @@ Ship the same React codebase on desktop (Tauri) and web, with platform-specific 
 - [x] macOS, Windows, Linux builds (Desktop App)
 - [x] Rust backend for file export, validation, batch, scanner (Desktop App)
 - [x] SQLite storage for history and templates (Desktop App)
-- [x] Sidebar navigation with 6 tabs (Generator, Batch, Scanner, History, Templates, Dynamic Codes placeholder) (App)
+- [x] Sidebar navigation with 6 tabs (Generator, Batch, Scanner, History, Templates, Dynamic Codes) (App)
 - [x] Custom title bar with QR Foundry branding, theme toggle, and window controls (App)
 - [x] Status bar showing export dimensions, EC level, and validation state (App)
 - [x] Dark/light/system theme with `themeStore`, CSS variables, and localStorage persistence (App)
@@ -519,16 +521,16 @@ Public-facing landing page that explains the product, showcases features, and dr
 - As a business owner searching for "branded QR code generator," I want to find QR Foundry in search results so that I discover the tool organically.
 
 **Features:**
-- [ ] Landing page: hero, feature showcase, live interactive QR generator, CTAs (Site, see marketing-site.md Phase 1)
-- [ ] Embedded QR generator using the same `qr-code-styling` library as the app (Site)
-- [ ] Social proof section: testimonials, Product Hunt badge, App Store ratings (Site)
+- [x] Landing page: hero, feature showcase, live interactive QR generator, CTAs (Site, see marketing-site.md Phase 1)
+- [x] Embedded QR generator using the same `qr-code-styling` library as the app (Site)
+- [~] Social proof section: testimonials and counters (placeholder data for now) (Site)
 - [ ] Pricing comparison page with FAQ (Site, see marketing-site.md Phase 2)
-- [ ] Blog/content section with 3-5 initial SEO articles (Site, see marketing-site.md Phase 3)
-- [ ] Technical SEO: sitemap.xml, robots.txt, OpenGraph/Twitter Card meta, structured data (Site)
+- [~] Blog/content section (teasers shipped; full blog infra pending) (Site, see marketing-site.md Phase 3)
+- [~] Technical SEO (meta tags + structured data + robots shipped; sitemap/blog SEO pending) (Site)
 - [ ] Google Search Console setup (Site)
-- [ ] Responsive design: mobile, tablet, desktop (Site)
+- [x] Responsive design: mobile, tablet, desktop (Site)
 - [ ] Privacy-friendly analytics: Plausible or Fathom (Site)
-- [ ] Deployment to Vercel or Cloudflare Pages with DNS (`qr-foundry.com`) (Site, see marketing-site.md Phase 4)
+- [x] Deployment to Cloudflare Workers with DNS (`qr-foundry.com`) (Site, see marketing-site.md Phase 4)
 - [ ] Redirects: `www` -> apex, `/app` -> web app, `/download` -> store links (Site)
 - [ ] Six design directions explored: Workshop, Matrix, Broadsheet, Playground, Terminal, Gallery (see [mockups.md](../design/mockups.md))
 
@@ -589,7 +591,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 
 ### Worker / Dynamic Codes
 - [ ] **Password-protected links** — Serve an HTML challenge page for gated redirects (worker.md Future)
-- [ ] **Per-user JWT auth** — Replace single shared bearer token with per-user JWTs (worker.md Future, billing-api.md Phase 2)
+- [ ] **JWT hardening** — Move to asymmetric signing + key rotation (issuer/audience checks, JWKS)
 - [ ] **Custom redirect domains** — Let users bring their own domains, e.g. `go.mycompany.com` (ARCHITECTURE.md Future)
 - [ ] **Bulk operations API** — Batch create/update/delete for CSV-driven workflows (worker.md Future)
 - [ ] **Webhook notifications** — Notify users when a code hits a scan milestone (worker.md Future)
@@ -613,26 +615,15 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 
 ## Implementation Status Summary
 
-| Area | Shipped | Partial | Planned | Total |
-|------|---------|---------|---------|-------|
-| QR Code Generation | 10 | 0 | 1 | 11 |
-| Customization | 9 | 1 | 0 | 10 |
-| Validation | 5 | 0 | 0 | 5 |
-| Export | 3 | 0 | 3 | 6 |
-| Batch Generation | 6 | 1 | 0 | 7 |
-| QR Scanner | 5 | 1 | 0 | 6 |
-| History & Templates | 7 | 1 | 1 | 9 |
-| Dynamic QR Codes (Worker + App) | 21 | 0 | 0 | 21 |
-| Scan Analytics (Worker + App) | 16 | 0 | 0 | 16 |
-| User Accounts & Auth | 14 | 0 | 2 | 16 |
-| Billing & Subscriptions | 13 | 0 | 2 | 15 |
-| Trial Management | 5 | 0 | 3 | 8 |
-| Feature Gating | 6 | 0 | 1 | 7 |
-| Platform & Distribution | 21 | 0 | 8 | 29 |
-| Marketing Site | 0 | 0 | 12 | 12 |
-| Settings & Preferences | 1 | 0 | 12 | 13 |
-| Native App Features | 1 | 0 | 9 | 10 |
-| Infrastructure | 4 | 0 | 3 | 7 |
-| **Totals** | **147** | **4** | **57** | **208** |
+| Area | Current state |
+|------|---------------|
+| Core QR generation/customization/validation | Shipped in desktop + web codebase |
+| Dynamic codes (CRUD + quota + usage) | Shipped in Worker + App |
+| Scan analytics (event logging + APIs + UI) | Shipped in Worker + App |
+| Billing API (auth, Stripe, quotas, lifecycle, personas) | Shipped and deployed |
+| Platform adapters and desktop distribution | Shipped |
+| Web app deployment (`app.qr-foundry.com`) | Pending (build exists, deployment/config pending) |
+| Marketing site | Phase 1 shipped, Phase 2-3 pending |
+| Deferred backlog (settings/native advanced features/rate limiting) | Planned |
 
-Core QR generation, customization, validation, Worker API, dynamic codes CRUD UI, analytics dashboard, and "Make Dynamic" generator toggle are all complete. The Billing API (auth, Stripe, plan tier, quota writes, subscription lifecycle) is implemented — remaining work is production deployment. The desktop app has all dynamic code features (management, analytics, generator toggle), feature gating, and auth integration. The primary remaining work is web app deployment, Billing API deployment, and the marketing site.
+Use the matrix statuses above (`[x]`, `[~]`, `[ ]`) as the source of truth.

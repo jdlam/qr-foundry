@@ -7,6 +7,7 @@ This file is a lightweight index. All planning resources live in this directory.
 - [`architecture/FEATURES.md`](architecture/FEATURES.md) — Master feature list, user stories, feature matrix, and implementation status across all services
 - [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) — System-wide architecture, service interactions, pricing model, auth/quota/scan flows, data ownership, environment matrix
 - [`architecture/product-spec.md`](architecture/product-spec.md) — Original product specification (pricing model, feature tiers, UI layouts, technical architecture, data flow, distribution strategy)
+- [`DOC_SYNC.md`](DOC_SYNC.md) — Required workflow for keeping plans/docs in sync with implementation and strategy changes
 - [`design/mockups.md`](design/mockups.md) — Marketing site design mockups (6 design directions)
 - [`design/qr-forge-mockup.jsx`](design/qr-forge-mockup.jsx) — React UI mockup component
 
@@ -16,7 +17,7 @@ This file is a lightweight index. All planning resources live in this directory.
 |---------|------|------|--------|
 | **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. Grace period cron enforcement implemented |
 | **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-5 complete (auth, gating, dynamic codes CRUD, analytics, "Make Dynamic" toggle, platform abstraction); release pipeline + auto-updater added; Phase 6 (web deploy) pending |
-| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-6 and 8 complete. Phase 7 (deploy) pending |
+| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-9 complete, deployed to production at `api.qr-foundry.com` |
 | **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), pricing simplified (PR #5), Phases 2-3 pending |
 
 ## Current Releases

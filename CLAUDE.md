@@ -52,6 +52,8 @@ qr-foundry/                  ← this repo (qr-foundry-plans)
 - **[`plans/architecture/ARCHITECTURE.md`](plans/architecture/ARCHITECTURE.md)** —
   System-wide architecture, service interactions, auth/quota/scan flows,
   data ownership, and environment configuration.
+- **[`plans/DOC_SYNC.md`](plans/DOC_SYNC.md)** — Required documentation
+  sync workflow and pre-merge checklist.
 
 ## How This Repo Is Used
 
@@ -59,7 +61,7 @@ Each service repo's `CLAUDE.md` contains instructions to update these
 shared docs whenever a feature or change is implemented:
 
 - **`plans/architecture/FEATURES.md`** — Check off completed features,
-  mark partials with `[~]`, update summary table counts
+  mark partials with `[~]`, keep implementation summary current
 - **`plans/services/<service>.md`** — Check off completed items in the
   relevant phase, add sub-items if implementation reveals additional work
 - **`plans/PLAN.md`** — Update status column when a major milestone
@@ -67,16 +69,30 @@ shared docs whenever a feature or change is implemented:
 - **`plans/architecture/ARCHITECTURE.md`** — Update when system
   architecture, data flows, API contracts, or environment config changes
 
+## Documentation Sync Gate (Required)
+
+Use this checklist for every implementation change and every strategy change.
+Treat it as part of Definition of Done.
+
+1. Update `plans/architecture/FEATURES.md` status markers (`[x]`, `[~]`, `[ ]`) for shipped/partial/planned behavior.
+2. Update `plans/services/<service>.md` phase checklist and notes for the service that changed.
+3. Update `plans/PLAN.md` service status when a phase or milestone status changes.
+4. Update `plans/architecture/ARCHITECTURE.md` when contracts, auth flow, env config, runtime stack, or deployment assumptions change.
+5. If a change intentionally does **not** affect shared docs, add a one-line note in the PR/commit message: `Docs impact: none (reason)`.
+6. Run `./scripts/check-doc-drift.sh` before merge.
+
+Never merge strategy or implementation changes with stale shared docs.
+
 ## Current Status
 
 | Service | Version | Status |
 |---------|---------|--------|
-| **Worker** | v0.1.0 | Phases 1-8 complete (168 tests), deployed to production at `qrfo.link` |
-| **Billing API** | v0.1.1 | Phases 1-6 and 8 complete (179 tests), Phase 7 (deploy) in progress |
-| **Desktop App** | v0.1.0 | Phases 1-5 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, "Make Dynamic" toggle, session expiry interceptor (534 tests); Phase 6 (web deploy) pending |
+| **Worker** | v0.1.0 | Phases 1-8 complete (172 tests), deployed to production at `qrfo.link` |
+| **Billing API** | v0.1.1 | Phases 1-9 complete (201 tests), deployed to production at `api.qr-foundry.com` |
+| **Desktop App** | v0.1.0 | Phases 1-5 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, "Make Dynamic" toggle, session expiry interceptor (553 tests); Phase 6 (web deploy) pending |
 | **Marketing Site** | v0.1.0 | Phase 1 complete (landing page, dark/light theme, QR generator, pricing, CI/CD); Phases 2-3 pending |
 
-**Feature totals:** 147 shipped, 4 partial, 57 planned (208 total)
+**Feature totals:** maintain counts in `plans/architecture/FEATURES.md` as part of the Documentation Sync Gate.
 
 ## Pricing Model
 

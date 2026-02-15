@@ -154,9 +154,9 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 
 ### 3. Billing API — `api.qr-foundry.com`
 
-**Purpose:** Authentication, subscription management, purchases, trial tracking, and quota control.
+**Purpose:** Authentication, subscription management, add-ons, and quota control.
 
-- **Stack:** TBD. Options: Cloudflare Worker, a small Node/Bun server, or a serverless function platform. Must integrate with Stripe (or similar) for payments.
+- **Stack:** Hono on Cloudflare Workers (built with Vite), Cloudflare D1 (Drizzle ORM), Stripe.
 - **Responsibilities:**
   - User authentication (signup, login, JWT issuance, password reset)
   - Subscription lifecycle (create, cancel, payment failure handling, code deactivation)
@@ -168,7 +168,7 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
   - Stripe (or equivalent payment processor)
   - Cloudflare KV API (to write quota records to the Worker's namespace)
   - A database for user accounts and subscription state (Cloudflare D1)
-- **Repo:** `qr-foundry-api` (does not exist yet)
+- **Repo:** `qr-foundry-api`
 
 ### 4. Redirect Worker — `qrfo.link`
 
@@ -214,9 +214,7 @@ Desktop App / Web App       Billing API              Worker
     │◄─── response ───────────────────────────────────│
 ```
 
-Both the desktop app and web app use the same auth flow — the only difference is token storage (OS keychain for desktop, `httpOnly` cookie or `localStorage` for web). The Worker validates JWTs issued by the Billing API. No separate auth system for the Worker — it trusts JWTs signed by the Billing API.
-
-For launch, the Worker uses a single shared bearer token (simple, single-user). The Billing API will issue per-user JWTs when multi-user support is added. The Worker's `authenticateRequest` function is designed to be swapped from shared-token to JWT validation without changing any other code.
+Both the desktop app and web app use the same auth flow — the only difference is token storage (OS keychain via adapter for desktop, `localStorage` via adapter for web). The Worker validates JWTs issued by the Billing API using the shared signing key.
 
 ### Feature Gating Flow
 
@@ -376,9 +374,9 @@ Each environment tier is self-contained — all services within a tier reference
 | Service | Local | Dev (PR) | Preview (main) | Production (release) |
 |---------|-------|----------|----------------|---------------------|
 | **Marketing Site** | `http://localhost:4321` | `qr-foundry-site-dev.<account>.workers.dev` | `qr-foundry-site-preview.<account>.workers.dev` | `qr-foundry.com` |
-| **Billing API** | `http://localhost:8787` | `qr-foundry-api-dev.<account>.workers.dev` | `qr-foundry-api-preview.<account>.workers.dev` | `api.qr-foundry.com` |
-| **Redirect Worker** | `http://localhost:8788` | `qr-foundry-worker-dev.<account>.workers.dev` | `qr-foundry-worker-preview.<account>.workers.dev` | `qrfo.link` |
-| **App (web)** | `http://localhost:5173` | TBD | `app-preview.qr-foundry.com` | `app.qr-foundry.com` |
+| **Billing API** | `http://localhost:5173` (`bun run dev`) / `http://localhost:8787` (`bun run preview`) | `qr-foundry-api-dev.<account>.workers.dev` | `qr-foundry-api-preview.<account>.workers.dev` | `api.qr-foundry.com` |
+| **Redirect Worker** | `http://localhost:8787` (`npm run dev`) | `qr-foundry-worker-dev.<account>.workers.dev` | `qr-foundry-worker-preview.<account>.workers.dev` | `qrfo.link` |
+| **App (web)** | `http://localhost:1420` (`npm run dev:web`) | TBD | `app-preview.qr-foundry.com` | `app.qr-foundry.com` |
 | **App (desktop)** | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` |
 
 ### Cross-Service URL References
@@ -390,6 +388,9 @@ These are the env vars / config values each service uses to reference other serv
 | **Worker** | `FALLBACK_URL` (wrangler.toml / .dev.vars) | `http://localhost:4321` | `https://qr-foundry-site-dev.<account>.workers.dev` | `https://qr-foundry-site-preview.<account>.workers.dev` | `https://qr-foundry.com` |
 | **API** | `CORS_ORIGINS` (wrangler.toml / .dev.vars) | `http://localhost:5173,http://localhost:4321,tauri://localhost` | `https://qr-foundry-site-dev.<account>.workers.dev,tauri://localhost,http://localhost:5173` | `https://app-preview.qr-foundry.com,https://qr-foundry-site-preview.<account>.workers.dev,tauri://localhost,http://localhost:5173` | `https://app.qr-foundry.com,tauri://localhost` |
 | **App** | `VITE_API_URL` (.env files) | `http://localhost:8787` | `http://localhost:8787` | `https://qr-foundry-api-preview.<account>.workers.dev` | `https://api.qr-foundry.com` |
+| **App** | `VITE_WORKER_URL` (.env files; optional) | unset (falls back to `https://qrfo.link`) | unset (falls back to `https://qrfo.link`) | unset (falls back to `https://qrfo.link`) | `https://qrfo.link` |
+
+**Note:** local web app development currently runs on `http://localhost:1420`, while API `CORS_ORIGINS` still allowlists `http://localhost:5173`.
 
 ### Worker & API Cloudflare Resources
 
@@ -406,10 +407,11 @@ To run all services locally, start each in a separate terminal:
 | Service | Command | Port | Directory |
 |---------|---------|------|-----------|
 | Marketing Site | `npm run dev` | 4321 | `qr-foundry-site/` |
-| Billing API | `bun run dev` | 8787 | `qr-foundry-api/` |
-| Redirect Worker | `npm run dev` | 8788 | `qr-foundry-worker/` |
-| App (web) | `npm run dev:web` | 5173 | `qr-foundry-app/` |
-| App (desktop) | `npm run tauri dev` | 5173 + Tauri | `qr-foundry-app/` |
+| Billing API | `bun run dev` | 5173 | `qr-foundry-api/` |
+| Billing API (Worker runtime) | `bun run preview` | 8787 | `qr-foundry-api/` |
+| Redirect Worker | `npm run dev` | 8787 (default wrangler port) | `qr-foundry-worker/` |
+| App (web) | `npm run dev:web` | 1420 | `qr-foundry-app/` |
+| App (desktop) | `npm run tauri dev` | 1420 + Tauri | `qr-foundry-app/` |
 
 **Local overrides:** Workers use `.dev.vars` files (gitignored) to override wrangler.toml vars for local dev. Copy `.dev.vars.example` → `.dev.vars` in each Worker repo. The app uses `.env.development` (committed) for Vite env vars.
 
@@ -510,7 +512,7 @@ Detailed implementation plans:
 
 ## Future Considerations
 
-- **Per-user JWT auth:** Replace the shared bearer token. The Billing API issues JWTs, the Worker validates them. The `ownerId` comes from JWT claims instead of being hardcoded to `"default"`.
+- **JWT hardening:** Move from shared HS256 secret to asymmetric signing (issuer/audience checks, key rotation via JWKS).
 - **Custom redirect domains:** Let users bring their own domains (e.g., `go.company.com`). Requires Cloudflare for SaaS or custom hostname configuration on the Worker.
 - **Rate limiting:** Protect the redirect path from abuse. Cloudflare's built-in rate limiting or a Durable Object token bucket.
 - **Webhook from Billing → Worker:** Instead of the Billing API writing directly to KV, it could call a webhook endpoint on the Worker that handles quota updates. Adds a layer of validation but also latency.
