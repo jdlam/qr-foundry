@@ -46,25 +46,21 @@ No password reset exists. Users who forget passwords can't recover accounts.
 
 **Action:** Add a notification via the Discord webhook after the `console.error` in `syncQuota` when `writeQuota` returns `false`. Don't build a full retry queue — just know when it breaks so you can fix manually. Optionally add a single retry with 1s delay for transient failures.
 
-## P4: Subscription UX gating — do before selling subscriptions
+## P4: Subscription UX gating — status updated
 
-App Phases 3-4 (dynamic code management UI, analytics dashboard) are unbuilt. If someone subscribes, they can't use what they paid for.
+Dynamic code management UI and analytics dashboard are now shipped in app Phases 3-4. Subscription users can create/manage dynamic codes and view analytics.
 
-**Action:** Either:
-- Build minimum dynamic codes UI (list, create, edit) before enabling subscriptions, OR
-- Don't offer subscriptions at launch — ship the free product, add subscriptions when UI is ready
+**Action:** Keep checkout and upgrade-entry surfaces aligned across app and marketing site.
 
-## P5: Doc drift cleanup — do whenever convenient (low priority)
+## P5: Doc drift cleanup — status updated
 
-`FEATURES.md` lines 11-15 still reference Pro tier / Trial. `ARCHITECTURE.md` has the correct simplified model.
+Pricing and tier docs were updated to match the simplified model (free static features + subscription for dynamic codes).
 
-**Action:** Update `FEATURES.md` pricing table to match `ARCHITECTURE.md`.
+**Action:** Keep `FEATURES.md`, `PLAN.md`, and service plans synchronized via `DOC_SYNC.md`.
 
-## P6: Port mismatch typo — do whenever convenient (trivial)
+## P6: Port mismatch typo — resolved
 
-`billing-api.md` line 169 says dev is `localhost:8788`, but `ARCHITECTURE.md` says Billing API is `:8787`.
-
-**Action:** Fix the typo in `billing-api.md`.
+Billing API docs now consistently reference local preview runtime at `localhost:8787`.
 
 ---
 

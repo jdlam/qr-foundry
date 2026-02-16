@@ -5,7 +5,7 @@
 
 ## Overview
 
-The Billing API handles authentication, subscription management, one-time purchases, trial tracking, and quota control. It is the source of truth for what a user has purchased and what features they can access. Both the desktop app and web app call this API for auth and plan checks.
+The Billing API handles authentication, subscription management, add-on management, and quota control. It is the source of truth for subscription status and feature access. Both the desktop app and web app call this API for auth and plan checks.
 
 For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md).
 
@@ -20,8 +20,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [x] Design database schema (Drizzle ORM + Cloudflare D1):
   - `users` — id, email, passwordHash, createdAt, updatedAt
   - `subscriptions` — id, userId, stripeSubscriptionId, status, plan, currentPeriodStart, currentPeriodEnd, createdAt
-  - `purchases` — id, userId, stripePaymentId, product ("pro" | "addon_25"), createdAt
-  - `trials` — id, userId, startedAt, expiresAt
+  - `purchases` — id, userId, stripePaymentId, product ("subscription" | "addon_25"), createdAt
 - [x] Set up database migrations (Drizzle Kit)
 - [x] Set up environment configuration (dev, preview, production)
 - [x] Add health check endpoint (`GET /health`)
@@ -65,7 +64,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ## Phase 3: Trial Management — REMOVED
 
-> **Note:** The trial and Pro tier have been eliminated in a pricing simplification. All QR generation features are now free. The only paid feature is dynamic QR codes via subscription. Existing trial code and database table can be removed in a cleanup pass.
+> **Note:** The trial and Pro tier have been eliminated in a pricing simplification. All QR generation features are free. The only paid feature is dynamic QR codes via subscription.
 
 ~~**Goal:** New users get a 7-day Pro trial.~~
 
@@ -78,7 +77,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 ## Phase 4: Stripe Integration ✅
 
-**Goal:** Users can purchase Pro (one-time), subscribe for dynamic codes, and buy add-on slots. All payment events are tracked.
+**Goal:** Users can subscribe for dynamic codes and buy add-on slots. All payment events are tracked.
 
 - [x] Integrate Stripe SDK
 - [x] Implement `POST /api/billing/checkout` — create Stripe Checkout session
@@ -103,7 +102,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [x] Add Stripe price ID env vars — `STRIPE_PRICE_SUBSCRIPTION`, `STRIPE_PRICE_SUBSCRIPTION_ANNUAL`, `STRIPE_PRICE_ADDON_25`, `STRIPE_PRICE_ADDON_25_ANNUAL`
 - [x] Idempotent webhook handlers (check for existing records before inserting)
 
-**Exit criteria:** Users can purchase Pro, subscribe, and buy add-ons. Webhook handles all lifecycle events. Database reflects current subscription state. ✅ (Stripe product/price creation is a manual step.)
+**Exit criteria:** Users can subscribe and buy add-ons. Webhook handles all lifecycle events. Database reflects current subscription state. ✅ (Stripe product/price creation is a manual step.)
 
 ---
 

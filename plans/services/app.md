@@ -18,7 +18,6 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 **Goal:** Users can sign up, log in, and maintain a session. The app stores and sends JWTs for authenticated API calls.
 
 - [x] Implement signup flow (calls Billing API `POST /api/auth/signup`)
-  - Auto-starts 7-day Pro trial on signup
   - Returns JWT token
 - [x] Implement login flow (calls Billing API `POST /api/auth/login`)
 - [x] Implement logout (clear stored token)
@@ -50,11 +49,11 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 
 **Goal:** All QR generation features are free with no account required. The only gated feature is dynamic QR codes, which requires a subscription.
 
-> **Note:** The original plan gated Pro features (advanced customization, SVG export, batch, templates) behind a Pro tier with a 7-day trial. This has been simplified — all QR generation features are now free. The existing feature gating code (`useFeatureAccess`, PRO badges, etc.) needs to be removed.
+> **Note:** The original plan gated Pro features (advanced customization, SVG export, batch, templates) behind a Pro tier with a 7-day trial. This has been simplified — all QR generation features are now free, and only dynamic features remain gated by subscription.
 
 - [x] ~~Implement `usePlan` hook~~ — still used for dynamic code access check
-- [x] ~~Build feature gating system~~ — `useFeatureAccess` hook built but **needs to be removed** (all features are now free)
-- [x] ~~Gate features by tier~~ — **needs to be reverted** (remove PRO badges, unlock all features for free users)
+- [x] ~~Build feature gating system~~ — `useFeatureAccess` now used for dynamic-only gating
+- [x] ~~Gate features by tier~~ — Pro-era gating reverted (all QR features free)
 - [x] **Remove Pro feature gating from app:**
   - [x] Remove PRO badges from Sidebar tabs (Batch, Templates)
   - [x] Remove gating from input types (vCard, Email, SMS, Geo)
@@ -189,7 +188,7 @@ The Worker-side analytics endpoints (`GET /api/analytics/:code` and `GET /api/an
 
 - [x] **Configure DNS** — `custom_domain = true` auto-creates DNS record on first production deploy
 - [x] **Update CORS on Billing API** — Added `app.qr-foundry.com` (production) and workers.dev URLs (preview/dev) to `CORS_ORIGINS`
-- [ ] **Update marketing site** — Add "Use in browser" option alongside desktop download links
+- [x] **Update marketing site** — Added "Try in browser" and download routes (`/app`, `/download`) on site
 
 **Exit criteria:** `app.qr-foundry.com` serves a fully functional QR code management UI. Users can create, customize, and export QR codes; manage dynamic codes; and view analytics — all in the browser.
 

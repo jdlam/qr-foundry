@@ -100,17 +100,17 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 
 **Goal:** Clear pricing comparison that converts visitors to customers.
 
-- [ ] Build dedicated `/pricing` page with full-width pricing comparison table:
+- [x] Build dedicated `/pricing` page with full-width pricing comparison table:
   - **Free** — $0, everything included, CTA: "Get Started Free" (links to generator or app)
   - **Subscription** — $6/month or $60/year, dynamic codes + analytics, CTA: "Start Subscription"
   - **Add-on** — +$3/month or +$30/year per 25 extra codes, shown as upgrade option
 - [ ] Monthly/annual toggle on pricing page
-- [ ] FAQ section (common questions about dynamic codes, what happens on cancel, refund policy, etc.)
+- [x] FAQ section (common questions about dynamic codes, what happens on cancel, refund policy, etc.)
   - Structured data: `FAQPage` schema for FAQ section
-- [ ] CTAs that link to:
+- [x] CTAs that link to:
   - Desktop: Mac App Store / Microsoft Store / download pages
   - Web: `app.qr-foundry.com` (direct to signup) — **always offer "Try in browser" as an option**
-- [ ] Add-on mention for power users who need more dynamic code slots
+- [x] Add-on mention for power users who need more dynamic code slots
 - [ ] Structured data: `Product` with `Offer` for each tier
 - [ ] OG image specific to pricing page
 
@@ -125,7 +125,7 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 ### Blog Infrastructure
 
 - [ ] Set up Astro Content Collections for blog posts (MDX)
-- [ ] Blog index page at `/blog`
+- [x] Blog index page at `/blog`
 - [ ] Individual post pages at `/blog/[slug]`
 - [ ] Blog layout with reading time, published date, author
 - [ ] RSS feed via `@astrojs/rss`
@@ -141,7 +141,7 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 
 ### Technical SEO
 
-- [ ] Sitemap.xml (auto-generated, includes blog posts)
+- [x] Sitemap.xml (static sitemap-index.xml shipped; auto-generated blog sitemap pending)
 - [ ] OpenGraph / Twitter Card meta tags on every blog post
 - [ ] Structured data: `Article` / `BlogPosting` on blog posts
 - [ ] Internal links from blog posts back to landing page and pricing page
@@ -164,19 +164,19 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 - [x] Deploy to Cloudflare Workers (static assets)
 - [x] Set up CI/CD via GitHub Actions (`wrangler deploy` on merge to main)
 - [x] Set up preview environment (`wrangler deploy --env preview` on PRs)
-- [ ] Configure `qr-foundry.com` DNS (transfer nameservers to Cloudflare)
-- [ ] Set up SSL (automatic with Cloudflare)
+- [x] Configure `qr-foundry.com` DNS (transfer nameservers to Cloudflare)
+- [x] Set up SSL (automatic with Cloudflare)
 - [ ] Set up uptime monitoring
-- [ ] Configure redirects:
+- [~] Configure redirects:
   - `www.qr-foundry.com` -> `qr-foundry.com`
-  - `/app` -> `app.qr-foundry.com`
-  - `/download` -> appropriate store links
+  - `/app` -> `app.qr-foundry.com` (implemented as site route forwarding page)
+  - `/download` -> appropriate store links (implemented as site route with web + release links)
 
 ### Manual steps (requires action outside IDE)
 
 - [x] **Register domain** `qr-foundry.com` (on Squarespace)
-- [ ] **Transfer nameservers** to Cloudflare
-- [ ] **Add custom domain** in Cloudflare Workers settings
+- [x] **Transfer nameservers** to Cloudflare
+- [x] **Add custom domain** in Cloudflare Workers settings
 - [ ] **Set up analytics account** (Plausible or Fathom)
 - [ ] **Submit to Google Search Console**
 

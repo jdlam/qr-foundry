@@ -67,7 +67,7 @@ All QR generation features are **free with no account required**. The only paid 
 
 | Tier | Monthly | Annual (17% off) | Features |
 |------|---------|------------------|----------|
-| **Free** | $0 | — | Everything: all QR types, full customization, all export formats, batch, templates, scanner, unlimited history. No account required. |
+| **Free** | $0 | — | Everything: all QR types, full customization, PNG/SVG export, batch, templates, scanner, unlimited history. No account required. |
 | **Subscription** | $6/month | $60/year ($5/mo) | Free + 25 dynamic QR codes, scan analytics dashboard, code management. Requires account. |
 | **Add-on** (+25 codes) | +$3/month | +$30/year ($2.50/mo) | Additional 25 dynamic code slots. Stackable (buy multiple). Requires active subscription. |
 
@@ -103,7 +103,7 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 
 **Purpose:** Landing page, pricing, download links, documentation.
 
-- **Stack:** Static site (Astro, Next.js, or similar). Deployed on Vercel or Cloudflare Pages.
+- **Stack:** Astro static site deployed on Cloudflare Workers (assets mode).
 - **Responsibilities:**
   - Explain the product and pricing tiers (Free, Subscription)
   - Host download links for the desktop app and link to the web app
@@ -117,7 +117,7 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 
 - **Stack:** Tauri + React. Runs locally on macOS, Windows, Linux.
 - **Responsibilities:**
-  - All static QR generation and customization (runs fully offline for Free/Pro)
+  - All static QR generation and customization (runs fully offline for Free users)
   - Template management, batch export, QR scanning/import
   - Dynamic code management UI for Subscription users (calls the Worker API and Billing API)
   - Auth token storage (OS keychain via Tauri secure storage)
@@ -130,7 +130,7 @@ The Worker enforces a numeric quota (`maxCodes`). It doesn't know about plans or
 
 **Purpose:** Browser-based version of the desktop app for users who don't want to install software.
 
-- **Stack:** React (same UI codebase as the desktop app). Deployed on Vercel or Cloudflare Pages.
+- **Stack:** React (same UI codebase as the desktop app). Deployed on Cloudflare Workers (assets mode).
 - **Responsibilities:**
   - Same core functionality as the desktop app, minus platform-specific features (OS keychain, native file dialogs)
   - QR code generation, customization, and export (PNG, SVG, clipboard via browser APIs)
@@ -376,7 +376,7 @@ Each environment tier is self-contained — all services within a tier reference
 | **Marketing Site** | `http://localhost:4321` | `qr-foundry-site-dev.<account>.workers.dev` | `qr-foundry-site-preview.<account>.workers.dev` | `qr-foundry.com` |
 | **Billing API** | `http://localhost:5173` (`bun run dev`) / `http://localhost:8787` (`bun run preview`) | `qr-foundry-api-dev.<account>.workers.dev` | `qr-foundry-api-preview.<account>.workers.dev` | `api.qr-foundry.com` |
 | **Redirect Worker** | `http://localhost:8787` (`npm run dev`) | `qr-foundry-worker-dev.<account>.workers.dev` | `qr-foundry-worker-preview.<account>.workers.dev` | `qrfo.link` |
-| **App (web)** | `http://localhost:1420` (`npm run dev:web`) | TBD | `app-preview.qr-foundry.com` | `app.qr-foundry.com` |
+| **App (web)** | `http://localhost:1420` (`npm run dev:web`) | `qr-foundry-app-dev.<account>.workers.dev` | `app-preview.qr-foundry.com` | `app.qr-foundry.com` |
 | **App (desktop)** | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` |
 
 ### Cross-Service URL References
@@ -443,7 +443,7 @@ All services follow the same CI/CD pattern:
 | **Redirect Worker** | Cloudflare Workers + KV + Analytics Engine | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Billing API** | Cloudflare Workers + D1 | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/{ci,deploy}.yml` |
 | **Desktop App** | GitHub Releases (direct download) | GitHub Actions: production→release | `tauri.conf.json` + `.github/workflows/{ci,deploy}.yml` |
-| **Web App** | TBD | TBD | — |
+| **Web App** | Cloudflare Workers (static assets) | GitHub Actions: dev→PR, preview→main, production→release | `wrangler.toml` + `.github/workflows/deploy-web.yml` |
 
 ### DNS (Cloudflare)
 
@@ -456,7 +456,7 @@ All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`.
 | `qr-foundry.com` | Worker Custom Domain | `qr-foundry-site` (via `wrangler.toml` routes) |
 | `www` | CNAME (proxied) → Redirect Rule | `qr-foundry.com` + 301 redirect rule to apex |
 | `api.qr-foundry.com` | Worker Custom Domain | `qr-foundry-api` (via `wrangler.toml` routes) |
-| `app.qr-foundry.com` | CNAME (proxied) | TBD |
+| `app.qr-foundry.com` | Worker Custom Domain | `qr-foundry-app` (via `wrangler.toml` routes) |
 
 ### GitHub Secrets Required
 
@@ -464,6 +464,8 @@ All subdomains managed in a single Cloudflare DNS zone for `qr-foundry.com`.
 |------|--------|---------|
 | `qr-foundry-site` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
 | `qr-foundry-site` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
+| `qr-foundry-app` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy for web app (`deploy-web.yml`) |
+| `qr-foundry-app` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
 | `qr-foundry-worker` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
 | `qr-foundry-worker` | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account identifier |
 | `qr-foundry-api` | `CLOUDFLARE_API_TOKEN` | Wrangler deploy (Workers edit permission) |
@@ -514,5 +516,5 @@ Detailed implementation plans:
 
 - **JWT hardening:** Move from shared HS256 secret to asymmetric signing (issuer/audience checks, key rotation via JWKS).
 - **Custom redirect domains:** Let users bring their own domains (e.g., `go.company.com`). Requires Cloudflare for SaaS or custom hostname configuration on the Worker.
-- **Rate limiting:** Protect the redirect path from abuse. Cloudflare's built-in rate limiting or a Durable Object token bucket.
+- **Rate limiting hardening:** Redirect path now includes Worker-level KV rate limiting (free-tier compatible). Consider Durable Object token bucket for stricter atomicity at higher scale.
 - **Webhook from Billing → Worker:** Instead of the Billing API writing directly to KV, it could call a webhook endpoint on the Worker that handles quota updates. Adds a layer of validation but also latency.

@@ -41,7 +41,7 @@ All QR generation features are free. You only pay for dynamic QR codes.
 
 | Tier | Price | Key Features |
 |------|-------|-------------|
-| **Free** | $0 | Everything — all QR types, full customization, all exports, batch, templates, unlimited history |
+| **Free** | $0 | Everything — all QR types, full customization, PNG/SVG export, batch, templates, unlimited history |
 | **Subscription** | $6/month or $60/year | Free + 25 dynamic QR codes, scan analytics |
 | **Add-on** | +$3/month or +$30/year | Additional 25 dynamic code slots (stackable) |
 

@@ -10,7 +10,7 @@ All QR generation features are free. You only pay for dynamic QR codes.
 
 | Tier | Monthly | Annual (17% off) | Summary |
 |------|---------|------------------|---------|
-| **Free** | $0 | — | Everything: all QR types, full customization, all export formats, batch, templates, scanner, unlimited history. No account required. |
+| **Free** | $0 | — | Everything: all QR types, full customization, PNG/SVG export, batch, templates, scanner, unlimited history. No account required. |
 | **Subscription** | $6/month | $60/year ($5/mo) | Free + 25 dynamic QR codes, scan analytics dashboard, code management. Requires account. |
 | **Add-on** (+25 codes) | +$3/month | +$30/year ($2.50/mo) | Additional 25 dynamic code slots. Stackable (buy multiple). Requires active subscription. |
 
@@ -20,7 +20,7 @@ Full pricing breakdown, revenue per channel, and quota mapping in [ARCHITECTURE.
 
 Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemented
 
-| Feature | Free | Pro | Subscription | Status |
+| Feature | Free | Legacy Pro (deprecated) | Subscription | Status |
 |---------|------|-----|--------------|--------|
 | **QR Generation** | | | | |
 | URL input | Yes | Yes | Yes | [x] |
@@ -130,8 +130,8 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Design token system (60+ CSS variables) | Yes | Yes | Yes | [x] App |
 | **Marketing Site** | | | | |
 | Landing page with embedded QR generator | -- | -- | -- | [x] Site |
-| Pricing comparison page | -- | -- | -- | [ ] Site |
-| Blog/SEO content | -- | -- | -- | [ ] Site |
+| Pricing comparison page | -- | -- | -- | [~] Site |
+| Blog/SEO content | -- | -- | -- | [~] Site |
 | **Infrastructure** | | | | |
 | Worker CI/CD (lint, typecheck, test on PR) | -- | -- | -- | [x] Worker |
 | Worker deploy workflow (Releases -> production) | -- | -- | -- | [x] Worker |
@@ -139,7 +139,7 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Billing API deploy workflow | -- | -- | -- | [x] Billing API |
 | Custom domain `qrfo.link` | -- | -- | -- | [x] Worker |
 | Custom domain `api.qr-foundry.com` | -- | -- | -- | [x] Billing API |
-| Rate limiting on redirect path | -- | -- | -- | [ ] Worker |
+| Rate limiting on redirect path | -- | -- | -- | [x] Worker |
 
 ## Feature Details
 
@@ -149,22 +149,22 @@ Create QR codes from multiple content types with real-time live preview.
 
 **User stories:**
 - As a free user, I want to paste a URL and instantly see a QR code so that I can download it without creating an account.
-- As a Pro user, I want to create a vCard QR code with my full contact information so that people can scan it at conferences and save my details.
+- As a free user, I want to create a vCard QR code with my full contact information so that people can scan it at conferences and save my details.
 - As a user, I want to see the QR code update in real time as I type so that I can see exactly what I am generating before exporting.
-- As a Pro user, I want to manually set the error correction level so that I can balance between data density and scan reliability for print use cases.
+- As a free user, I want to manually set the error correction level so that I can balance between data density and scan reliability for print use cases.
 
 **Features:**
 - [x] URL input with live preview (App, Free)
 - [x] Plain text input (App, Free)
 - [x] WiFi input (SSID, password, encryption, hidden toggle) (App, Free)
 - [x] Phone number input (App, Free)
-- [x] vCard input (name, org, title, email, phone, URL, address) (App, Pro)
-- [x] Email compose input (App, Pro)
-- [x] SMS input (App, Pro)
-- [x] Geographic location input (App, Pro)
-- [ ] Calendar event input (App, Pro) — no form or formatter implemented yet
+- [x] vCard input (name, org, title, email, phone, URL, address) (App, Free)
+- [x] Email compose input (App, Free)
+- [x] SMS input (App, Free)
+- [x] Geographic location input (App, Free)
+- [ ] Calendar event input (App, Free) — no form or formatter implemented yet
 - [x] Live preview canvas with real-time updates (App)
-- [x] Error correction selection: L/M/Q/H with guidance (App, Pro)
+- [x] Error correction selection: L/M/Q/H with guidance (App, Free)
 
 **Services:** Desktop App, Web App
 
@@ -174,22 +174,22 @@ Style QR codes with brand colors, gradients, logos, and custom dot/eye patterns.
 
 **User stories:**
 - As a free user, I want to change the foreground and background colors so that my QR code matches my brand's color scheme.
-- As a Pro user, I want to embed my company logo in the center of the QR code so that it looks professional on printed materials.
-- As a Pro user, I want to apply a gradient fill across the QR dots so that the code looks modern and visually appealing.
-- As a Pro user, I want to choose from different dot and eye styles (rounded, diamond, circle, leaf) so that I can create a unique visual identity.
-- As a Pro user, I want to export with a transparent background so that I can place the QR code on any colored surface or photograph.
+- As a free user, I want to embed my company logo in the center of the QR code so that it looks professional on printed materials.
+- As a free user, I want to apply a gradient fill across the QR dots so that the code looks modern and visually appealing.
+- As a free user, I want to choose from different dot and eye styles (rounded, diamond, circle, leaf) so that I can create a unique visual identity.
+- As a free user, I want to export with a transparent background so that I can place the QR code on any colored surface or photograph.
 
 **Features:**
 - [x] Foreground/background color picker (App, Free)
-- [x] Linear gradient fills across QR dots (App, Pro)
-- [x] Dot styles: square, rounded, dots, classy, classy-rounded, extra-rounded (App, Pro)
-- [x] Eye/corner styles: square, rounded, circle, leaf (App, Pro)
-- [x] Logo embedding via drag-drop (App, Pro)
-- [x] Adjustable logo size: 10-40% of QR area with real-time preview (App, Pro)
-- [x] Logo shape: square or circle mask with automatic padding (App, Pro)
-- [~] Logo placement: center only (corners and finder eyes not yet implemented) (App, Pro)
-- [x] Logo auto-resize (max 512px), transparent border trimming, auto-compression over 500KB (App, Pro)
-- [x] Transparent background (PNG/SVG with alpha channel) (App, Pro)
+- [x] Linear gradient fills across QR dots (App, Free)
+- [x] Dot styles: square, rounded, dots, classy, classy-rounded, extra-rounded (App, Free)
+- [x] Eye/corner styles: square, rounded, circle, leaf (App, Free)
+- [x] Logo embedding via drag-drop (App, Free)
+- [x] Adjustable logo size: 10-40% of QR area with real-time preview (App, Free)
+- [x] Logo shape: square or circle mask with automatic padding (App, Free)
+- [~] Logo placement: center only (corners and finder eyes not yet implemented) (App, Free)
+- [x] Logo auto-resize (max 512px), transparent border trimming, auto-compression over 500KB (App, Free)
+- [x] Transparent background (PNG/SVG with alpha channel) (App, Free)
 
 **Services:** Desktop App, Web App
 
@@ -207,7 +207,7 @@ Verify that styled QR codes remain scannable after customization.
 - [x] Three-state feedback: pass (scans clean), marginal (low confidence), fail (cannot decode) (App)
 - [x] Smart warnings when logo size + EC level combo risks scanability (App)
 - [x] Auto-reset: validation resets when any style or content changes (App)
-- [x] Batch validation: validates every code during batch generation, flags failures before export (App, Pro)
+- [x] Batch validation: validates every code during batch generation, flags failures before export (App, Free)
 
 **Services:** Desktop App (Rust backend for decode), Web App
 
@@ -218,17 +218,17 @@ Save QR codes in multiple formats for screen and print.
 **User stories:**
 - As a free user, I want to download my QR code as a PNG so that I can use it in documents and social media.
 - As a free user, I want to copy the QR code to my clipboard so that I can paste it directly into a design tool.
-- As a Pro user, I want to export as SVG so that my QR code scales perfectly for any print size.
-- As a Pro user, I want print-ready PDF export with bleed and trim marks so that my print shop can use the file directly.
-- As a Pro user, I want a web asset pack (favicons, manifest.json, HTML meta tags) generated from my QR code so that I can add it to my website in one step.
+- As a free user, I want to export as SVG so that my QR code scales perfectly for any print size.
+- As a free user, I want print-ready PDF export with bleed and trim marks so that my print shop can use the file directly.
+- As a free user, I want a web asset pack (favicons, manifest.json, HTML meta tags) generated from my QR code so that I can add it to my website in one step.
 
 **Features:**
 - [x] PNG export with multiple size presets (up to 4096x4096) (App, Free)
-- [x] SVG export (vector, infinitely scalable) (App, Pro)
-- [ ] PDF export (print-ready with optional bleed/trim marks) (App, Pro)
-- [ ] EPS export (professional print workflows) (App, Pro)
+- [x] SVG export (vector, infinitely scalable) (App, Free)
+- [ ] PDF export (print-ready with optional bleed/trim marks) (App, Free)
+- [ ] EPS export (professional print workflows) (App, Free)
 - [x] Clipboard copy (one-click) (App, Free)
-- [ ] Web asset pack: full favicon set + manifest.json + HTML meta tags + browserconfig.xml (App, Pro)
+- [ ] Web asset pack: full favicon set + manifest.json + HTML meta tags + browserconfig.xml (App, Free)
 
 **Services:** Desktop App (Rust backend for PNG/SVG/PDF/EPS), Web App (browser-based PNG/SVG/clipboard)
 
@@ -237,18 +237,18 @@ Save QR codes in multiple formats for screen and print.
 Generate multiple QR codes from a CSV file in a single operation.
 
 **User stories:**
-- As a Pro user, I want to import a CSV of URLs and generate branded QR codes for all of them at once so that I can prepare materials for a product catalog.
-- As a Pro user, I want to apply a saved style template to an entire batch so that all codes match my brand identity.
-- As a Pro user, I want to export all generated codes as a ZIP file so that I can hand them off to my design team.
+- As a free user, I want to import a CSV of URLs and generate branded QR codes for all of them at once so that I can prepare materials for a product catalog.
+- As a free user, I want to apply a saved style template to an entire batch so that all codes match my brand identity.
+- As a free user, I want to export all generated codes as a ZIP file so that I can hand them off to my design team.
 
 **Features:**
-- [x] CSV drop zone with parsing (expected columns: content, type, label) (App, Pro)
-- [x] Preview table with row status (pending, generating, validating, done, error) (App, Pro)
-- [x] Apply current style template to all batch items (App, Pro)
-- [x] Bulk generation with per-row validation (App, Pro)
-- [x] Individual download from preview (App, Pro)
-- [~] ZIP export of all generated codes (App, Pro) — partially implemented, toast confirmation pending
-- [x] Format selection (PNG/SVG) for batch output (App, Pro)
+- [x] CSV drop zone with parsing (expected columns: content, type, label) (App, Free)
+- [x] Preview table with row status (pending, generating, validating, done, error) (App, Free)
+- [x] Apply current style template to all batch items (App, Free)
+- [x] Bulk generation with per-row validation (App, Free)
+- [x] Individual download from preview (App, Free)
+- [~] ZIP export of all generated codes (App, Free) — partially implemented, toast confirmation pending
+- [x] Format selection (PNG/SVG) for batch output (App, Free)
 
 **Services:** Desktop App (Rust CSV parsing + batch generation), Web App
 
@@ -276,21 +276,21 @@ Save and organize previously generated QR codes and reusable style presets.
 
 **User stories:**
 - As a free user, I want my last 10 generated QR codes saved automatically so that I can revisit them without re-entering content.
-- As a Pro user, I want unlimited history with search so that I can find any QR code I have ever generated.
-- As a Pro user, I want to save my brand's style settings as a template so that I can apply them to new QR codes with one click.
+- As a free user, I want unlimited history with search so that I can find any QR code I have ever generated.
+- As a free user, I want to save my brand's style settings as a template so that I can apply them to new QR codes with one click.
 
 **Features:**
 - [x] Auto-save generated QRs to history with thumbnail (App)
 - [x] Limited history: 10 codes (App, Free)
-- [x] Unlimited history (App, Pro)
+- [x] Unlimited history (App, Free)
 - [x] Searchable history list (App)
 - [~] Click history item to reload content and style (App) — partially working
-- [x] Save style presets as named templates (App, Pro)
-- [x] Load template to apply all style settings (App, Pro)
-- [ ] Default template applied on startup (App, Pro) — backlog
+- [x] Save style presets as named templates (App, Free)
+- [x] Load template to apply all style settings (App, Free)
+- [ ] Default template applied on startup (App, Free) — backlog
 - [x] SQLite storage for history and templates (Desktop App)
 
-**Services:** Desktop App (SQLite), Web App (planned storage TBD)
+**Services:** Desktop App (SQLite), Web App (localStorage adapters)
 
 ### Dynamic QR Codes
 
@@ -363,15 +363,15 @@ Track how dynamic QR codes are scanned: counts, geographic data, traffic sources
 
 ### User Accounts & Auth
 
-Account system for Pro purchases, subscriptions, and cross-device access.
+Account system for subscription access and cross-device session management.
 
 **User stories:**
-- As a new user, I want to sign up and automatically receive a 7-day Pro trial so that I can try all features before purchasing.
+- As a new user, I want to sign up so I can create and manage dynamic QR codes.
 - As a returning user, I want to log in and have my session persist across app restarts so that I do not need to re-authenticate every time.
 - As a user, I want to reset my password via email so that I can recover my account if I forget my credentials.
 
 **Features (Billing API — mostly shipped):**
-- [x] Signup with auto 7-day Pro trial (Billing API, see billing-api.md Phase 2)
+- [x] Signup endpoint with JWT issuance (Billing API, see billing-api.md Phase 2)
 - [x] Login with credential validation (Billing API)
 - [x] JWT issuance with claims: `sub` (user ID), `email`, `iat`, `exp` (7-day expiry) (Billing API)
 - [x] Token refresh endpoint (Billing API)
@@ -394,10 +394,9 @@ Account system for Pro purchases, subscriptions, and cross-device access.
 
 ### Billing & Subscriptions
 
-Payment processing for Pro purchases, recurring subscriptions, and add-on code packs.
+Payment processing for recurring subscriptions and add-on code packs.
 
 **User stories:**
-- As a user, I want to purchase Pro with a single one-time payment so that I unlock all customization and export features permanently.
 - As a user, I want to subscribe monthly for dynamic QR codes so that I can manage changeable codes and view scan analytics.
 - As a power user, I want to buy additional code slots so that I can manage more than 25 active dynamic codes.
 - As a subscriber, I want to manage my subscription (upgrade, downgrade, cancel, update payment) through a self-service portal.
@@ -423,24 +422,7 @@ Payment processing for Pro purchases, recurring subscriptions, and add-on code p
 
 ### Trial Management
 
-Free 7-day trial of Pro features for every new user.
-
-**User stories:**
-- As a new user, I want to try all Pro features for 7 days without entering payment information so that I can evaluate the product risk-free.
-- As a trial user, I want to see how many days remain in my trial so that I can decide whether to purchase before it expires.
-- As a user whose trial has expired, I want my existing QR codes preserved in history (just with advanced exports locked) so that I do not lose my work.
-
-**Features:**
-- [x] Auto-create trial record on signup: `{ userId, startedAt, expiresAt: now + 7 days }` (Billing API, see billing-api.md Phase 3)
-- [x] Trial status computation: active -> pro_trial, expired without purchase -> free, purchased -> pro/subscription (Billing API)
-- [x] Trial does NOT include dynamic QR codes (Billing API)
-- [x] One trial per user, enforced by unique constraint (Billing API)
-- [x] Trial days remaining in plan tier response (Billing API)
-- N/A ~~Trial banner in app~~ — not needed; all QR features are free, trial only affects dynamic codes which are gated separately
-- N/A ~~Upgrade prompt when trial expires~~ — not needed; same reason
-- N/A ~~Graceful feature degradation~~ — not needed; no features to lock on trial expiry
-
-**Services:** Billing API, Desktop App, Web App
+Removed from the pricing model. There is no trial tier; all QR generation features are free.
 
 ### Feature Gating
 
@@ -524,14 +506,14 @@ Public-facing landing page that explains the product, showcases features, and dr
 - [x] Landing page: hero, feature showcase, live interactive QR generator, CTAs (Site, see marketing-site.md Phase 1)
 - [x] Embedded QR generator using the same `qr-code-styling` library as the app (Site)
 - [~] Social proof section: testimonials and counters (placeholder data for now) (Site)
-- [ ] Pricing comparison page with FAQ (Site, see marketing-site.md Phase 2)
+- [~] Pricing comparison page with FAQ (basic page shipped; richer comparison/annual toggle pending) (Site, see marketing-site.md Phase 2)
 - [~] Blog/content section (teasers shipped; full blog infra pending) (Site, see marketing-site.md Phase 3)
 - [~] Technical SEO (meta tags + structured data + robots shipped; sitemap/blog SEO pending) (Site)
 - [ ] Google Search Console setup (Site)
 - [x] Responsive design: mobile, tablet, desktop (Site)
 - [ ] Privacy-friendly analytics: Plausible or Fathom (Site)
 - [x] Deployment to Cloudflare Workers with DNS (`qr-foundry.com`) (Site, see marketing-site.md Phase 4)
-- [ ] Redirects: `www` -> apex, `/app` -> web app, `/download` -> store links (Site)
+- [~] Redirects: `www` -> apex, `/app` -> web app, `/download` -> store links (site routes shipped; edge redirects can be hardened) (Site)
 - [ ] Six design directions explored: Workshop, Matrix, Broadsheet, Playground, Terminal, Gallery (see [mockups.md](../design/mockups.md))
 
 **Services:** Marketing Site (`qr-foundry-site`)
