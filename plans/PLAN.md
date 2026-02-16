@@ -18,7 +18,7 @@ This file is a lightweight index. All planning resources live in this directory.
 | **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. Grace period cron enforcement implemented |
 | **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-6 complete (auth, gating, dynamic codes CRUD, analytics, platform abstraction, web deploy to `app.qr-foundry.com`); release pipeline + auto-updater added |
 | **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-9 complete, deployed to production at `api.qr-foundry.com` |
-| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete (landing page + CI/CD), pricing simplified (PR #5), Phases 2-3 pending |
+| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete; Phase 2 partially complete (`/pricing`, CTA routes, download/legal pages); Phase 3 partially complete (`/blog`, sitemap baseline) |
 
 ## Current Releases
 
@@ -35,7 +35,7 @@ All QR generation features are free. You only pay for dynamic QR codes.
 
 | Tier | Monthly | Annual (17% off) | Key Features |
 |------|---------|------------------|-------------|
-| Free | $0 | — | Everything: all QR types, full customization, all exports, batch, templates |
+| Free | $0 | — | Everything: all QR types, full customization, PNG/SVG export, batch, templates, scanner, unlimited history |
 | Subscription | $6/month | $60/year | Free + 25 dynamic codes, scan analytics |
 | Add-on (+25 codes) | +$3/month | +$30/year | Stackable extra dynamic code slots |
 
