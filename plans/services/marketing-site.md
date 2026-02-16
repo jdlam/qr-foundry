@@ -61,7 +61,7 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 - [x] **Two-column scroll section** (sticky generator left, content panels right)
   - Scroll-reveal animations via IntersectionObserver
   - Skip animations when `prefers-reduced-motion` is set (show panels immediately)
-  - **Features panel** — highlight that everything is free (all QR types, SVG/PDF export, logos, batch, templates), CTAs: "Get the desktop app" + **"Try in browser"** (links to `app.qr-foundry.com`)
+  - **Features panel** — highlight that everything is free (all QR types, PNG/SVG export, logos, batch, templates), CTAs: "Get the desktop app" + **"Try in browser"** (links to `app.qr-foundry.com`)
   - **Dynamic panel** — feature list (change destinations, scan analytics, dashboard, 25 codes), CTA: "Start subscription — $6/mo or $60/yr"
 - [x] **Social proof section** — between hero and upsell panels
   - "X QR codes generated" counter (placeholder numbers for now)
@@ -130,7 +130,7 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 - [ ] Individual post pages at `/blog/[slug]`
 - [ ] Blog layout with reading time, published date, author
 - [ ] RSS feed via `@astrojs/rss`
-- [ ] Sitemap via `@astrojs/sitemap`
+- [~] Sitemap via `@astrojs/sitemap` (baseline shipped; blog collection auto-generation pending)
 
 ### Initial SEO Articles (3-5)
 
