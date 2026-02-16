@@ -376,7 +376,7 @@ Each environment tier is self-contained — all services within a tier reference
 | **Marketing Site** | `http://localhost:4321` | `qr-foundry-site-dev.<account>.workers.dev` | `qr-foundry-site-preview.<account>.workers.dev` | `qr-foundry.com` |
 | **Billing API** | `http://localhost:5173` (`bun run dev`) / `http://localhost:8787` (`bun run preview`) | `qr-foundry-api-dev.<account>.workers.dev` | `qr-foundry-api-preview.<account>.workers.dev` | `api.qr-foundry.com` |
 | **Redirect Worker** | `http://localhost:8787` (`npm run dev`) | `qr-foundry-worker-dev.<account>.workers.dev` | `qr-foundry-worker-preview.<account>.workers.dev` | `qrfo.link` |
-| **App (web)** | `http://localhost:1420` (`npm run dev:web`) | `qr-foundry-app-dev.<account>.workers.dev` | `app-preview.qr-foundry.com` | `app.qr-foundry.com` |
+| **App (web)** | `http://localhost:5173` (`npm run dev:web`) | `qr-foundry-app-dev.<account>.workers.dev` | `app-preview.qr-foundry.com` | `app.qr-foundry.com` |
 | **App (desktop)** | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` | `tauri://localhost` |
 
 ### Cross-Service URL References

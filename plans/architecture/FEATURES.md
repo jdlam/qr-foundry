@@ -605,7 +605,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Billing API (auth, Stripe, quotas, lifecycle, personas) | Shipped and deployed |
 | Platform adapters and desktop distribution | Shipped |
 | Web app deployment (`app.qr-foundry.com`) | Shipped (Cloudflare Workers, 3-env deploy pipeline) |
-| Marketing site | Phase 1 shipped, Phase 2-3 pending |
+| Marketing site | Phase 1 shipped, Phase 2-3 partially complete (pricing page, blog index, FAQ, CTAs, sitemap) |
 | Deferred backlog (settings/native advanced features/rate limiting) | Planned |
 
 Use the matrix statuses above (`[x]`, `[~]`, `[ ]`) as the source of truth.

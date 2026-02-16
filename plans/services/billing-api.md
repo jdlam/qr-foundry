@@ -20,7 +20,7 @@ For system-wide architecture, see [`ARCHITECTURE.md`](../architecture/ARCHITECTU
 - [x] Design database schema (Drizzle ORM + Cloudflare D1):
   - `users` — id, email, passwordHash, createdAt, updatedAt
   - `subscriptions` — id, userId, stripeSubscriptionId, status, plan, currentPeriodStart, currentPeriodEnd, createdAt
-  - `purchases` — id, userId, stripePaymentId, product ("subscription" | "addon_25"), createdAt
+  - `purchases` — id, userId, stripePaymentId, product ("pro" | "addon_25"), createdAt (Pro purchase type is legacy; table unused for new purchases)
 - [x] Set up database migrations (Drizzle Kit)
 - [x] Set up environment configuration (dev, preview, production)
 - [x] Add health check endpoint (`GET /health`)
