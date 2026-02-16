@@ -19,7 +19,7 @@
 | **Pro Trial** | $0 for 7 days | All Pro features unlocked for 7 days after signup. Reverts to Free when trial expires. |
 | **Pro** | ~$12-15 one-time | Full customization (logos, gradients, dot/eye styles), all export formats (PNG, SVG, PDF, EPS), batch CSV generation, QR scanning/import, saved templates, unlimited history, web asset pack |
 | **Subscription** | ~$5-7/month | Everything in Pro + dynamic QR codes (changeable destinations), scan analytics dashboard, code management. Includes 25 active dynamic codes. |
-| **Add-on** | TBD per pack | Additional dynamic code slots (e.g., buy 25 more) |
+| **Add-on** | +$3/month, +$30/year | Additional dynamic code slots (25 codes per pack, stackable) |
 
 ### Revenue per sale
 
