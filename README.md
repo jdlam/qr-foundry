@@ -41,7 +41,7 @@ All QR generation features are free. You only pay for dynamic QR codes.
 
 | Tier | Price | Key Features |
 |------|-------|-------------|
-| **Free** | $0 | Everything — all QR types, full customization, PNG/SVG export, batch, templates, unlimited history |
+| **Free** | $0 | Everything — all QR types, full customization, PNG/SVG export, batch, templates, scanner, unlimited history |
 | **Subscription** | $6/month or $60/year | Free + 25 dynamic QR codes, scan analytics |
 | **Add-on** | +$3/month or +$30/year | Additional 25 dynamic code slots (stackable) |
 
@@ -68,12 +68,12 @@ All QR generation features are free. You only pay for dynamic QR codes.
 
 | Service | Progress |
 |---------|----------|
-| **Desktop App** | Core complete — QR generation, customization, export, batch, scanner, templates, history, theming |
-| **Worker** | Phases 1-7 automated complete (160 tests) — redirects, CRUD, analytics, quota, validation |
-| **Billing API** | Phases 1-4, 6 complete (107 tests) — auth, trials, Stripe, plan tiers |
-| **Marketing Site** | Phase 1 complete — landing page, QR generator, dark/light theme, pricing, CI/CD |
+| **Desktop + Web App** | Phases 1-6 complete (553 tests) — QR generation, customization, export, batch, scanner, templates, history, theming, auth, dynamic codes, analytics, web deploy |
+| **Worker** | Phases 1-8 complete (172 tests) — redirects, CRUD, analytics, quota, validation, rate limiting |
+| **Billing API** | Phases 1-9 complete (201 tests) — auth, Stripe, subscriptions, add-ons, quota sync |
+| **Marketing Site** | Phase 1 complete; Phases 2-3 partially complete (pricing page, blog index, FAQ, CTAs, sitemap) |
 
-**Feature totals:** 120 shipped, 5 partial, 78 planned (203 total)
+**Feature totals:** 88 shipped, 6 partial, 9 planned (103 matrix items)
 
 See [`plans/architecture/FEATURES.md`](plans/architecture/FEATURES.md) for the full feature breakdown.
 

@@ -328,7 +328,7 @@ The Billing API (see [`billing-api.md`](billing-api.md)) is responsible for writ
 - [x] Input sanitization audit — added `isValidLabel`, `isValidPassword`, `isValidExpiresAt` validators; wired into `createCode` and `updateCode` handlers
 - [x] Error page polish — branded 404 with QR Foundry wordmark, reason-specific messages (not_found / paused / expired)
 - [x] API documentation — complete endpoint reference in `API.md` covering all 10 routes
-- [x] Tests — 160 total tests (27 new), all passing with lint and typecheck clean
+- [x] Tests — 172 total tests, all passing with lint and typecheck clean
 - [x] Redirect rate limiting (free-tier compatible): Worker-level KV fixed-window limiter on `/:shortCode` with configurable env vars
 - [ ] Load testing — verify KV read latency stays under 50ms at expected traffic
 - [ ] Security review — auth bypass, ownership boundary enforcement, CORS policy

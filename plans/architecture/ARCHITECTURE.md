@@ -390,7 +390,7 @@ These are the env vars / config values each service uses to reference other serv
 | **App** | `VITE_API_URL` (.env files) | `http://localhost:8787` | `http://localhost:8787` | `https://qr-foundry-api-preview.<account>.workers.dev` | `https://api.qr-foundry.com` |
 | **App** | `VITE_WORKER_URL` (.env files; optional) | unset (falls back to `https://qrfo.link`) | unset (falls back to `https://qrfo.link`) | unset (falls back to `https://qrfo.link`) | `https://qrfo.link` |
 
-**Note:** local web app development currently runs on `http://localhost:1420`, while API `CORS_ORIGINS` still allowlists `http://localhost:5173`.
+**Note:** The web app (`npm run dev:web`) runs on `http://localhost:5173` (Vite default). The Tauri desktop app (`npm run tauri dev`) runs on `http://localhost:1420`.
 
 ### Worker & API Cloudflare Resources
 
@@ -410,8 +410,8 @@ To run all services locally, start each in a separate terminal:
 | Billing API | `bun run dev` | 5173 | `qr-foundry-api/` |
 | Billing API (Worker runtime) | `bun run preview` | 8787 | `qr-foundry-api/` |
 | Redirect Worker | `npm run dev` | 8787 (default wrangler port) | `qr-foundry-worker/` |
-| App (web) | `npm run dev:web` | 1420 | `qr-foundry-app/` |
-| App (desktop) | `npm run tauri dev` | 1420 + Tauri | `qr-foundry-app/` |
+| App (web) | `npm run dev:web` | 5173 | `qr-foundry-app/` |
+| App (desktop) | `npm run tauri dev` | 1420 | `qr-foundry-app/` |
 
 **Local overrides:** Workers use `.dev.vars` files (gitignored) to override wrangler.toml vars for local dev. Copy `.dev.vars.example` → `.dev.vars` in each Worker repo. The app uses `.env.development` (committed) for Vite env vars.
 

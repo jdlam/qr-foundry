@@ -25,7 +25,7 @@ qr-foundry/                  ← this repo (qr-foundry-plans)
 ├── plans/
 │   ├── PLAN.md              # Plan index (start here)
 │   ├── architecture/        # Product & architecture docs
-│   │   ├── FEATURES.md      # Master feature list (203 features, status tracking)
+│   │   ├── FEATURES.md      # Master feature list (103 matrix items, status tracking)
 │   │   ├── ARCHITECTURE.md  # System architecture, data flows, API contracts
 │   │   └── product-spec.md  # Original product specification
 │   ├── services/            # Per-service implementation plans
@@ -100,7 +100,7 @@ All QR generation features are free. You only pay for dynamic QR codes.
 
 | Tier | Monthly | Annual (17% off) | Key Features |
 |------|---------|------------------|-------------|
-| Free | $0 | — | Everything: all QR types, full customization, PNG/SVG export, batch, templates, unlimited history |
+| Free | $0 | — | Everything: all QR types, full customization, PNG/SVG export, batch, templates, scanner, unlimited history |
 | Subscription | $6/month | $60/year | Free + 25 dynamic codes, scan analytics |
 | Add-on (+25 codes) | +$3/month | +$30/year | Stackable extra dynamic code slots |
 

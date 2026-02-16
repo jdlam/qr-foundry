@@ -20,126 +20,126 @@ Full pricing breakdown, revenue per channel, and quota mapping in [ARCHITECTURE.
 
 Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemented
 
-| Feature | Free | Legacy Pro (deprecated) | Subscription | Status |
-|---------|------|-----|--------------|--------|
-| **QR Generation** | | | | |
-| URL input | Yes | Yes | Yes | [x] |
-| Plain text input | Yes | Yes | Yes | [x] |
-| WiFi input | Yes | Yes | Yes | [x] |
-| Phone input | Yes | Yes | Yes | [x] |
-| vCard input | -- | Yes | Yes | [x] |
-| Email input | -- | Yes | Yes | [x] |
-| SMS input | -- | Yes | Yes | [x] |
-| Geo/location input | -- | Yes | Yes | [x] |
-| Calendar event input | -- | Yes | Yes | [ ] |
-| Live preview | Yes | Yes | Yes | [x] |
-| **Customization** | | | | |
-| Foreground/background colors | Yes | Yes | Yes | [x] |
-| Gradient fills | -- | Yes | Yes | [x] |
-| Dot styles (square, rounded, dots, classy, classy-rounded, extra-rounded) | -- | Yes | Yes | [x] |
-| Eye/corner styles (square, rounded, circle, leaf) | -- | Yes | Yes | [x] |
-| Logo embedding (drag-drop) | -- | Yes | Yes | [x] |
-| Logo sizing (10-40% of QR area) | -- | Yes | Yes | [x] |
-| Logo shape (square/circle mask) | -- | Yes | Yes | [x] |
-| Logo placement (center only; corners/finder eyes planned) | -- | Yes | Yes | [~] |
-| Transparent backgrounds | -- | Yes | Yes | [x] |
-| Error correction manual control (L/M/Q/H) | -- | Yes | Yes | [x] |
-| **Validation** | | | | |
-| Built-in scan validation (render-decode-compare) | Yes | Yes | Yes | [x] |
-| Three-state feedback (pass/marginal/fail) | Yes | Yes | Yes | [x] |
-| Smart warnings (logo + EC risk detection) | Yes | Yes | Yes | [x] |
-| Auto-reset on content/style change | Yes | Yes | Yes | [x] |
-| Batch validation | -- | Yes | Yes | [x] |
-| **Export** | | | | |
-| PNG export (up to 4096x4096, size presets) | Yes | Yes | Yes | [x] |
-| SVG export | -- | Yes | Yes | [x] |
-| PDF export (print-ready, bleed/trim marks) | -- | Yes | Yes | [ ] |
-| EPS export | -- | Yes | Yes | [ ] |
-| Clipboard copy | Yes | Yes | Yes | [x] |
-| Web asset pack (favicons + manifest + HTML meta) | -- | Yes | Yes | [ ] |
-| **Batch Generation** | | | | |
-| CSV import and parse | -- | Yes | Yes | [x] |
-| Bulk generation with progress | -- | Yes | Yes | [x] |
-| Per-row validation during generation | -- | Yes | Yes | [x] |
-| ZIP export | -- | Yes | Yes | [~] |
-| Apply style template to batch | -- | Yes | Yes | [x] |
-| **QR Scanner** | | | | |
-| Decode from dropped image | Yes | Yes | Yes | [x] |
-| Decode from clipboard paste | Yes | Yes | Yes | [~] |
-| Re-generate decoded content | Yes | Yes | Yes | [x] |
-| Copy decoded content | Yes | Yes | Yes | [x] |
-| Open URL in browser | Yes | Yes | Yes | [x] |
-| **History** | | | | |
-| Save generated QRs | 10 limit | Unlimited | Unlimited | [x] |
-| Search history | Yes | Yes | Yes | [x] |
-| Load from history | Yes | Yes | Yes | [~] |
-| **Templates** | | | | |
-| Save style presets | -- | Yes | Yes | [x] |
-| Load style presets | -- | Yes | Yes | [x] |
-| Default template | -- | Yes | Yes | [ ] |
-| **Dynamic QR Codes** | | | | |
-| Create dynamic code (encodes `qrfo.link/:shortCode`) | -- | -- | Yes | [x] Worker |
-| Custom short codes | -- | -- | Yes | [x] Worker |
-| List codes with status filter | -- | -- | Yes | [x] Worker |
-| Edit destination URL | -- | -- | Yes | [x] Worker |
-| Pause/resume codes | -- | -- | Yes | [x] Worker |
-| Delete codes | -- | -- | Yes | [x] Worker |
-| Quota enforcement (active codes only) | -- | -- | Yes | [x] Worker |
-| Usage endpoint (active/paused/expired counts) | -- | -- | Yes | [x] Worker |
-| Public 302 redirect | -- | -- | Yes | [x] Worker |
-| Branded 404 page (not found/paused/expired) | -- | -- | Yes | [x] Worker |
-| Dynamic code management UI (app) | -- | -- | Yes | [x] App |
-| "Make Dynamic" toggle in generator | -- | -- | Yes | [x] App |
-| **Scan Analytics** | | | | |
-| Scan event logging (Analytics Engine) | -- | -- | Yes | [x] Worker |
-| Per-code analytics API | -- | -- | Yes | [x] Worker |
-| Overview analytics API | -- | -- | Yes | [x] Worker |
-| Analytics dashboard UI (app) | -- | -- | Yes | [x] App |
-| Per-code analytics view (app) | -- | -- | Yes | [x] App |
-| Date range filtering | -- | -- | Yes | [x] Worker |
-| Granularity toggle (hourly/daily/weekly) | -- | -- | Yes | [x] Worker |
-| Response caching (5-10 min) | -- | -- | Yes | [x] Worker |
-| **User Accounts & Auth** | | | | |
-| Signup | -- | -- | -- | [x] Billing API |
-| Login | -- | -- | -- | [x] Billing API |
-| JWT issuance and validation | -- | -- | -- | [x] Billing API |
-| Token refresh | -- | -- | -- | [x] Billing API |
-| Password reset | -- | -- | -- | [x] Billing API |
-| Login/signup UI | -- | -- | -- | [x] App |
-| Token storage (LazyStore / localStorage) | -- | -- | -- | [x] App |
-| **Billing & Subscriptions** | | | | |
-| Stripe Checkout (Subscription) | -- | -- | -- | [x] Billing API |
-| Add-on management (`POST /api/billing/addon`) | -- | -- | -- | [x] Billing API |
-| Stripe Customer Portal | -- | -- | -- | [x] Billing API |
-| Stripe webhook handler | -- | -- | -- | [x] Billing API |
-| Quota writes to Worker KV | -- | -- | -- | [x] Billing API |
-| **Feature Gating** | | | | |
-| Plan tier API (`GET /api/me/plan`) | -- | -- | -- | [x] Billing API |
-| `<FeatureGate>` component | -- | -- | -- | [x] App |
-| Subscription upsell prompts | -- | -- | -- | [x] App |
-| **Platform & Distribution** | | | | |
-| macOS desktop app (Tauri) | Yes | Yes | Yes | [x] |
-| Windows desktop app (Tauri) | Yes | Yes | Yes | [x] |
-| Linux desktop app (Tauri) | Yes | Yes | Yes | [x] |
-| Web app (`app.qr-foundry.com`) | Yes | Yes | Yes | [x] |
-| Platform adapters (8 adapters including auth) | -- | -- | -- | [x] App |
-| Sidebar navigation | Yes | Yes | Yes | [x] App |
-| Title bar with theme toggle | Yes | Yes | Yes | [x] App |
-| Status bar (dimensions, EC level, validation) | Yes | Yes | Yes | [x] App |
-| Dark/light/system theme | Yes | Yes | Yes | [x] App |
-| Design token system (60+ CSS variables) | Yes | Yes | Yes | [x] App |
-| **Marketing Site** | | | | |
-| Landing page with embedded QR generator | -- | -- | -- | [x] Site |
-| Pricing comparison page | -- | -- | -- | [~] Site |
-| Blog/SEO content | -- | -- | -- | [~] Site |
-| **Infrastructure** | | | | |
-| Worker CI/CD (lint, typecheck, test on PR) | -- | -- | -- | [x] Worker |
-| Worker deploy workflow (Releases -> production) | -- | -- | -- | [x] Worker |
-| Billing API CI/CD (lint, typecheck, test on PR) | -- | -- | -- | [x] Billing API |
-| Billing API deploy workflow | -- | -- | -- | [x] Billing API |
-| Custom domain `qrfo.link` | -- | -- | -- | [x] Worker |
-| Custom domain `api.qr-foundry.com` | -- | -- | -- | [x] Billing API |
-| Rate limiting on redirect path | -- | -- | -- | [x] Worker |
+| Feature | Free | Subscription | Status |
+|---------|------|--------------|--------|
+| **QR Generation** | | | |
+| URL input | Yes | Yes | [x] |
+| Plain text input | Yes | Yes | [x] |
+| WiFi input | Yes | Yes | [x] |
+| Phone input | Yes | Yes | [x] |
+| vCard input | Yes | Yes | [x] |
+| Email input | Yes | Yes | [x] |
+| SMS input | Yes | Yes | [x] |
+| Geo/location input | Yes | Yes | [x] |
+| Calendar event input | Yes | Yes | [ ] |
+| Live preview | Yes | Yes | [x] |
+| **Customization** | | | |
+| Foreground/background colors | Yes | Yes | [x] |
+| Gradient fills | Yes | Yes | [x] |
+| Dot styles (square, rounded, dots, classy, classy-rounded, extra-rounded) | Yes | Yes | [x] |
+| Eye/corner styles (square, rounded, circle, leaf) | Yes | Yes | [x] |
+| Logo embedding (drag-drop) | Yes | Yes | [x] |
+| Logo sizing (10-40% of QR area) | Yes | Yes | [x] |
+| Logo shape (square/circle mask) | Yes | Yes | [x] |
+| Logo placement (center only; corners/finder eyes planned) | Yes | Yes | [~] |
+| Transparent backgrounds | Yes | Yes | [x] |
+| Error correction manual control (L/M/Q/H) | Yes | Yes | [x] |
+| **Validation** | | | |
+| Built-in scan validation (render-decode-compare) | Yes | Yes | [x] |
+| Three-state feedback (pass/marginal/fail) | Yes | Yes | [x] |
+| Smart warnings (logo + EC risk detection) | Yes | Yes | [x] |
+| Auto-reset on content/style change | Yes | Yes | [x] |
+| Batch validation | Yes | Yes | [x] |
+| **Export** | | | |
+| PNG export (up to 4096x4096, size presets) | Yes | Yes | [x] |
+| SVG export | Yes | Yes | [x] |
+| PDF export (print-ready, bleed/trim marks) | Yes | Yes | [ ] |
+| EPS export | Yes | Yes | [ ] |
+| Clipboard copy | Yes | Yes | [x] |
+| Web asset pack (favicons + manifest + HTML meta) | Yes | Yes | [ ] |
+| **Batch Generation** | | | |
+| CSV import and parse | Yes | Yes | [x] |
+| Bulk generation with progress | Yes | Yes | [x] |
+| Per-row validation during generation | Yes | Yes | [x] |
+| ZIP export | Yes | Yes | [~] |
+| Apply style template to batch | Yes | Yes | [x] |
+| **QR Scanner** | | | |
+| Decode from dropped image | Yes | Yes | [x] |
+| Decode from clipboard paste | Yes | Yes | [~] |
+| Re-generate decoded content | Yes | Yes | [x] |
+| Copy decoded content | Yes | Yes | [x] |
+| Open URL in browser | Yes | Yes | [x] |
+| **History** | | | |
+| Save generated QRs (unlimited) | Yes | Yes | [x] |
+| Search history | Yes | Yes | [x] |
+| Load from history | Yes | Yes | [~] |
+| **Templates** | | | |
+| Save style presets | Yes | Yes | [x] |
+| Load style presets | Yes | Yes | [x] |
+| Default template | Yes | Yes | [ ] |
+| **Dynamic QR Codes** | | | |
+| Create dynamic code (encodes `qrfo.link/:shortCode`) | -- | Yes | [x] Worker |
+| Custom short codes | -- | Yes | [x] Worker |
+| List codes with status filter | -- | Yes | [x] Worker |
+| Edit destination URL | -- | Yes | [x] Worker |
+| Pause/resume codes | -- | Yes | [x] Worker |
+| Delete codes | -- | Yes | [x] Worker |
+| Quota enforcement (active codes only) | -- | Yes | [x] Worker |
+| Usage endpoint (active/paused/expired counts) | -- | Yes | [x] Worker |
+| Public 302 redirect | -- | Yes | [x] Worker |
+| Branded 404 page (not found/paused/expired) | -- | Yes | [x] Worker |
+| Dynamic code management UI (app) | -- | Yes | [x] App |
+| "Make Dynamic" toggle in generator | -- | Yes | [x] App |
+| **Scan Analytics** | | | |
+| Scan event logging (Analytics Engine) | -- | Yes | [x] Worker |
+| Per-code analytics API | -- | Yes | [x] Worker |
+| Overview analytics API | -- | Yes | [x] Worker |
+| Analytics dashboard UI (app) | -- | Yes | [x] App |
+| Per-code analytics view (app) | -- | Yes | [x] App |
+| Date range filtering | -- | Yes | [x] Worker |
+| Granularity toggle (hourly/daily/weekly) | -- | Yes | [x] Worker |
+| Response caching (5-10 min) | -- | Yes | [x] Worker |
+| **User Accounts & Auth** | | | |
+| Signup | -- | -- | [x] Billing API |
+| Login | -- | -- | [x] Billing API |
+| JWT issuance and validation | -- | -- | [x] Billing API |
+| Token refresh | -- | -- | [x] Billing API |
+| Password reset | -- | -- | [x] Billing API |
+| Login/signup UI | -- | -- | [x] App |
+| Token storage (LazyStore / localStorage) | -- | -- | [x] App |
+| **Billing & Subscriptions** | | | |
+| Stripe Checkout (Subscription) | -- | -- | [x] Billing API |
+| Add-on management (`POST /api/billing/addon`) | -- | -- | [x] Billing API |
+| Stripe Customer Portal | -- | -- | [x] Billing API |
+| Stripe webhook handler | -- | -- | [x] Billing API |
+| Quota writes to Worker KV | -- | -- | [x] Billing API |
+| **Feature Gating** | | | |
+| Plan tier API (`GET /api/me/plan`) | -- | -- | [x] Billing API |
+| `<FeatureGate>` component | -- | -- | [x] App |
+| Subscription upsell prompts | -- | -- | [x] App |
+| **Platform & Distribution** | | | |
+| macOS desktop app (Tauri) | Yes | Yes | [x] |
+| Windows desktop app (Tauri) | Yes | Yes | [x] |
+| Linux desktop app (Tauri) | Yes | Yes | [x] |
+| Web app (`app.qr-foundry.com`) | Yes | Yes | [x] |
+| Platform adapters (8 adapters including auth) | -- | -- | [x] App |
+| Sidebar navigation | Yes | Yes | [x] App |
+| Title bar with theme toggle | Yes | Yes | [x] App |
+| Status bar (dimensions, EC level, validation) | Yes | Yes | [x] App |
+| Dark/light/system theme | Yes | Yes | [x] App |
+| Design token system (60+ CSS variables) | Yes | Yes | [x] App |
+| **Marketing Site** | | | |
+| Landing page with embedded QR generator | -- | -- | [x] Site |
+| Pricing comparison page | -- | -- | [~] Site |
+| Blog/SEO content | -- | -- | [~] Site |
+| **Infrastructure** | | | |
+| Worker CI/CD (lint, typecheck, test on PR) | -- | -- | [x] Worker |
+| Worker deploy workflow (Releases -> production) | -- | -- | [x] Worker |
+| Billing API CI/CD (lint, typecheck, test on PR) | -- | -- | [x] Billing API |
+| Billing API deploy workflow | -- | -- | [x] Billing API |
+| Custom domain `qrfo.link` | -- | -- | [x] Worker |
+| Custom domain `api.qr-foundry.com` | -- | -- | [x] Billing API |
+| Rate limiting on redirect path | -- | -- | [x] Worker |
 
 ## Feature Details
 
@@ -275,14 +275,13 @@ Decode existing QR codes from images or clipboard.
 Save and organize previously generated QR codes and reusable style presets.
 
 **User stories:**
-- As a free user, I want my last 10 generated QR codes saved automatically so that I can revisit them without re-entering content.
+- As a free user, I want my generated QR codes saved automatically so that I can revisit them without re-entering content.
 - As a free user, I want unlimited history with search so that I can find any QR code I have ever generated.
 - As a free user, I want to save my brand's style settings as a template so that I can apply them to new QR codes with one click.
 
 **Features:**
 - [x] Auto-save generated QRs to history with thumbnail (App)
-- [x] Limited history: 10 codes (App, Free)
-- [x] Unlimited history (App, Free)
+- [x] Unlimited history (App, Free) — originally 10-code limit for Free, now unlimited for all users
 - [x] Searchable history list (App)
 - [~] Click history item to reload content and style (App) — partially working
 - [x] Save style presets as named templates (App, Free)

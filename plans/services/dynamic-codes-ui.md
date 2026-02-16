@@ -1,5 +1,7 @@
 # Dynamic Codes UI — App Phases 3-4
 
+> **COMPLETED:** All 4 PRs have been merged. Dynamic codes CRUD, analytics views, and the "Make Dynamic" toggle are shipped in app Phases 3-4. See [app.md](app.md) for the phase checklists.
+
 ## Context
 
 Subscriptions need to be enabled at launch. The Worker API for dynamic codes is fully built and deployed (`qrfo.link`), but the app has only a placeholder tab. Users who subscribe need to manage dynamic codes (create, list, edit, pause, delete) and view scan analytics. This plan implements both features across 4 PRs in `qr-foundry-app/`.

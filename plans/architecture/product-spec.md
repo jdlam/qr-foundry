@@ -1,5 +1,7 @@
 # QR Foundry — Product Specification
 
+> **ARCHIVED:** This is the original product specification from initial design. The pricing model has been simplified — all QR generation features are now free, and the Pro tier and trial have been removed. See [ARCHITECTURE.md](ARCHITECTURE.md) for the current pricing and feature tiers.
+
 ## App Name Ideas
 
 - **QR Foundry** (craftsmanship connotation, memorable)

@@ -7,7 +7,7 @@ Remaining items from the Codex security audit. Ordered by priority.
 | Item | Priority | Status |
 |------|----------|--------|
 | JWT auth migration | Launch blocker | Done (#15) |
-| WAF rate limiting | P1 | Deferred (requires CF Pro plan) |
+| Rate limiting | P1 | Baseline shipped (Worker KV limiter); WAF hardening deferred |
 | Password reset flow | P2 | Done (PR #15) |
 | KV sync failure alerting | P3 | Done (PR #11) |
 | Subscription UX gating | P4 | Done (App Phases 3-4) |
@@ -16,17 +16,11 @@ Remaining items from the Codex security audit. Ordered by priority.
 
 ---
 
-## P1: WAF rate limiting — deferred, revisit when traffic justifies CF Pro
+## P1: Rate limiting — baseline shipped, WAF hardening deferred
 
-The redirect path has no rate limiting. Abuse costs money (KV reads) and degrades service.
+Baseline rate limiting is now implemented directly in the Worker (KV-backed per-IP fixed-window limiter on `/:shortCode`, 100 req/10s/IP, returns 429 + `Retry-After`). No paid Cloudflare plan required.
 
-**Why deferred:** WAF rate limiting rules require Cloudflare Pro ($20/month). Not justified for MVP-level traffic. KV free tier includes 100k reads/day — abuse would need to be sustained and high-volume to matter. Monitor KV read analytics in the Cloudflare dashboard and revisit if anomalies appear or if upgrading to CF Pro for other reasons.
-
-**Action (when ready):** Configure in Cloudflare Dashboard per the existing spec in `worker.md` lines 338-344:
-- Security > WAF > Rate limiting rules > Create rule
-- Match: hostname = `qrfo.link`, URI path NOT `/api/*`, NOT `/health`
-- Rate: 100 requests / 10 seconds / IP
-- Action: Block (429) for 60 seconds
+**What remains:** WAF-level rate limiting rules (Cloudflare Pro, $20/month) could provide stricter atomicity and edge-level blocking before requests hit the Worker. Not justified for MVP-level traffic. Revisit if traffic grows or if upgrading to CF Pro for other reasons. Consider Durable Object token bucket for stricter guarantees at scale.
 
 ## P2: Password reset flow — do before launch (~half day)
 

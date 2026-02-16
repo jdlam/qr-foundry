@@ -141,7 +141,7 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 
 ### Technical SEO
 
-- [x] Sitemap.xml (static sitemap-index.xml shipped; auto-generated blog sitemap pending)
+- [x] Sitemap index XML (`/sitemap-index.xml` shipped; auto-generated blog sitemap pending)
 - [ ] OpenGraph / Twitter Card meta tags on every blog post
 - [ ] Structured data: `Article` / `BlogPosting` on blog posts
 - [ ] Internal links from blog posts back to landing page and pricing page
