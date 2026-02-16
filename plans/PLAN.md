@@ -18,7 +18,7 @@ This file is a lightweight index. All planning resources live in this directory.
 | **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. Grace period cron enforcement implemented |
 | **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-6 complete (auth, gating, dynamic codes CRUD, analytics, platform abstraction, web deploy to `app.qr-foundry.com`); release pipeline + auto-updater added |
 | **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-9 complete, deployed to production at `api.qr-foundry.com` |
-| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete; Phase 2 partially complete (`/pricing`, CTA routes, download/legal pages); Phase 3 partially complete (`/blog`, sitemap baseline) |
+| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete; Phase 2 partially complete (`/pricing` with Product + FAQ structured data, CTA routes, download/legal pages); Phase 3 partially complete (`/blog`, sitemap baseline) |
 
 ## Current Releases
 

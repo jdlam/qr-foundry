@@ -111,7 +111,8 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
   - Desktop: Mac App Store / Microsoft Store / download pages
   - Web: `app.qr-foundry.com` (direct to signup) — **always offer "Try in browser" as an option**
 - [x] Add-on mention for power users who need more dynamic code slots
-- [ ] Structured data: `Product` with `Offer` for each tier
+- [x] `/legal` placeholder page with redirect to legal content
+- [x] Structured data: `Product` with `Offer` for each tier, `FAQPage` for FAQ section
 - [ ] OG image specific to pricing page
 
 **Exit criteria:** Visitors can clearly understand what each tier includes and how to purchase. Page ranks for "QR code generator pricing" searches.
@@ -141,7 +142,7 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 
 ### Technical SEO
 
-- [x] Sitemap index XML (`/sitemap-index.xml` shipped; auto-generated blog sitemap pending)
+- [x] Sitemap XML (`/sitemap.xml` shipped; auto-generated blog sitemap pending)
 - [ ] OpenGraph / Twitter Card meta tags on every blog post
 - [ ] Structured data: `Article` / `BlogPosting` on blog posts
 - [ ] Internal links from blog posts back to landing page and pricing page
@@ -169,8 +170,9 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 - [ ] Set up uptime monitoring
 - [~] Configure redirects:
   - `www.qr-foundry.com` -> `qr-foundry.com`
-  - `/app` -> `app.qr-foundry.com` (implemented as site route forwarding page)
+  - `/app` -> `app.qr-foundry.com` (implemented as site route forwarding page, noindexed)
   - `/download` -> appropriate store links (implemented as site route with web + release links)
+  - `/legal` -> placeholder legal page (implemented as site route)
 
 ### Manual steps (requires action outside IDE)
 
