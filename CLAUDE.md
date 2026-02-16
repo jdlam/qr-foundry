@@ -249,21 +249,13 @@ Two GitHub Actions workflows:
 
 ## Releasing
 
-Releases are managed via the shared release script in the plans repo:
+Releases are created automatically when a `## [X.Y.Z]` changelog entry is merged to `main`.
+The `release.yml` workflow parses the version, bumps all version files
+(`package.json`, `package-lock.json`, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`,
+`src-tauri/Cargo.lock`), and creates a GitHub Release — which triggers `deploy.yml` to build
+and attach platform binaries.
 
-```bash
-# From the plans repo root:
-./scripts/release.sh app v0.2.0          # production release
-./scripts/release.sh app v0.2.0 --dry-run # preview what would happen
-```
-
-The script:
-
-1. Validates clean working tree on `main`
-2. Extracts release notes from `CHANGELOG.md`
-3. Bumps version in **3 files**: `package.json`, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`
-4. Commits, pushes, and creates a GitHub Release
-5. The `deploy.yml` workflow triggers automatically, building and attaching platform binaries
+You can still use `../scripts/release.sh app vX.Y.Z` for manual releases. Use `--dry-run` to preview without side effects.
 
 ## Version Policy
 
