@@ -18,7 +18,7 @@ This file is a lightweight index. All planning resources live in this directory.
 | **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. Grace period cron enforcement implemented |
 | **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-6 complete (auth, gating, dynamic codes CRUD, analytics, platform abstraction, web deploy to `app.qr-foundry.com`); release pipeline + auto-updater added |
 | **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-9 complete, deployed to production at `api.qr-foundry.com` |
-| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phase 1 complete; Phase 2 partially complete (`/pricing` with Product + FAQ structured data, CTA routes, download/legal pages); Phase 3 partially complete (`/blog`, sitemap baseline) |
+| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phases 1-3 complete: landing page, pricing, blog (5 articles, MDX content collections, BlogPosting JSON-LD, sitemap auto-generation) |
 
 ## Current Releases
 
@@ -27,7 +27,7 @@ This file is a lightweight index. All planning resources live in this directory.
 | **Redirect Worker** | v0.1.0 | 2026-02-13 | `qrfo.link` |
 | **Billing API** | v0.1.2 | 2026-02-14 | `api.qr-foundry.com` |
 | **Desktop + Web App** | v0.2.0 | 2026-02-14 | downloadable / `app.qr-foundry.com` |
-| **Marketing Site** | v0.1.0 | 2026-02-13 | `qr-foundry.com` |
+| **Marketing Site** | v0.2.0 | 2026-03-21 | `qr-foundry.com` |
 
 ## Pricing Model (quick reference)
 

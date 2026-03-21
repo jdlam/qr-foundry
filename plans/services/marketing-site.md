@@ -125,28 +125,31 @@ For design reference, see `qr-foundry-site/mockups/9-foundry-toggle.html`.
 
 ### Blog Infrastructure
 
-- [ ] Set up Astro Content Collections for blog posts (MDX)
-- [x] Blog index page at `/blog`
-- [ ] Individual post pages at `/blog/[slug]`
-- [ ] Blog layout with reading time, published date, author
+- [x] Set up Astro Content Collections for blog posts (MDX) — `src/content/config.ts`, `@astrojs/mdx@4`
+- [x] Blog index page at `/blog` — pulls from content collection, sorted by date
+- [x] Individual post pages at `/blog/[slug]` — dynamic route with prose styles, hero image, breadcrumb
+- [x] Blog layout with published date, author, tag in post header
 - [ ] RSS feed via `@astrojs/rss`
-- [~] Sitemap via `@astrojs/sitemap` (baseline shipped; blog collection auto-generation pending)
+- [x] Sitemap via `@astrojs/sitemap` — now auto-includes all blog post URLs
 
-### Initial SEO Articles (3-5)
+### Initial SEO Articles (5 shipped)
 
-- [ ] "How to Create Branded QR Codes" (target: branded QR code generator)
-- [ ] "QR Code Sizes for Print: Complete Guide" (target: QR code print size)
-- [ ] "Static vs Dynamic QR Codes: Which Do You Need?" (target: dynamic QR code)
-- [ ] "Best QR Code Generators for Mac in 2026" (target: QR code generator mac)
-- [ ] "How to Add a Logo to Your QR Code" (target: QR code with logo)
+- [x] "The Complete Guide to QR Code Sizes for Print" (target: qr code size for print, qr code minimum size)
+- [x] "Static vs Dynamic QR Codes: Which Do You Need?" (target: static vs dynamic qr code, qr code tracking)
+- [x] "5 QR Code Design Mistakes That Kill Scan Rates" (target: qr code design, qr code not scanning)
+- [x] "How to Create a Free QR Code Without Signing Up" (target: free qr code generator no signup)
+- [x] "QR Codes for Business Cards: Size, Design, and Best Practices" (target: qr code for business card)
+- [ ] "How to Create Branded QR Codes" (target: branded qr code generator)
+- [ ] "Best QR Code Generators for Mac in 2026" (target: qr code generator mac)
+- [ ] "How to Add a Logo to Your QR Code" (target: qr code with logo)
 
 ### Technical SEO
 
-- [x] Sitemap XML (`/sitemap.xml` shipped; auto-generated blog sitemap pending)
-- [ ] OpenGraph / Twitter Card meta tags on every blog post
-- [ ] Structured data: `Article` / `BlogPosting` on blog posts
-- [ ] Internal links from blog posts back to landing page and pricing page
-- [ ] Blog teasers on landing page auto-update from content collections
+- [x] Sitemap XML — `@astrojs/sitemap` now auto-generates `sitemap-index.xml` including all blog posts
+- [x] OpenGraph / Twitter Card meta tags on every blog post (via `SEOHead` component)
+- [x] Structured data: `BlogPosting` JSON-LD on each blog post via `blogPostLD()`
+- [x] Internal links from blog posts back to landing page and pricing page
+- [x] Blog teasers on landing page link to real post slugs (no longer hardcoded `/blog`)
 
 ### Search Console
 

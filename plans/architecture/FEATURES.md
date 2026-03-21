@@ -506,8 +506,8 @@ Public-facing landing page that explains the product, showcases features, and dr
 - [x] Embedded QR generator using the same `qr-code-styling` library as the app (Site)
 - [~] Social proof section: testimonials and counters (placeholder data for now) (Site)
 - [~] Pricing comparison page with FAQ (basic page shipped with Product + FAQPage structured data; richer comparison/annual toggle pending) (Site, see marketing-site.md Phase 2)
-- [~] Blog/content section (teasers shipped; full blog infra pending) (Site, see marketing-site.md Phase 3)
-- [~] Technical SEO (meta tags + structured data + robots shipped; sitemap/blog SEO pending) (Site)
+- [x] Blog/content section — 5 SEO articles shipped with MDX content collections, dynamic `/blog/[slug]` route, hero images, BlogPosting JSON-LD, sitemap integration (Site, see marketing-site.md Phase 3)
+- [x] Technical SEO — meta tags, structured data, robots, sitemap with blog posts, BlogPosting JSON-LD on all posts (Site)
 - [ ] Google Search Console setup (Site)
 - [x] Responsive design: mobile, tablet, desktop (Site)
 - [ ] Privacy-friendly analytics: Plausible or Fathom (Site)
@@ -604,7 +604,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 | Billing API (auth, Stripe, quotas, lifecycle, personas) | Shipped and deployed |
 | Platform adapters and desktop distribution | Shipped |
 | Web app deployment (`app.qr-foundry.com`) | Shipped (Cloudflare Workers, 3-env deploy pipeline) |
-| Marketing site | Phase 1 shipped, Phase 2-3 partially complete (pricing page, blog index, FAQ, CTAs, sitemap) |
+| Marketing site | Phases 1-3 complete: landing page, pricing, 5-article blog with MDX collections, BlogPosting JSON-LD, full sitemap (v0.2.0) |
 | Deferred backlog (settings/native advanced features/rate limiting) | Planned |
 
 Use the matrix statuses above (`[x]`, `[~]`, `[ ]`) as the source of truth.
