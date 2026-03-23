@@ -51,8 +51,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Rosetta 2 (x86_64 cross-compile on ARM)
-        if: matrix.install_rosetta
-        run: softwareupdate --install-rosetta --agree-to-license
+        if: matrix.install_rosetta && runner.os == 'macOS' && runner.arch == 'ARM64'
+        run: sudo softwareupdate --install-rosetta --agree-to-license
 
       - name: Add Rust target (macOS)
         if: runner.os == 'macOS'
