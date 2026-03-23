@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   checks:
     name: Lint, Typecheck & Test
@@ -62,7 +65,7 @@ jobs:
         include:
           - platform: macos-latest
             args: --target aarch64-apple-darwin
-          - platform: macos-latest
+          - platform: macos-13
             args: --target x86_64-apple-darwin
           - platform: ubuntu-22.04
             args: ""
@@ -83,7 +86,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Add Rust target (macOS)
-        if: matrix.platform == 'macos-latest'
+        if: runner.os == 'macOS'
         run: |
           rustup target add aarch64-apple-darwin
           rustup target add x86_64-apple-darwin
