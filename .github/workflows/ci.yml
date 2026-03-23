@@ -65,8 +65,9 @@ jobs:
         include:
           - platform: macos-latest
             args: --target aarch64-apple-darwin
-          - platform: macos-13
+          - platform: macos-latest
             args: --target x86_64-apple-darwin
+            install_rosetta: true
           - platform: ubuntu-22.04
             args: ""
           - platform: windows-latest
@@ -84,6 +85,10 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Rosetta 2 (x86_64 cross-compile on ARM)
+        if: matrix.install_rosetta
+        run: softwareupdate --install-rosetta --agree-to-license
 
       - name: Add Rust target (macOS)
         if: runner.os == 'macOS'
