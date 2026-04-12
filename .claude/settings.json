@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "afterEdit": [
+      {
+        "matcher": "plans/",
+        "command": "./scripts/check-doc-drift.sh"
+      }
+    ]
+  }
+}

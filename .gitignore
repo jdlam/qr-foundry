@@ -4,5 +4,8 @@ qr-foundry-worker/
 qr-foundry-api/
 qr-foundry-site/
 
+# Dependencies
+node_modules/
+
 # OS files
 .DS_Store
