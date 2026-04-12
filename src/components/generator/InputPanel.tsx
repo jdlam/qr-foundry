@@ -8,6 +8,7 @@ import {
   formatPhone,
   formatGeo,
   formatUrl,
+  formatBitcoin,
 } from '../../lib/formatters';
 import type { QrType } from '../../types/qr';
 
@@ -20,6 +21,7 @@ const INPUT_TYPES: { id: QrType; label: string }[] = [
   { id: 'email', label: 'Email' },
   { id: 'sms', label: 'SMS' },
   { id: 'geo', label: 'Location' },
+  { id: 'bitcoin', label: 'Bitcoin' },
 ];
 
 export function InputPanel() {
@@ -31,6 +33,7 @@ export function InputPanel() {
     emailConfig,
     smsConfig,
     geoConfig,
+    bitcoinConfig,
     isDynamic,
     dynamicShortCode,
     dynamicLabel,
@@ -41,6 +44,7 @@ export function InputPanel() {
     setEmailConfig,
     setSmsConfig,
     setGeoConfig,
+    setBitcoinConfig,
     setIsDynamic,
     setDynamicLabel,
   } = useQrStore();
@@ -332,6 +336,60 @@ export function InputPanel() {
                 setContent(formatGeo({ ...geoConfig, longitude: e.target.value }));
               }}
               placeholder="Longitude"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
+        );
+
+      case 'bitcoin':
+        return (
+          <div className="flex flex-col gap-2">
+            <input
+              value={bitcoinConfig.address}
+              onChange={(e) => {
+                setBitcoinConfig({ address: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, address: e.target.value }));
+              }}
+              placeholder="Bitcoin address"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={bitcoinConfig.amount || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ amount: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, amount: e.target.value }));
+              }}
+              placeholder="Amount in BTC (optional)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={bitcoinConfig.label || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ label: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, label: e.target.value }));
+              }}
+              placeholder="Label (optional)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={bitcoinConfig.message || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ message: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, message: e.target.value }));
+              }}
+              placeholder="Message (optional)"
               className={inputClassName}
               style={inputStyle}
               onFocus={handleInputFocus}

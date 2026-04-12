@@ -8,7 +8,8 @@ export type QrType =
   | 'sms'
   | 'phone'
   | 'geo'
-  | 'calendar';
+  | 'calendar'
+  | 'bitcoin';
 
 // Dot style options
 export type DotStyle = 'square' | 'rounded' | 'dots' | 'classy' | 'classy-rounded' | 'extra-rounded';
@@ -115,6 +116,14 @@ export interface SmsConfig {
 export interface GeoConfig {
   latitude: string;
   longitude: string;
+}
+
+// Bitcoin payment input
+export interface BitcoinConfig {
+  address: string;
+  amount?: string;
+  label?: string;
+  message?: string;
 }
 
 // Template

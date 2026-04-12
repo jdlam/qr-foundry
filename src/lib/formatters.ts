@@ -1,4 +1,4 @@
-import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig } from '../types/qr';
+import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, BitcoinConfig } from '../types/qr';
 
 /**
  * Format WiFi credentials for QR code
@@ -148,6 +148,31 @@ export function formatUrl(url: string): string {
 }
 
 /**
+ * Format Bitcoin payment URI (BIP 21)
+ * Format: bitcoin:<address>?amount=<amount>&label=<label>&message=<message>
+ */
+export function formatBitcoin(config: BitcoinConfig): string {
+  let result = `bitcoin:${config.address}`;
+
+  const params: string[] = [];
+  if (config.amount) {
+    params.push(`amount=${encodeURIComponent(config.amount)}`);
+  }
+  if (config.label) {
+    params.push(`label=${encodeURIComponent(config.label)}`);
+  }
+  if (config.message) {
+    params.push(`message=${encodeURIComponent(config.message)}`);
+  }
+
+  if (params.length > 0) {
+    result += `?${params.join('&')}`;
+  }
+
+  return result;
+}
+
+/**
  * Detect QR type from content
  */
 export function detectQrType(content: string): string {
@@ -162,6 +187,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('tel:')) return 'phone';
   if (lower.startsWith('geo:')) return 'geo';
   if (lower.startsWith('begin:vevent')) return 'calendar';
+  if (lower.startsWith('bitcoin:')) return 'bitcoin';
   if (/^https?:\/\//i.test(content)) return 'url';
   if (/^[a-z0-9.-]+\.[a-z]{2,}/i.test(content)) return 'url';
 
