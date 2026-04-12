@@ -14,6 +14,7 @@ import type {
   EmailConfig,
   SmsConfig,
   GeoConfig,
+  BitcoinConfig,
 } from '../types/qr';
 
 interface QrState {
@@ -27,6 +28,7 @@ interface QrState {
   emailConfig: EmailConfig;
   smsConfig: SmsConfig;
   geoConfig: GeoConfig;
+  bitcoinConfig: BitcoinConfig;
 
   // Style
   dotStyle: DotStyle;
@@ -63,6 +65,7 @@ interface QrState {
   setEmailConfig: (config: Partial<EmailConfig>) => void;
   setSmsConfig: (config: Partial<SmsConfig>) => void;
   setGeoConfig: (config: Partial<GeoConfig>) => void;
+  setBitcoinConfig: (config: Partial<BitcoinConfig>) => void;
   setDotStyle: (style: DotStyle) => void;
   setCornerSquareStyle: (style: CornerSquareStyle) => void;
   setCornerDotStyle: (style: CornerDotStyle) => void;
@@ -116,6 +119,13 @@ const defaultGeoConfig: GeoConfig = {
   longitude: '',
 };
 
+const defaultBitcoinConfig: BitcoinConfig = {
+  address: '',
+  amount: '',
+  label: '',
+  message: '',
+};
+
 const defaultGradient: GradientConfig = {
   type: 'linear',
   rotation: 0,
@@ -136,6 +146,7 @@ export const useQrStore = create<QrState>((set, get) => ({
   emailConfig: defaultEmailConfig,
   smsConfig: defaultSmsConfig,
   geoConfig: defaultGeoConfig,
+  bitcoinConfig: defaultBitcoinConfig,
 
   // Style
   dotStyle: 'rounded',
@@ -191,6 +202,11 @@ export const useQrStore = create<QrState>((set, get) => ({
 
   setGeoConfig: (config) => set((state) => ({
     geoConfig: { ...state.geoConfig, ...config },
+    validationState: 'idle',
+  })),
+
+  setBitcoinConfig: (config) => set((state) => ({
+    bitcoinConfig: { ...state.bitcoinConfig, ...config },
     validationState: 'idle',
   })),
 
@@ -251,6 +267,7 @@ export const useQrStore = create<QrState>((set, get) => ({
     emailConfig: defaultEmailConfig,
     smsConfig: defaultSmsConfig,
     geoConfig: defaultGeoConfig,
+    bitcoinConfig: defaultBitcoinConfig,
     dotStyle: 'rounded',
     cornerSquareStyle: 'extra-rounded',
     cornerDotStyle: 'dot',
