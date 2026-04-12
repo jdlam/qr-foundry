@@ -516,6 +516,12 @@ mod tests {
     }
 
     #[test]
+    fn test_detect_qr_type_bitcoin() {
+        assert_eq!(detect_qr_type("bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"), "bitcoin");
+        assert_eq!(detect_qr_type("BITCOIN:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?amount=0.5"), "bitcoin");
+    }
+
+    #[test]
     fn test_detect_qr_type_url() {
         assert_eq!(detect_qr_type("https://example.com"), "url");
         assert_eq!(detect_qr_type("http://example.com/path"), "url");
