@@ -31,6 +31,8 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Email input | Yes | Yes | [x] |
 | SMS input | Yes | Yes | [x] |
 | Geo/location input | Yes | Yes | [x] |
+| Google Review input | Yes | Yes | [ ] |
+| Bitcoin payment input | Yes | Yes | [ ] |
 | Calendar event input | Yes | Yes | [ ] |
 | Live preview | Yes | Yes | [x] |
 | **Customization** | | | |
@@ -152,6 +154,9 @@ Create QR codes from multiple content types with real-time live preview.
 - As a free user, I want to create a vCard QR code with my full contact information so that people can scan it at conferences and save my details.
 - As a user, I want to see the QR code update in real time as I type so that I can see exactly what I am generating before exporting.
 - As a free user, I want to manually set the error correction level so that I can balance between data density and scan reliability for print use cases.
+- As a local business owner, I want to generate a QR code that links directly to my Google review page so that customers can leave a review by scanning.
+- As a business accepting Bitcoin, I want to generate a QR code with my Bitcoin address and optional amount so that customers can scan to initiate payment.
+- As an event organizer, I want to generate a QR code that adds an event to the scanner's calendar so that attendees can save the date.
 
 **Features:**
 - [x] URL input with live preview (App, Free)
@@ -162,7 +167,9 @@ Create QR codes from multiple content types with real-time live preview.
 - [x] Email compose input (App, Free)
 - [x] SMS input (App, Free)
 - [x] Geographic location input (App, Free)
-- [ ] Calendar event input (App, Free) — no form or formatter implemented yet
+- [ ] Google Review input (Google Place ID → direct review URL) (App, Free)
+- [ ] Bitcoin/crypto payment input (BIP 21 URI: address, amount, label, message) (App, Free)
+- [ ] Calendar event input (VCALENDAR/VEVENT: title, location, start/end datetime, description, all-day toggle) (App, Free)
 - [x] Live preview canvas with real-time updates (App)
 - [x] Error correction selection: L/M/Q/H with guidance (App, Free)
 
