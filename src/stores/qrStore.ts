@@ -14,6 +14,7 @@ import type {
   EmailConfig,
   SmsConfig,
   GeoConfig,
+  GoogleReviewConfig,
 } from '../types/qr';
 
 interface QrState {
@@ -27,6 +28,7 @@ interface QrState {
   emailConfig: EmailConfig;
   smsConfig: SmsConfig;
   geoConfig: GeoConfig;
+  googleReviewConfig: GoogleReviewConfig;
 
   // Style
   dotStyle: DotStyle;
@@ -63,6 +65,7 @@ interface QrState {
   setEmailConfig: (config: Partial<EmailConfig>) => void;
   setSmsConfig: (config: Partial<SmsConfig>) => void;
   setGeoConfig: (config: Partial<GeoConfig>) => void;
+  setGoogleReviewConfig: (config: Partial<GoogleReviewConfig>) => void;
   setDotStyle: (style: DotStyle) => void;
   setCornerSquareStyle: (style: CornerSquareStyle) => void;
   setCornerDotStyle: (style: CornerDotStyle) => void;
@@ -116,6 +119,10 @@ const defaultGeoConfig: GeoConfig = {
   longitude: '',
 };
 
+const defaultGoogleReviewConfig: GoogleReviewConfig = {
+  placeId: '',
+};
+
 const defaultGradient: GradientConfig = {
   type: 'linear',
   rotation: 0,
@@ -136,6 +143,7 @@ export const useQrStore = create<QrState>((set, get) => ({
   emailConfig: defaultEmailConfig,
   smsConfig: defaultSmsConfig,
   geoConfig: defaultGeoConfig,
+  googleReviewConfig: defaultGoogleReviewConfig,
 
   // Style
   dotStyle: 'rounded',
@@ -191,6 +199,11 @@ export const useQrStore = create<QrState>((set, get) => ({
 
   setGeoConfig: (config) => set((state) => ({
     geoConfig: { ...state.geoConfig, ...config },
+    validationState: 'idle',
+  })),
+
+  setGoogleReviewConfig: (config) => set((state) => ({
+    googleReviewConfig: { ...state.googleReviewConfig, ...config },
     validationState: 'idle',
   })),
 
@@ -251,6 +264,7 @@ export const useQrStore = create<QrState>((set, get) => ({
     emailConfig: defaultEmailConfig,
     smsConfig: defaultSmsConfig,
     geoConfig: defaultGeoConfig,
+    googleReviewConfig: defaultGoogleReviewConfig,
     dotStyle: 'rounded',
     cornerSquareStyle: 'extra-rounded',
     cornerDotStyle: 'dot',

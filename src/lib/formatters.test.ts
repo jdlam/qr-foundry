@@ -7,6 +7,7 @@ import {
   formatPhone,
   formatGeo,
   formatUrl,
+  formatGoogleReview,
   detectQrType,
 } from './formatters';
 
@@ -268,6 +269,18 @@ describe('formatUrl', () => {
   });
 });
 
+describe('formatGoogleReview', () => {
+  it('formats Google Review URL with Place ID', () => {
+    const result = formatGoogleReview({ placeId: 'ChIJN1t_tDeuEmsRUsoyG83frY4' });
+    expect(result).toBe('https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4');
+  });
+
+  it('formats with empty Place ID', () => {
+    const result = formatGoogleReview({ placeId: '' });
+    expect(result).toBe('https://search.google.com/local/writereview?placeid=');
+  });
+});
+
 describe('detectQrType', () => {
   it('returns text for empty content', () => {
     expect(detectQrType('')).toBe('text');
@@ -306,6 +319,10 @@ describe('detectQrType', () => {
 
   it('detects calendar event content', () => {
     expect(detectQrType('BEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT')).toBe('calendar');
+  });
+
+  it('detects Google Review content', () => {
+    expect(detectQrType('https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4')).toBe('google-review');
   });
 
   it('detects URL content with protocol', () => {
