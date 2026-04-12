@@ -583,6 +583,7 @@ Features that are explicitly deferred or speculative. Not on any current impleme
 - [ ] **Custom redirect domains** — Let users bring their own domains, e.g. `go.mycompany.com` (ARCHITECTURE.md Future)
 - [ ] **Bulk operations API** — Batch create/update/delete for CSV-driven workflows (worker.md Future)
 - [ ] **Webhook notifications** — Notify users when a code hits a scan milestone (worker.md Future)
+- [ ] **App Store smart links** — Detect device type (iOS/Android/desktop) via User-Agent and redirect to the appropriate store URL. Requires: multi-destination KV schema (ios/android/fallback URLs per code), conditional redirect logic in Worker, new CRUD fields in API, multi-URL input form in App, optional platform breakdown in analytics. Touches Worker + App + ~2-3 days. (Identified via competitor analysis)
 - [ ] **A/B redirect testing** — Split traffic between two destination URLs with configurable weights (worker.md Future)
 - [ ] **QR code expiration warnings** — Email or in-app notification before a code expires (worker.md Future)
 - [ ] **Rate limiting** — Cloudflare WAF rate limiting or Durable Object token bucket (ARCHITECTURE.md Future)
