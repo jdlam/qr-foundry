@@ -7,6 +7,7 @@ import {
   formatPhone,
   formatGeo,
   formatUrl,
+  formatCalendarEvent,
   detectQrType,
 } from './formatters';
 
@@ -268,6 +269,72 @@ describe('formatUrl', () => {
   });
 });
 
+describe('formatCalendarEvent', () => {
+  it('formats a standard timed event', () => {
+    const result = formatCalendarEvent({
+      title: 'Team Meeting',
+      location: 'Conference Room A',
+      startDate: '2026-04-15',
+      startTime: '09:00',
+      endDate: '2026-04-15',
+      endTime: '10:00',
+      description: 'Weekly sync',
+    });
+    expect(result).toContain('BEGIN:VCALENDAR');
+    expect(result).toContain('BEGIN:VEVENT');
+    expect(result).toContain('SUMMARY:Team Meeting');
+    expect(result).toContain('DTSTART:20260415T090000');
+    expect(result).toContain('DTEND:20260415T100000');
+    expect(result).toContain('LOCATION:Conference Room A');
+    expect(result).toContain('DESCRIPTION:Weekly sync');
+    expect(result).toContain('END:VEVENT');
+    expect(result).toContain('END:VCALENDAR');
+  });
+
+  it('formats an all-day event', () => {
+    const result = formatCalendarEvent({
+      title: 'Company Holiday',
+      startDate: '2026-12-25',
+      startTime: '',
+      endDate: '2026-12-26',
+      endTime: '',
+      allDay: true,
+    });
+    expect(result).toContain('DTSTART;VALUE=DATE:20261225');
+    expect(result).toContain('DTEND;VALUE=DATE:20261226');
+    expect(result).not.toContain('DTSTART:');
+    expect(result).not.toContain('DTEND:2');
+  });
+
+  it('formats minimal fields (title + dates only)', () => {
+    const result = formatCalendarEvent({
+      title: 'Quick Event',
+      startDate: '2026-01-01',
+      startTime: '12:00',
+      endDate: '2026-01-01',
+      endTime: '13:00',
+    });
+    expect(result).toContain('SUMMARY:Quick Event');
+    expect(result).toContain('DTSTART:20260101T120000');
+    expect(result).toContain('DTEND:20260101T130000');
+    expect(result).not.toContain('LOCATION:');
+    expect(result).not.toContain('DESCRIPTION:');
+  });
+
+  it('handles special characters in title and description', () => {
+    const result = formatCalendarEvent({
+      title: 'Meeting: Q1 & Q2 Review',
+      startDate: '2026-03-01',
+      startTime: '14:00',
+      endDate: '2026-03-01',
+      endTime: '15:00',
+      description: 'Discuss Q1 results & plan Q2',
+    });
+    expect(result).toContain('SUMMARY:Meeting: Q1 & Q2 Review');
+    expect(result).toContain('DESCRIPTION:Discuss Q1 results & plan Q2');
+  });
+});
+
 describe('detectQrType', () => {
   it('returns text for empty content', () => {
     expect(detectQrType('')).toBe('text');
@@ -305,7 +372,9 @@ describe('detectQrType', () => {
   });
 
   it('detects calendar event content', () => {
+    expect(detectQrType('BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT\nEND:VCALENDAR')).toBe('calendar');
     expect(detectQrType('BEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT')).toBe('calendar');
+    expect(detectQrType('begin:vcalendar')).toBe('calendar');
   });
 
   it('detects URL content with protocol', () => {
