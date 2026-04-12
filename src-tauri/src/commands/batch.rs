@@ -510,6 +510,7 @@ mod tests {
 
     #[test]
     fn test_detect_qr_type_calendar() {
+        assert_eq!(detect_qr_type("BEGIN:VCALENDAR\r\nVERSION:2.0"), "calendar");
         assert_eq!(detect_qr_type("BEGIN:VEVENT\nSUMMARY:Meeting"), "calendar");
     }
 
