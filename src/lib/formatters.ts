@@ -151,7 +151,7 @@ export function formatUrl(url: string): string {
  * Format Google Review URL for QR code
  */
 export function formatGoogleReview(config: GoogleReviewConfig): string {
-  return `https://search.google.com/local/writereview?placeid=${config.placeId}`;
+  return `https://search.google.com/local/writereview?placeid=${encodeURIComponent(config.placeId)}`;
 }
 
 /**
@@ -169,7 +169,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('tel:')) return 'phone';
   if (lower.startsWith('geo:')) return 'geo';
   if (lower.startsWith('begin:vevent')) return 'calendar';
-  if (lower.includes('search.google.com/local/writereview')) return 'google-review';
+  if (lower.startsWith('https://search.google.com/local/writereview')) return 'google-review';
   if (/^https?:\/\//i.test(content)) return 'url';
   if (/^[a-z0-9.-]+\.[a-z]{2,}/i.test(content)) return 'url';
 

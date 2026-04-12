@@ -279,6 +279,11 @@ describe('formatGoogleReview', () => {
     const result = formatGoogleReview({ placeId: '' });
     expect(result).toBe('https://search.google.com/local/writereview?placeid=');
   });
+
+  it('encodes special characters in Place ID', () => {
+    const result = formatGoogleReview({ placeId: 'foo&bar=baz' });
+    expect(result).toBe('https://search.google.com/local/writereview?placeid=foo%26bar%3Dbaz');
+  });
 });
 
 describe('detectQrType', () => {
