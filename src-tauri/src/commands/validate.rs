@@ -200,6 +200,8 @@ fn detect_qr_type(content: &str) -> String {
         "geo".to_string()
     } else if lower.starts_with("begin:vevent") {
         "calendar".to_string()
+    } else if lower.starts_with("https://search.google.com/local/writereview") {
+        "google-review".to_string()
     } else if lower.starts_with("http://") || lower.starts_with("https://") {
         "url".to_string()
     } else {
@@ -234,6 +236,9 @@ mod tests {
 
         // Calendar
         assert_eq!(detect_qr_type("BEGIN:VEVENT"), "calendar");
+
+        // Google Review
+        assert_eq!(detect_qr_type("https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"), "google-review");
 
         // URL
         assert_eq!(detect_qr_type("https://example.com"), "url");
