@@ -1,4 +1,4 @@
-import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig } from '../types/qr';
+import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, CalendarConfig } from '../types/qr';
 
 /**
  * Format WiFi credentials for QR code
@@ -148,6 +148,47 @@ export function formatUrl(url: string): string {
 }
 
 /**
+ * Format calendar event for QR code
+ * Outputs VCALENDAR/VEVENT string
+ */
+export function formatCalendarEvent(config: CalendarConfig): string {
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'BEGIN:VEVENT',
+  ];
+
+  lines.push(`SUMMARY:${config.title}`);
+
+  if (config.allDay) {
+    // All-day events use VALUE=DATE format (YYYYMMDD)
+    const startDate = config.startDate.replace(/-/g, '');
+    const endDate = config.endDate.replace(/-/g, '');
+    lines.push(`DTSTART;VALUE=DATE:${startDate}`);
+    lines.push(`DTEND;VALUE=DATE:${endDate}`);
+  } else {
+    // Timed events use YYYYMMDDTHHMMSS format
+    const startDt = config.startDate.replace(/-/g, '') + 'T' + config.startTime.replace(/:/g, '') + '00';
+    const endDt = config.endDate.replace(/-/g, '') + 'T' + config.endTime.replace(/:/g, '') + '00';
+    lines.push(`DTSTART:${startDt}`);
+    lines.push(`DTEND:${endDt}`);
+  }
+
+  if (config.location) {
+    lines.push(`LOCATION:${config.location}`);
+  }
+
+  if (config.description) {
+    lines.push(`DESCRIPTION:${config.description}`);
+  }
+
+  lines.push('END:VEVENT');
+  lines.push('END:VCALENDAR');
+
+  return lines.join('\n');
+}
+
+/**
  * Detect QR type from content
  */
 export function detectQrType(content: string): string {
@@ -161,7 +202,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('sms:') || lower.startsWith('smsto:')) return 'sms';
   if (lower.startsWith('tel:')) return 'phone';
   if (lower.startsWith('geo:')) return 'geo';
-  if (lower.startsWith('begin:vevent')) return 'calendar';
+  if (lower.startsWith('begin:vcalendar') || lower.startsWith('begin:vevent')) return 'calendar';
   if (/^https?:\/\//i.test(content)) return 'url';
   if (/^[a-z0-9.-]+\.[a-z]{2,}/i.test(content)) return 'url';
 
