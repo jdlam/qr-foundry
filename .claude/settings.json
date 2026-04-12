@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "if": "Edit(src/**/*.{ts,tsx})|Write(src/**/*.{ts,tsx})",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run typecheck",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
