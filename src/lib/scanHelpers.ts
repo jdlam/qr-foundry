@@ -66,7 +66,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('sms:') || lower.startsWith('smsto:')) return 'sms';
   if (lower.startsWith('tel:')) return 'phone';
   if (lower.startsWith('geo:')) return 'geo';
-  if (lower.startsWith('begin:vevent')) return 'calendar';
+  if (lower.startsWith('begin:vcalendar') || lower.startsWith('begin:vevent')) return 'calendar';
   if (lower.startsWith('http://') || lower.startsWith('https://')) return 'url';
 
   return 'text';

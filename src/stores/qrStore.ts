@@ -14,6 +14,7 @@ import type {
   EmailConfig,
   SmsConfig,
   GeoConfig,
+  CalendarConfig,
 } from '../types/qr';
 
 interface QrState {
@@ -27,6 +28,7 @@ interface QrState {
   emailConfig: EmailConfig;
   smsConfig: SmsConfig;
   geoConfig: GeoConfig;
+  calendarConfig: CalendarConfig;
 
   // Style
   dotStyle: DotStyle;
@@ -63,6 +65,7 @@ interface QrState {
   setEmailConfig: (config: Partial<EmailConfig>) => void;
   setSmsConfig: (config: Partial<SmsConfig>) => void;
   setGeoConfig: (config: Partial<GeoConfig>) => void;
+  setCalendarConfig: (config: Partial<CalendarConfig>) => void;
   setDotStyle: (style: DotStyle) => void;
   setCornerSquareStyle: (style: CornerSquareStyle) => void;
   setCornerDotStyle: (style: CornerDotStyle) => void;
@@ -116,6 +119,17 @@ const defaultGeoConfig: GeoConfig = {
   longitude: '',
 };
 
+const defaultCalendarConfig: CalendarConfig = {
+  title: '',
+  location: '',
+  startDate: '',
+  startTime: '',
+  endDate: '',
+  endTime: '',
+  description: '',
+  allDay: false,
+};
+
 const defaultGradient: GradientConfig = {
   type: 'linear',
   rotation: 0,
@@ -136,6 +150,7 @@ export const useQrStore = create<QrState>((set, get) => ({
   emailConfig: defaultEmailConfig,
   smsConfig: defaultSmsConfig,
   geoConfig: defaultGeoConfig,
+  calendarConfig: defaultCalendarConfig,
 
   // Style
   dotStyle: 'rounded',
@@ -191,6 +206,11 @@ export const useQrStore = create<QrState>((set, get) => ({
 
   setGeoConfig: (config) => set((state) => ({
     geoConfig: { ...state.geoConfig, ...config },
+    validationState: 'idle',
+  })),
+
+  setCalendarConfig: (config) => set((state) => ({
+    calendarConfig: { ...state.calendarConfig, ...config },
     validationState: 'idle',
   })),
 
@@ -251,6 +271,7 @@ export const useQrStore = create<QrState>((set, get) => ({
     emailConfig: defaultEmailConfig,
     smsConfig: defaultSmsConfig,
     geoConfig: defaultGeoConfig,
+    calendarConfig: defaultCalendarConfig,
     dotStyle: 'rounded',
     cornerSquareStyle: 'extra-rounded',
     cornerDotStyle: 'dot',

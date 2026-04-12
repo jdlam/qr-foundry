@@ -8,6 +8,7 @@ import {
   formatPhone,
   formatGeo,
   formatUrl,
+  formatCalendarEvent,
 } from '../../lib/formatters';
 import type { QrType } from '../../types/qr';
 
@@ -20,6 +21,7 @@ const INPUT_TYPES: { id: QrType; label: string }[] = [
   { id: 'email', label: 'Email' },
   { id: 'sms', label: 'SMS' },
   { id: 'geo', label: 'Location' },
+  { id: 'calendar', label: 'Calendar' },
 ];
 
 export function InputPanel() {
@@ -31,6 +33,7 @@ export function InputPanel() {
     emailConfig,
     smsConfig,
     geoConfig,
+    calendarConfig,
     isDynamic,
     dynamicShortCode,
     dynamicLabel,
@@ -41,6 +44,7 @@ export function InputPanel() {
     setEmailConfig,
     setSmsConfig,
     setGeoConfig,
+    setCalendarConfig,
     setIsDynamic,
     setDynamicLabel,
   } = useQrStore();
@@ -336,6 +340,123 @@ export function InputPanel() {
               style={inputStyle}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+            />
+          </div>
+        );
+
+      case 'calendar':
+        return (
+          <div className="flex flex-col gap-2">
+            <input
+              value={calendarConfig.title}
+              onChange={(e) => {
+                setCalendarConfig({ title: e.target.value });
+                setContent(formatCalendarEvent({ ...calendarConfig, title: e.target.value }));
+              }}
+              placeholder="Event title"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={calendarConfig.location || ''}
+              onChange={(e) => {
+                setCalendarConfig({ location: e.target.value });
+                setContent(formatCalendarEvent({ ...calendarConfig, location: e.target.value }));
+              }}
+              placeholder="Location (optional)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <label className="flex items-center gap-2 text-[13px] cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+              <input
+                type="checkbox"
+                checked={calendarConfig.allDay || false}
+                onChange={(e) => {
+                  setCalendarConfig({ allDay: e.target.checked });
+                  setContent(formatCalendarEvent({ ...calendarConfig, allDay: e.target.checked }));
+                }}
+                className="accent-accent"
+              />
+              All-day event
+            </label>
+            <div>
+              <div className="text-[11px] font-mono mb-1" style={{ color: 'var(--text-faint)' }}>Start</div>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={calendarConfig.startDate}
+                  onChange={(e) => {
+                    setCalendarConfig({ startDate: e.target.value });
+                    setContent(formatCalendarEvent({ ...calendarConfig, startDate: e.target.value }));
+                  }}
+                  className={inputClassName}
+                  style={inputStyle}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                />
+                {!calendarConfig.allDay && (
+                  <input
+                    type="time"
+                    value={calendarConfig.startTime}
+                    onChange={(e) => {
+                      setCalendarConfig({ startTime: e.target.value });
+                      setContent(formatCalendarEvent({ ...calendarConfig, startTime: e.target.value }));
+                    }}
+                    className={inputClassName}
+                    style={inputStyle}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                  />
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="text-[11px] font-mono mb-1" style={{ color: 'var(--text-faint)' }}>End</div>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={calendarConfig.endDate}
+                  onChange={(e) => {
+                    setCalendarConfig({ endDate: e.target.value });
+                    setContent(formatCalendarEvent({ ...calendarConfig, endDate: e.target.value }));
+                  }}
+                  className={inputClassName}
+                  style={inputStyle}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                />
+                {!calendarConfig.allDay && (
+                  <input
+                    type="time"
+                    value={calendarConfig.endTime}
+                    onChange={(e) => {
+                      setCalendarConfig({ endTime: e.target.value });
+                      setContent(formatCalendarEvent({ ...calendarConfig, endTime: e.target.value }));
+                    }}
+                    className={inputClassName}
+                    style={inputStyle}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                  />
+                )}
+              </div>
+            </div>
+            <textarea
+              value={calendarConfig.description || ''}
+              onChange={(e) => {
+                setCalendarConfig({ description: e.target.value });
+                setContent(formatCalendarEvent({ ...calendarConfig, description: e.target.value }));
+              }}
+              placeholder="Description (optional)"
+              rows={2}
+              className={`${inputClassName} resize-y`}
+              style={inputStyle}
+              onFocus={handleInputFocus as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
+              onBlur={handleInputBlur as unknown as React.FocusEventHandler<HTMLTextAreaElement>}
             />
           </div>
         );
