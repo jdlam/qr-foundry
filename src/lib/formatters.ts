@@ -148,44 +148,66 @@ export function formatUrl(url: string): string {
 }
 
 /**
+ * Escape special characters in iCalendar TEXT values per RFC 5545 Section 3.3.11
+ */
+function escapeICalText(value: string): string {
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+}
+
+/**
+ * Normalize time string to HHMMSS format.
+ * Handles both "HH:MM" and "HH:MM:SS" from browser input.
+ */
+function formatICalTime(time: string): string {
+  const parts = time.split(':');
+  const hh = parts[0] || '00';
+  const mm = parts[1] || '00';
+  const ss = parts[2] || '00';
+  return `${hh}${mm}${ss}`;
+}
+
+/**
  * Format calendar event for QR code
- * Outputs VCALENDAR/VEVENT string
+ * Outputs VCALENDAR/VEVENT string per RFC 5545
  */
 export function formatCalendarEvent(config: CalendarConfig): string {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
+    'PRODID:-//QR Foundry//QR Foundry App//EN',
     'BEGIN:VEVENT',
   ];
 
-  lines.push(`SUMMARY:${config.title}`);
+  lines.push(`SUMMARY:${escapeICalText(config.title)}`);
 
   if (config.allDay) {
-    // All-day events use VALUE=DATE format (YYYYMMDD)
     const startDate = config.startDate.replace(/-/g, '');
     const endDate = config.endDate.replace(/-/g, '');
     lines.push(`DTSTART;VALUE=DATE:${startDate}`);
     lines.push(`DTEND;VALUE=DATE:${endDate}`);
   } else {
-    // Timed events use YYYYMMDDTHHMMSS format
-    const startDt = config.startDate.replace(/-/g, '') + 'T' + config.startTime.replace(/:/g, '') + '00';
-    const endDt = config.endDate.replace(/-/g, '') + 'T' + config.endTime.replace(/:/g, '') + '00';
+    const startDt = config.startDate.replace(/-/g, '') + 'T' + formatICalTime(config.startTime || '00:00');
+    const endDt = config.endDate.replace(/-/g, '') + 'T' + formatICalTime(config.endTime || '00:00');
     lines.push(`DTSTART:${startDt}`);
     lines.push(`DTEND:${endDt}`);
   }
 
   if (config.location) {
-    lines.push(`LOCATION:${config.location}`);
+    lines.push(`LOCATION:${escapeICalText(config.location)}`);
   }
 
   if (config.description) {
-    lines.push(`DESCRIPTION:${config.description}`);
+    lines.push(`DESCRIPTION:${escapeICalText(config.description)}`);
   }
 
   lines.push('END:VEVENT');
   lines.push('END:VCALENDAR');
 
-  return lines.join('\n');
+  return lines.join('\r\n');
 }
 
 /**

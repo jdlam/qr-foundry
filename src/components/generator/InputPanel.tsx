@@ -383,61 +383,67 @@ export function InputPanel() {
               />
               All-day event
             </label>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={calendarConfig.startDate}
-                onChange={(e) => {
-                  setCalendarConfig({ startDate: e.target.value });
-                  setContent(formatCalendarEvent({ ...calendarConfig, startDate: e.target.value }));
-                }}
-                className={inputClassName}
-                style={inputStyle}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-              />
-              {!calendarConfig.allDay && (
+            <div>
+              <div className="text-[11px] font-mono mb-1" style={{ color: 'var(--text-faint)' }}>Start</div>
+              <div className="flex gap-2">
                 <input
-                  type="time"
-                  value={calendarConfig.startTime}
+                  type="date"
+                  value={calendarConfig.startDate}
                   onChange={(e) => {
-                    setCalendarConfig({ startTime: e.target.value });
-                    setContent(formatCalendarEvent({ ...calendarConfig, startTime: e.target.value }));
+                    setCalendarConfig({ startDate: e.target.value });
+                    setContent(formatCalendarEvent({ ...calendarConfig, startDate: e.target.value }));
                   }}
                   className={inputClassName}
                   style={inputStyle}
                   onFocus={handleInputFocus}
                   onBlur={handleInputBlur}
                 />
-              )}
+                {!calendarConfig.allDay && (
+                  <input
+                    type="time"
+                    value={calendarConfig.startTime}
+                    onChange={(e) => {
+                      setCalendarConfig({ startTime: e.target.value });
+                      setContent(formatCalendarEvent({ ...calendarConfig, startTime: e.target.value }));
+                    }}
+                    className={inputClassName}
+                    style={inputStyle}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                  />
+                )}
+              </div>
             </div>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={calendarConfig.endDate}
-                onChange={(e) => {
-                  setCalendarConfig({ endDate: e.target.value });
-                  setContent(formatCalendarEvent({ ...calendarConfig, endDate: e.target.value }));
-                }}
-                className={inputClassName}
-                style={inputStyle}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-              />
-              {!calendarConfig.allDay && (
+            <div>
+              <div className="text-[11px] font-mono mb-1" style={{ color: 'var(--text-faint)' }}>End</div>
+              <div className="flex gap-2">
                 <input
-                  type="time"
-                  value={calendarConfig.endTime}
+                  type="date"
+                  value={calendarConfig.endDate}
                   onChange={(e) => {
-                    setCalendarConfig({ endTime: e.target.value });
-                    setContent(formatCalendarEvent({ ...calendarConfig, endTime: e.target.value }));
+                    setCalendarConfig({ endDate: e.target.value });
+                    setContent(formatCalendarEvent({ ...calendarConfig, endDate: e.target.value }));
                   }}
                   className={inputClassName}
                   style={inputStyle}
                   onFocus={handleInputFocus}
                   onBlur={handleInputBlur}
                 />
-              )}
+                {!calendarConfig.allDay && (
+                  <input
+                    type="time"
+                    value={calendarConfig.endTime}
+                    onChange={(e) => {
+                      setCalendarConfig({ endTime: e.target.value });
+                      setContent(formatCalendarEvent({ ...calendarConfig, endTime: e.target.value }));
+                    }}
+                    className={inputClassName}
+                    style={inputStyle}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
+                  />
+                )}
+              </div>
             </div>
             <textarea
               value={calendarConfig.description || ''}

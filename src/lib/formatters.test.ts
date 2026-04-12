@@ -270,7 +270,7 @@ describe('formatUrl', () => {
 });
 
 describe('formatCalendarEvent', () => {
-  it('formats a standard timed event', () => {
+  it('formats a standard timed event with CRLF and PRODID', () => {
     const result = formatCalendarEvent({
       title: 'Team Meeting',
       location: 'Conference Room A',
@@ -281,6 +281,7 @@ describe('formatCalendarEvent', () => {
       description: 'Weekly sync',
     });
     expect(result).toContain('BEGIN:VCALENDAR');
+    expect(result).toContain('PRODID:-//QR Foundry//QR Foundry App//EN');
     expect(result).toContain('BEGIN:VEVENT');
     expect(result).toContain('SUMMARY:Team Meeting');
     expect(result).toContain('DTSTART:20260415T090000');
@@ -289,6 +290,9 @@ describe('formatCalendarEvent', () => {
     expect(result).toContain('DESCRIPTION:Weekly sync');
     expect(result).toContain('END:VEVENT');
     expect(result).toContain('END:VCALENDAR');
+    // RFC 5545 requires CRLF line endings
+    expect(result).toContain('\r\n');
+    expect(result).not.toMatch(/[^\r]\n/);
   });
 
   it('formats an all-day event', () => {
@@ -303,7 +307,7 @@ describe('formatCalendarEvent', () => {
     expect(result).toContain('DTSTART;VALUE=DATE:20261225');
     expect(result).toContain('DTEND;VALUE=DATE:20261226');
     expect(result).not.toContain('DTSTART:');
-    expect(result).not.toContain('DTEND:2');
+    expect(result).not.toMatch(/^DTEND:\d{8}T/m);
   });
 
   it('formats minimal fields (title + dates only)', () => {
@@ -321,17 +325,43 @@ describe('formatCalendarEvent', () => {
     expect(result).not.toContain('DESCRIPTION:');
   });
 
-  it('handles special characters in title and description', () => {
+  it('escapes special characters per RFC 5545', () => {
     const result = formatCalendarEvent({
-      title: 'Meeting: Q1 & Q2 Review',
+      title: 'Meeting; recap, Q1 & Q2',
       startDate: '2026-03-01',
       startTime: '14:00',
       endDate: '2026-03-01',
       endTime: '15:00',
-      description: 'Discuss Q1 results & plan Q2',
+      description: 'Line 1\nLine 2',
+      location: 'Room A; Building 2',
     });
-    expect(result).toContain('SUMMARY:Meeting: Q1 & Q2 Review');
-    expect(result).toContain('DESCRIPTION:Discuss Q1 results & plan Q2');
+    expect(result).toContain('SUMMARY:Meeting\\; recap\\, Q1 & Q2');
+    expect(result).toContain('DESCRIPTION:Line 1\\nLine 2');
+    expect(result).toContain('LOCATION:Room A\\; Building 2');
+  });
+
+  it('normalizes HH:MM:SS time format from browser', () => {
+    const result = formatCalendarEvent({
+      title: 'Event',
+      startDate: '2026-01-01',
+      startTime: '09:30:45',
+      endDate: '2026-01-01',
+      endTime: '10:00:00',
+    });
+    expect(result).toContain('DTSTART:20260101T093045');
+    expect(result).toContain('DTEND:20260101T100000');
+  });
+
+  it('defaults empty time to 000000 for timed events', () => {
+    const result = formatCalendarEvent({
+      title: 'Event',
+      startDate: '2026-01-01',
+      startTime: '',
+      endDate: '2026-01-01',
+      endTime: '',
+    });
+    expect(result).toContain('DTSTART:20260101T000000');
+    expect(result).toContain('DTEND:20260101T000000');
   });
 });
 
@@ -372,7 +402,7 @@ describe('detectQrType', () => {
   });
 
   it('detects calendar event content', () => {
-    expect(detectQrType('BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT\nEND:VCALENDAR')).toBe('calendar');
+    expect(detectQrType('BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT')).toBe('calendar');
     expect(detectQrType('BEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT')).toBe('calendar');
     expect(detectQrType('begin:vcalendar')).toBe('calendar');
   });
