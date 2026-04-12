@@ -366,6 +366,7 @@ export function InputPanel() {
                 setContent(formatBitcoin({ ...bitcoinConfig, amount: e.target.value }));
               }}
               placeholder="Amount in BTC (optional)"
+              inputMode="decimal"
               className={inputClassName}
               style={inputStyle}
               onFocus={handleInputFocus}

@@ -449,6 +449,8 @@ fn detect_qr_type(content: &str) -> String {
         "geo".to_string()
     } else if lower.starts_with("begin:vevent") {
         "calendar".to_string()
+    } else if lower.starts_with("bitcoin:") {
+        "bitcoin".to_string()
     } else if lower.starts_with("http://") || lower.starts_with("https://") {
         "url".to_string()
     } else {

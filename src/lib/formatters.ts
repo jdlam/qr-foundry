@@ -156,7 +156,8 @@ export function formatBitcoin(config: BitcoinConfig): string {
 
   const params: string[] = [];
   if (config.amount) {
-    params.push(`amount=${encodeURIComponent(config.amount)}`);
+    // BIP 21: amount is a strict decimal literal, not encoded
+    params.push(`amount=${config.amount}`);
   }
   if (config.label) {
     params.push(`label=${encodeURIComponent(config.label)}`);
