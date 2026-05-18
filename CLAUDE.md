@@ -87,7 +87,7 @@ Vite path aliases (`@platform/*`) resolve to the correct platform at build time.
 ### Desktop App: Core (complete)
 
 - [x] Tauri project scaffold with React + TypeScript
-- [x] QR generation (URL, text, WiFi, phone, vCard, email, SMS, geo, calendar)
+- [x] QR generation (URL, text, WiFi, phone, vCard, email, SMS, geo, calendar, bitcoin, google-review)
 - [x] Live preview canvas
 - [x] Style customization (colors, dots, eyes, gradient fills)
 - [x] Logo embedding with drag-drop
