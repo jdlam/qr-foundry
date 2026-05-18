@@ -147,11 +147,22 @@ export function formatUrl(url: string): string {
   return url;
 }
 
+// Google Place IDs are URL-safe identifiers (alphanumeric + underscore + dash).
+// Reference: https://developers.google.com/maps/documentation/places/web-service/place-id
+const GOOGLE_PLACE_ID_RE = /^[A-Za-z0-9_-]+$/;
+
+export function isValidGooglePlaceId(placeId: string): boolean {
+  return GOOGLE_PLACE_ID_RE.test(placeId);
+}
+
 /**
- * Format Google Review URL for QR code
+ * Format Google Review URL for QR code. Place ID is interpolated unencoded —
+ * valid Place IDs are URL-safe by spec, and silently encoding bad input would
+ * produce a working URL that resolves to no place. Callers should reject
+ * invalid input via isValidGooglePlaceId before formatting.
  */
 export function formatGoogleReview(config: GoogleReviewConfig): string {
-  return `https://search.google.com/local/writereview?placeid=${encodeURIComponent(config.placeId)}`;
+  return `https://search.google.com/local/writereview?placeid=${config.placeId}`;
 }
 
 /**

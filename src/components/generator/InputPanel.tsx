@@ -9,6 +9,7 @@ import {
   formatGeo,
   formatUrl,
   formatGoogleReview,
+  isValidGooglePlaceId,
 } from '../../lib/formatters';
 import type { QrType } from '../../types/qr';
 
@@ -344,7 +345,10 @@ export function InputPanel() {
           </div>
         );
 
-      case 'google-review':
+      case 'google-review': {
+        const placeIdInvalid =
+          googleReviewConfig.placeId.length > 0 &&
+          !isValidGooglePlaceId(googleReviewConfig.placeId);
         return (
           <div className="flex flex-col gap-2">
             <input
@@ -358,7 +362,13 @@ export function InputPanel() {
               style={inputStyle}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              aria-invalid={placeIdInvalid}
             />
+            {placeIdInvalid && (
+              <p className="text-xs" style={{ color: 'var(--warning, #f59e0b)' }}>
+                Place IDs are alphanumeric, dashes, and underscores only.
+              </p>
+            )}
             <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
               Find your Place ID at{' '}
               <a
@@ -372,6 +382,7 @@ export function InputPanel() {
             </p>
           </div>
         );
+      }
 
       case 'url':
         return (

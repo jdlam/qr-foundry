@@ -8,6 +8,7 @@ import {
   formatGeo,
   formatUrl,
   formatGoogleReview,
+  isValidGooglePlaceId,
   detectQrType,
 } from './formatters';
 
@@ -276,13 +277,45 @@ describe('formatGoogleReview', () => {
   });
 
   it('formats with empty Place ID', () => {
+    // The formatter does not sanitize — invalid input is the caller's responsibility.
     const result = formatGoogleReview({ placeId: '' });
     expect(result).toBe('https://search.google.com/local/writereview?placeid=');
   });
 
-  it('encodes special characters in Place ID', () => {
+  it('passes Place ID through unencoded so invalid input produces an obviously-broken URL', () => {
     const result = formatGoogleReview({ placeId: 'foo&bar=baz' });
-    expect(result).toBe('https://search.google.com/local/writereview?placeid=foo%26bar%3Dbaz');
+    // Note: this URL has stray query params from the unsafe `&` — by design.
+    // Callers should reject invalid input via isValidGooglePlaceId.
+    expect(result).toBe('https://search.google.com/local/writereview?placeid=foo&bar=baz');
+  });
+});
+
+describe('isValidGooglePlaceId', () => {
+  it('accepts a real Place ID', () => {
+    expect(isValidGooglePlaceId('ChIJN1t_tDeuEmsRUsoyG83frY4')).toBe(true);
+  });
+
+  it('accepts dashes and underscores', () => {
+    expect(isValidGooglePlaceId('ChIJ-foo_bar123')).toBe(true);
+  });
+
+  it('rejects empty string', () => {
+    expect(isValidGooglePlaceId('')).toBe(false);
+  });
+
+  it('rejects whitespace', () => {
+    expect(isValidGooglePlaceId('ChIJ N1t_t')).toBe(false);
+    expect(isValidGooglePlaceId(' ChIJN1t_t')).toBe(false);
+  });
+
+  it('rejects URL special characters', () => {
+    expect(isValidGooglePlaceId('foo&bar=baz')).toBe(false);
+    expect(isValidGooglePlaceId('foo?bar')).toBe(false);
+    expect(isValidGooglePlaceId('foo/bar')).toBe(false);
+  });
+
+  it('rejects non-ASCII characters', () => {
+    expect(isValidGooglePlaceId('ChIJé')).toBe(false);
   });
 });
 
