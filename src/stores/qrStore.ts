@@ -15,6 +15,8 @@ import type {
   SmsConfig,
   GeoConfig,
   CalendarConfig,
+  BitcoinConfig,
+  GoogleReviewConfig,
 } from '../types/qr';
 
 interface QrState {
@@ -29,6 +31,8 @@ interface QrState {
   smsConfig: SmsConfig;
   geoConfig: GeoConfig;
   calendarConfig: CalendarConfig;
+  bitcoinConfig: BitcoinConfig;
+  googleReviewConfig: GoogleReviewConfig;
 
   // Style
   dotStyle: DotStyle;
@@ -66,6 +70,8 @@ interface QrState {
   setSmsConfig: (config: Partial<SmsConfig>) => void;
   setGeoConfig: (config: Partial<GeoConfig>) => void;
   setCalendarConfig: (config: Partial<CalendarConfig>) => void;
+  setBitcoinConfig: (config: Partial<BitcoinConfig>) => void;
+  setGoogleReviewConfig: (config: Partial<GoogleReviewConfig>) => void;
   setDotStyle: (style: DotStyle) => void;
   setCornerSquareStyle: (style: CornerSquareStyle) => void;
   setCornerDotStyle: (style: CornerDotStyle) => void;
@@ -130,6 +136,17 @@ const defaultCalendarConfig: CalendarConfig = {
   allDay: false,
 };
 
+const defaultBitcoinConfig: BitcoinConfig = {
+  address: '',
+  amount: '',
+  label: '',
+  message: '',
+};
+
+const defaultGoogleReviewConfig: GoogleReviewConfig = {
+  placeId: '',
+};
+
 const defaultGradient: GradientConfig = {
   type: 'linear',
   rotation: 0,
@@ -151,6 +168,8 @@ export const useQrStore = create<QrState>((set, get) => ({
   smsConfig: defaultSmsConfig,
   geoConfig: defaultGeoConfig,
   calendarConfig: defaultCalendarConfig,
+  bitcoinConfig: defaultBitcoinConfig,
+  googleReviewConfig: defaultGoogleReviewConfig,
 
   // Style
   dotStyle: 'rounded',
@@ -214,6 +233,16 @@ export const useQrStore = create<QrState>((set, get) => ({
     validationState: 'idle',
   })),
 
+  setBitcoinConfig: (config) => set((state) => ({
+    bitcoinConfig: { ...state.bitcoinConfig, ...config },
+    validationState: 'idle',
+  })),
+
+  setGoogleReviewConfig: (config) => set((state) => ({
+    googleReviewConfig: { ...state.googleReviewConfig, ...config },
+    validationState: 'idle',
+  })),
+
   setDotStyle: (dotStyle) => set({ dotStyle, validationState: 'idle' }),
 
   setCornerSquareStyle: (cornerSquareStyle) => set({ cornerSquareStyle, validationState: 'idle' }),
@@ -272,6 +301,8 @@ export const useQrStore = create<QrState>((set, get) => ({
     smsConfig: defaultSmsConfig,
     geoConfig: defaultGeoConfig,
     calendarConfig: defaultCalendarConfig,
+    bitcoinConfig: defaultBitcoinConfig,
+    googleReviewConfig: defaultGoogleReviewConfig,
     dotStyle: 'rounded',
     cornerSquareStyle: 'extra-rounded',
     cornerDotStyle: 'dot',

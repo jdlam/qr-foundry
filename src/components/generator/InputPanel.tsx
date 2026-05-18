@@ -9,6 +9,10 @@ import {
   formatGeo,
   formatUrl,
   formatCalendarEvent,
+  formatBitcoin,
+  isValidBitcoinAmount,
+  formatGoogleReview,
+  isValidGooglePlaceId,
 } from '../../lib/formatters';
 import type { QrType } from '../../types/qr';
 
@@ -22,6 +26,8 @@ const INPUT_TYPES: { id: QrType; label: string }[] = [
   { id: 'sms', label: 'SMS' },
   { id: 'geo', label: 'Location' },
   { id: 'calendar', label: 'Calendar' },
+  { id: 'bitcoin', label: 'Bitcoin' },
+  { id: 'google-review', label: 'Google Review' },
 ];
 
 export function InputPanel() {
@@ -34,6 +40,8 @@ export function InputPanel() {
     smsConfig,
     geoConfig,
     calendarConfig,
+    bitcoinConfig,
+    googleReviewConfig,
     isDynamic,
     dynamicShortCode,
     dynamicLabel,
@@ -45,6 +53,8 @@ export function InputPanel() {
     setSmsConfig,
     setGeoConfig,
     setCalendarConfig,
+    setBitcoinConfig,
+    setGoogleReviewConfig,
     setIsDynamic,
     setDynamicLabel,
   } = useQrStore();
@@ -464,6 +474,108 @@ export function InputPanel() {
             />
           </div>
         );
+
+      case 'bitcoin': {
+        const amountInvalid = !isValidBitcoinAmount(bitcoinConfig.amount);
+        return (
+          <div className="flex flex-col gap-2">
+            <input
+              value={bitcoinConfig.address}
+              onChange={(e) => {
+                setBitcoinConfig({ address: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, address: e.target.value }));
+              }}
+              placeholder="Bitcoin address"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={bitcoinConfig.amount || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ amount: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, amount: e.target.value }));
+              }}
+              placeholder="Amount in BTC (optional)"
+              inputMode="decimal"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              aria-invalid={amountInvalid}
+            />
+            {amountInvalid && (
+              <p className="text-xs" style={{ color: 'var(--warning, #f59e0b)' }}>
+                Amount must be a non-negative decimal (e.g. 0.5).
+              </p>
+            )}
+            <input
+              value={bitcoinConfig.label || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ label: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, label: e.target.value }));
+              }}
+              placeholder="Label (optional)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={bitcoinConfig.message || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ message: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, message: e.target.value }));
+              }}
+              placeholder="Message (optional)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
+        );
+      }
+
+      case 'google-review': {
+        const placeIdInvalid =
+          googleReviewConfig.placeId.length > 0 &&
+          !isValidGooglePlaceId(googleReviewConfig.placeId);
+        return (
+          <div className="flex flex-col gap-2">
+            <input
+              value={googleReviewConfig.placeId}
+              onChange={(e) => {
+                setGoogleReviewConfig({ placeId: e.target.value });
+                setContent(formatGoogleReview({ ...googleReviewConfig, placeId: e.target.value }));
+              }}
+              placeholder="Google Place ID (e.g. ChIJN1t_tDeuEmsRUsoyG83frY4)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              aria-invalid={placeIdInvalid}
+            />
+            {placeIdInvalid && (
+              <p className="text-xs" style={{ color: 'var(--warning, #f59e0b)' }}>
+                Place IDs are alphanumeric, dashes, and underscores only.
+              </p>
+            )}
+            <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
+              Find your Place ID at{' '}
+              <a
+                href="https://developers.google.com/maps/documentation/places/web-service/place-id"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)' }}
+              >
+                Google&apos;s Place ID documentation
+              </a>
+            </p>
+          </div>
+        );
+      }
 
       case 'url':
         return (
