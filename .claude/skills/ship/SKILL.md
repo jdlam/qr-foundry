@@ -1,20 +1,23 @@
 ---
-name: release
-description: Cut a release for one or all QR Foundry services (app, worker, api, site). Use when user wants to ship a version, tag a release, run `release.sh`, or asks to release/deploy a service. Handles pre-flight checks, the release script, GitHub Release creation, deploy-workflow monitoring, and post-release docs sync.
+name: ship
+description: Ship new code to production for one or all QR Foundry services (app, worker, api, site) — cuts a versioned release that triggers the deploy workflow. Use when user wants to ship code, push to production, cut a release, tag a version, or run `release.sh`. Handles pre-flight checks, the release script, GitHub Release creation, deploy-workflow monitoring, and post-release docs sync.
 ---
 
-# Release a QR Foundry service
+# Ship a QR Foundry service to production
+
+Cuts a versioned release (`vX.Y.Z`) for a service. The release tag triggers
+the service's deploy workflow, which pushes the new build to production.
 
 ## Quick start
 
 ```
-/release <service|all> <version> [--dry-run]
+/ship <service|all> <version> [--dry-run]
 ```
 
 Examples:
-- `/release app v0.3.0` — release just the desktop+web app
-- `/release all v0.3.0 --dry-run` — preview a coordinated release across all four services
-- `/release worker v0.2.1` — patch release of the redirect worker
+- `/ship app v0.3.0` — ship the desktop+web app to production
+- `/ship all v0.3.0 --dry-run` — preview a coordinated release across all four services
+- `/ship worker v0.2.1` — patch release of the redirect worker
 
 ## Service map
 
