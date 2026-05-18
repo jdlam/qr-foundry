@@ -15,19 +15,19 @@ This file is a lightweight index. All planning resources live in this directory.
 
 | Service | Repo | Plan | Status |
 |---------|------|------|--------|
-| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. Grace period cron enforcement implemented |
-| **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-7 complete (auth, gating, dynamic codes CRUD, analytics, platform abstraction, web deploy to `app.qr-foundry.com`, 11 QR types incl. Calendar/Bitcoin/Google Review); release pipeline + auto-updater added |
-| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-9 complete, deployed to production at `api.qr-foundry.com` |
-| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phases 1-3 complete: landing page, pricing, blog (5 articles, MDX content collections, BlogPosting JSON-LD, sitemap auto-generation) |
+| **Redirect Worker** | `qr-foundry-worker` | [`services/worker.md`](services/worker.md) | Phases 1-8 complete, deployed to production at `qrfo.link`. v0.2.0 adds free-tier redirect rate limiting and status validation hardening |
+| **Desktop + Web App** | `qr-foundry-app` | [`services/app.md`](services/app.md) | Phases 1-7 complete (auth, gating, dynamic codes CRUD, analytics, platform abstraction, web deploy to `app.qr-foundry.com`, 11 QR types incl. Calendar/Bitcoin/Google Review); release pipeline + auto-updater. v0.3.0 ships 3 new QR types |
+| **Billing API** | `qr-foundry-api` | [`services/billing-api.md`](services/billing-api.md) | Phases 1-9 complete, deployed to production at `api.qr-foundry.com`. v0.2.0 adds 14-day Stripe-native free trial for first-time subscribers |
+| **Marketing Site** | `qr-foundry-site` | [`services/marketing-site.md`](services/marketing-site.md) | Phases 1-3 complete: landing page, pricing (with 14-day trial + refund policy surfaced), blog (5 SEO articles), CTAs. v0.2.2 humanizes blog/marketing copy |
 
 ## Current Releases
 
 | Service | Version | Date | Domain |
 |---------|---------|------|--------|
-| **Redirect Worker** | v0.1.0 | 2026-02-13 | `qrfo.link` |
-| **Billing API** | v0.1.2 | 2026-02-14 | `api.qr-foundry.com` |
-| **Desktop + Web App** | v0.2.0 | 2026-02-14 | downloadable / `app.qr-foundry.com` |
-| **Marketing Site** | v0.2.0 | 2026-03-21 | `qr-foundry.com` |
+| **Redirect Worker** | v0.2.0 | 2026-05-18 | `qrfo.link` |
+| **Billing API** | v0.2.0 | 2026-05-18 | `api.qr-foundry.com` |
+| **Desktop + Web App** | v0.3.0 | 2026-05-18 | downloadable / `app.qr-foundry.com` |
+| **Marketing Site** | v0.2.2 | 2026-05-18 | `qr-foundry.com` |
 
 ## Pricing Model (quick reference)
 

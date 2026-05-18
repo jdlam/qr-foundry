@@ -87,10 +87,10 @@ Never merge strategy or implementation changes with stale shared docs.
 
 | Service | Version | Status |
 |---------|---------|--------|
-| **Worker** | v0.1.0 | Phases 1-8 complete (172 tests), deployed to production at `qrfo.link` |
-| **Billing API** | v0.1.2 | Phases 1-9 complete (201 tests), deployed to production at `api.qr-foundry.com` |
-| **Desktop + Web App** | v0.2.0 | Phases 1-7 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, web deploy to `app.qr-foundry.com`, 11 QR types incl. Calendar/Bitcoin/Google Review (588 tests) |
-| **Marketing Site** | v0.1.0 | Phase 1 complete (landing page, dark/light theme, QR generator, pricing, CI/CD); Phases 2-3 pending |
+| **Worker** | v0.2.0 | Phases 1-8 complete (187 tests); free-tier redirect rate limiting + status validation hardening shipped, deployed to production at `qrfo.link` |
+| **Billing API** | v0.2.0 | Phases 1-9 complete (203 tests); 14-day Stripe-native free trial for first-time subscribers shipped, deployed to production at `api.qr-foundry.com` |
+| **Desktop + Web App** | v0.3.0 | Phases 1-7 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, web deploy to `app.qr-foundry.com`, 11 QR types incl. Calendar/Bitcoin/Google Review (588 tests) |
+| **Marketing Site** | v0.2.2 | Phases 1-3 complete: landing page, pricing (with 14-day trial + refund policy surfaced), blog (5 SEO articles), CTAs |
 
 **Feature totals:** maintain counts in `plans/architecture/FEATURES.md` as part of the Documentation Sync Gate.
 
