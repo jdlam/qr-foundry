@@ -10,6 +10,8 @@ import {
   formatUrl,
   formatBitcoin,
   isValidBitcoinAmount,
+  formatGoogleReview,
+  isValidGooglePlaceId,
 } from '../../lib/formatters';
 import type { QrType } from '../../types/qr';
 
@@ -23,6 +25,7 @@ const INPUT_TYPES: { id: QrType; label: string }[] = [
   { id: 'sms', label: 'SMS' },
   { id: 'geo', label: 'Location' },
   { id: 'bitcoin', label: 'Bitcoin' },
+  { id: 'google-review', label: 'Google Review' },
 ];
 
 export function InputPanel() {
@@ -35,6 +38,7 @@ export function InputPanel() {
     smsConfig,
     geoConfig,
     bitcoinConfig,
+    googleReviewConfig,
     isDynamic,
     dynamicShortCode,
     dynamicLabel,
@@ -46,6 +50,7 @@ export function InputPanel() {
     setSmsConfig,
     setGeoConfig,
     setBitcoinConfig,
+    setGoogleReviewConfig,
     setIsDynamic,
     setDynamicLabel,
   } = useQrStore();
@@ -404,6 +409,45 @@ export function InputPanel() {
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
             />
+          </div>
+        );
+      }
+
+      case 'google-review': {
+        const placeIdInvalid =
+          googleReviewConfig.placeId.length > 0 &&
+          !isValidGooglePlaceId(googleReviewConfig.placeId);
+        return (
+          <div className="flex flex-col gap-2">
+            <input
+              value={googleReviewConfig.placeId}
+              onChange={(e) => {
+                setGoogleReviewConfig({ placeId: e.target.value });
+                setContent(formatGoogleReview({ ...googleReviewConfig, placeId: e.target.value }));
+              }}
+              placeholder="Google Place ID (e.g. ChIJN1t_tDeuEmsRUsoyG83frY4)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              aria-invalid={placeIdInvalid}
+            />
+            {placeIdInvalid && (
+              <p className="text-xs" style={{ color: 'var(--warning, #f59e0b)' }}>
+                Place IDs are alphanumeric, dashes, and underscores only.
+              </p>
+            )}
+            <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
+              Find your Place ID at{' '}
+              <a
+                href="https://developers.google.com/maps/documentation/places/web-service/place-id"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)' }}
+              >
+                Google&apos;s Place ID documentation
+              </a>
+            </p>
           </div>
         );
       }

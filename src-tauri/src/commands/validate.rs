@@ -202,6 +202,8 @@ fn detect_qr_type(content: &str) -> String {
         "calendar".to_string()
     } else if lower.starts_with("bitcoin:") {
         "bitcoin".to_string()
+    } else if lower.starts_with("https://search.google.com/local/writereview") {
+        "google-review".to_string()
     } else if lower.starts_with("http://") || lower.starts_with("https://") {
         "url".to_string()
     } else {
@@ -240,6 +242,9 @@ mod tests {
         // Bitcoin
         assert_eq!(detect_qr_type("bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"), "bitcoin");
         assert_eq!(detect_qr_type("BITCOIN:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?amount=0.5"), "bitcoin");
+
+        // Google Review
+        assert_eq!(detect_qr_type("https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"), "google-review");
 
         // URL
         assert_eq!(detect_qr_type("https://example.com"), "url");

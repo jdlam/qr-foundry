@@ -1,4 +1,4 @@
-import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, BitcoinConfig } from '../types/qr';
+import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, BitcoinConfig, GoogleReviewConfig } from '../types/qr';
 
 /**
  * Format WiFi credentials for QR code
@@ -190,6 +190,24 @@ export function formatBitcoin(config: BitcoinConfig): string {
   return result;
 }
 
+// Google Place IDs are URL-safe identifiers (alphanumeric + underscore + dash).
+// Reference: https://developers.google.com/maps/documentation/places/web-service/place-id
+const GOOGLE_PLACE_ID_RE = /^[A-Za-z0-9_-]+$/;
+
+export function isValidGooglePlaceId(placeId: string): boolean {
+  return GOOGLE_PLACE_ID_RE.test(placeId);
+}
+
+/**
+ * Format Google Review URL for QR code. Place ID is interpolated unencoded —
+ * valid Place IDs are URL-safe by spec, and silently encoding bad input would
+ * produce a working URL that resolves to no place. Callers should reject
+ * invalid input via isValidGooglePlaceId before formatting.
+ */
+export function formatGoogleReview(config: GoogleReviewConfig): string {
+  return `https://search.google.com/local/writereview?placeid=${config.placeId}`;
+}
+
 /**
  * Detect QR type from content
  */
@@ -206,6 +224,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('geo:')) return 'geo';
   if (lower.startsWith('begin:vevent')) return 'calendar';
   if (lower.startsWith('bitcoin:')) return 'bitcoin';
+  if (lower.startsWith('https://search.google.com/local/writereview')) return 'google-review';
   if (/^https?:\/\//i.test(content)) return 'url';
   if (/^[a-z0-9.-]+\.[a-z]{2,}/i.test(content)) return 'url';
 

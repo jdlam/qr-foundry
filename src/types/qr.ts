@@ -9,7 +9,8 @@ export type QrType =
   | 'phone'
   | 'geo'
   | 'calendar'
-  | 'bitcoin';
+  | 'bitcoin'
+  | 'google-review';
 
 // Dot style options
 export type DotStyle = 'square' | 'rounded' | 'dots' | 'classy' | 'classy-rounded' | 'extra-rounded';
@@ -124,6 +125,11 @@ export interface BitcoinConfig {
   amount?: string;
   label?: string;
   message?: string;
+}
+
+// Google Review input
+export interface GoogleReviewConfig {
+  placeId: string;
 }
 
 // Template

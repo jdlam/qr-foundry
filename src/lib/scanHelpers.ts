@@ -68,6 +68,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('geo:')) return 'geo';
   if (lower.startsWith('begin:vevent')) return 'calendar';
   if (lower.startsWith('bitcoin:')) return 'bitcoin';
+  if (lower.startsWith('https://search.google.com/local/writereview')) return 'google-review';
   if (lower.startsWith('http://') || lower.startsWith('https://')) return 'url';
 
   return 'text';
