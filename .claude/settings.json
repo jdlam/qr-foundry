@@ -3,10 +3,10 @@
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "if": "Edit(plans/**)|Write(plans/**)",
         "hooks": [
           {
             "type": "command",
+            "if": "Edit(plans/**)|Write(plans/**)",
             "command": "if [ -x \"$CLAUDE_PROJECT_DIR/scripts/check-doc-drift.sh\" ]; then \"$CLAUDE_PROJECT_DIR/scripts/check-doc-drift.sh\"; fi",
             "timeout": 30
           }
