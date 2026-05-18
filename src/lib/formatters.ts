@@ -147,6 +147,15 @@ export function formatUrl(url: string): string {
   return url;
 }
 
+// BIP 21 amount grammar: non-negative decimal literal (digits, optional fractional part).
+// Empty/undefined means "amount omitted" — the field is optional.
+const BITCOIN_AMOUNT_RE = /^\d+(\.\d+)?$/;
+
+export function isValidBitcoinAmount(amount: string | undefined): boolean {
+  if (!amount) return true;
+  return BITCOIN_AMOUNT_RE.test(amount);
+}
+
 /**
  * Format Bitcoin payment URI (BIP 21)
  * Format: bitcoin:<address>?amount=<amount>&label=<label>&message=<message>

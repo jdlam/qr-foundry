@@ -8,6 +8,7 @@ import {
   formatGeo,
   formatUrl,
   formatBitcoin,
+  isValidBitcoinAmount,
   detectQrType,
 } from './formatters';
 
@@ -314,6 +315,49 @@ describe('formatBitcoin', () => {
     });
     expect(result).toContain('label=Coffee%20%26%20Cake');
     expect(result).toContain('message=Pay%20for%20order%20%23123');
+  });
+});
+
+describe('isValidBitcoinAmount', () => {
+  it('treats empty/undefined as valid (amount is optional)', () => {
+    expect(isValidBitcoinAmount('')).toBe(true);
+    expect(isValidBitcoinAmount(undefined)).toBe(true);
+  });
+
+  it('accepts whole-number amounts', () => {
+    expect(isValidBitcoinAmount('0')).toBe(true);
+    expect(isValidBitcoinAmount('1')).toBe(true);
+    expect(isValidBitcoinAmount('21000000')).toBe(true);
+  });
+
+  it('accepts fractional amounts', () => {
+    expect(isValidBitcoinAmount('0.5')).toBe(true);
+    expect(isValidBitcoinAmount('1.00000001')).toBe(true);
+    expect(isValidBitcoinAmount('12.34')).toBe(true);
+  });
+
+  it('rejects non-numeric input', () => {
+    expect(isValidBitcoinAmount('abc')).toBe(false);
+    expect(isValidBitcoinAmount('12.5x')).toBe(false);
+    expect(isValidBitcoinAmount('1,000.5')).toBe(false);
+  });
+
+  it('rejects negatives', () => {
+    expect(isValidBitcoinAmount('-1')).toBe(false);
+    expect(isValidBitcoinAmount('-0.5')).toBe(false);
+  });
+
+  it('rejects malformed decimals', () => {
+    expect(isValidBitcoinAmount('.5')).toBe(false);
+    expect(isValidBitcoinAmount('12.')).toBe(false);
+    expect(isValidBitcoinAmount('1..5')).toBe(false);
+    expect(isValidBitcoinAmount(' 1.5')).toBe(false);
+    expect(isValidBitcoinAmount('1.5 ')).toBe(false);
+  });
+
+  it('rejects scientific notation', () => {
+    // BIP 21 grammar is a strict decimal literal, no exponent.
+    expect(isValidBitcoinAmount('1e8')).toBe(false);
   });
 });
 

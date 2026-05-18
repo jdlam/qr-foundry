@@ -9,6 +9,7 @@ import {
   formatGeo,
   formatUrl,
   formatBitcoin,
+  isValidBitcoinAmount,
 } from '../../lib/formatters';
 import type { QrType } from '../../types/qr';
 
@@ -344,7 +345,8 @@ export function InputPanel() {
           </div>
         );
 
-      case 'bitcoin':
+      case 'bitcoin': {
+        const amountInvalid = !isValidBitcoinAmount(bitcoinConfig.amount);
         return (
           <div className="flex flex-col gap-2">
             <input
@@ -371,7 +373,13 @@ export function InputPanel() {
               style={inputStyle}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
+              aria-invalid={amountInvalid}
             />
+            {amountInvalid && (
+              <p className="text-xs" style={{ color: 'var(--warning, #f59e0b)' }}>
+                Amount must be a non-negative decimal (e.g. 0.5).
+              </p>
+            )}
             <input
               value={bitcoinConfig.label || ''}
               onChange={(e) => {
@@ -398,6 +406,7 @@ export function InputPanel() {
             />
           </div>
         );
+      }
 
       case 'url':
         return (
