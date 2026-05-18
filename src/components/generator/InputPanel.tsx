@@ -388,6 +388,7 @@ export function InputPanel() {
               <div className="flex gap-2">
                 <input
                   type="date"
+                  aria-label="Start date"
                   value={calendarConfig.startDate}
                   onChange={(e) => {
                     setCalendarConfig({ startDate: e.target.value });
@@ -401,6 +402,7 @@ export function InputPanel() {
                 {!calendarConfig.allDay && (
                   <input
                     type="time"
+                    aria-label="Start time"
                     value={calendarConfig.startTime}
                     onChange={(e) => {
                       setCalendarConfig({ startTime: e.target.value });
@@ -419,6 +421,7 @@ export function InputPanel() {
               <div className="flex gap-2">
                 <input
                   type="date"
+                  aria-label="End date"
                   value={calendarConfig.endDate}
                   onChange={(e) => {
                     setCalendarConfig({ endDate: e.target.value });
@@ -432,6 +435,7 @@ export function InputPanel() {
                 {!calendarConfig.allDay && (
                   <input
                     type="time"
+                    aria-label="End time"
                     value={calendarConfig.endTime}
                     onChange={(e) => {
                       setCalendarConfig({ endTime: e.target.value });

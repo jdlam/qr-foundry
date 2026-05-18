@@ -290,9 +290,81 @@ describe('formatCalendarEvent', () => {
     expect(result).toContain('DESCRIPTION:Weekly sync');
     expect(result).toContain('END:VEVENT');
     expect(result).toContain('END:VCALENDAR');
+    // RFC 5545 requires UID + DTSTAMP on every VEVENT
+    expect(result).toMatch(/UID:.+@qr-foundry/);
+    expect(result).toMatch(/DTSTAMP:\d{8}T\d{6}Z/);
     // RFC 5545 requires CRLF line endings
     expect(result).toContain('\r\n');
     expect(result).not.toMatch(/[^\r]\n/);
+  });
+
+  it('generates a unique UID per call', () => {
+    const a = formatCalendarEvent({
+      title: 'A',
+      startDate: '2026-01-01',
+      startTime: '09:00',
+      endDate: '2026-01-01',
+      endTime: '10:00',
+    });
+    const b = formatCalendarEvent({
+      title: 'B',
+      startDate: '2026-01-01',
+      startTime: '09:00',
+      endDate: '2026-01-01',
+      endTime: '10:00',
+    });
+    const uidA = a.match(/UID:(.+)/)?.[1];
+    const uidB = b.match(/UID:(.+)/)?.[1];
+    expect(uidA).toBeTruthy();
+    expect(uidB).toBeTruthy();
+    expect(uidA).not.toBe(uidB);
+  });
+
+  it('returns empty string when required fields are missing', () => {
+    // No title
+    expect(
+      formatCalendarEvent({
+        title: '',
+        startDate: '2026-01-01',
+        startTime: '09:00',
+        endDate: '2026-01-01',
+        endTime: '10:00',
+      }),
+    ).toBe('');
+    // Empty startDate (store default before user input)
+    expect(
+      formatCalendarEvent({
+        title: 'Event',
+        startDate: '',
+        startTime: '09:00',
+        endDate: '2026-01-01',
+        endTime: '10:00',
+      }),
+    ).toBe('');
+    // Malformed date
+    expect(
+      formatCalendarEvent({
+        title: 'Event',
+        startDate: '2026/01/01',
+        startTime: '09:00',
+        endDate: '2026-01-01',
+        endTime: '10:00',
+      }),
+    ).toBe('');
+  });
+
+  it('normalizes Windows CRLF in description before escaping', () => {
+    const result = formatCalendarEvent({
+      title: 'Event',
+      startDate: '2026-01-01',
+      startTime: '09:00',
+      endDate: '2026-01-01',
+      endTime: '10:00',
+      description: 'Line 1\r\nLine 2\rLine 3',
+    });
+    expect(result).toContain('DESCRIPTION:Line 1\\nLine 2\\nLine 3');
+    // No stray \r in the description value would survive the join
+    expect(result).not.toMatch(/DESCRIPTION:[^\r]*\r[^\n]/);
   });
 
   it('formats an all-day event', () => {
