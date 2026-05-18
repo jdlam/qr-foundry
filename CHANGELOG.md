@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-18
+
+### Added
+
+- **Calendar Event QR type** — VCALENDAR/VEVENT formatter with title, location, start/end datetime, description, and all-day toggle (UID + DTSTAMP per RFC 5545). Scanning prompts the user to add the event to their calendar (#45)
+- **Bitcoin Payment QR type** — BIP 21 URI formatter with address, optional amount (strict decimal validation), label, and message. Scanning opens the user's Bitcoin wallet pre-filled (#47)
+- **Google Review QR type** — Google Place ID input with format validation, formatted as a direct review URL. Scanning takes customers straight to the review form (#46)
+- Auto-release workflow: pushing a new `## [X.Y.Z]` entry to `CHANGELOG.md` on `main` now bumps all version files (`package.json`, `tauri.conf.json`, `Cargo.toml`, `Cargo.lock`) and creates a GitHub Release that triggers the binary build + attach workflow (#40)
+
+### Fixed
+
+- Removed stale "7-day Pro trial" toast on signup — the Pro tier is gone and there is no 7-day trial. The free 14-day trial of the Subscription tier is surfaced by the Billing API/site (#49)
+- Aligned `Cargo.lock` version with `v0.2.0` so subsequent release tooling sees a clean version file (#39)
+
+### CI/Tooling
+
+- macOS x86_64 build: switched to `macos-13` runner and install Rosetta 2 on ARM runners so the DMG actually builds (#42, #44)
+- Bumped GitHub Actions Node.js from 20 → 24 across all workflows, silencing deprecation warnings (#41, #43)
+
 ## [0.2.0] - 2026-02-14
 
 ### Added
