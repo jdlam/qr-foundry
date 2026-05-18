@@ -14,6 +14,7 @@ import type {
   EmailConfig,
   SmsConfig,
   GeoConfig,
+  CalendarConfig,
   BitcoinConfig,
   GoogleReviewConfig,
 } from '../types/qr';
@@ -29,6 +30,7 @@ interface QrState {
   emailConfig: EmailConfig;
   smsConfig: SmsConfig;
   geoConfig: GeoConfig;
+  calendarConfig: CalendarConfig;
   bitcoinConfig: BitcoinConfig;
   googleReviewConfig: GoogleReviewConfig;
 
@@ -67,6 +69,7 @@ interface QrState {
   setEmailConfig: (config: Partial<EmailConfig>) => void;
   setSmsConfig: (config: Partial<SmsConfig>) => void;
   setGeoConfig: (config: Partial<GeoConfig>) => void;
+  setCalendarConfig: (config: Partial<CalendarConfig>) => void;
   setBitcoinConfig: (config: Partial<BitcoinConfig>) => void;
   setGoogleReviewConfig: (config: Partial<GoogleReviewConfig>) => void;
   setDotStyle: (style: DotStyle) => void;
@@ -122,6 +125,17 @@ const defaultGeoConfig: GeoConfig = {
   longitude: '',
 };
 
+const defaultCalendarConfig: CalendarConfig = {
+  title: '',
+  location: '',
+  startDate: '',
+  startTime: '',
+  endDate: '',
+  endTime: '',
+  description: '',
+  allDay: false,
+};
+
 const defaultBitcoinConfig: BitcoinConfig = {
   address: '',
   amount: '',
@@ -153,6 +167,7 @@ export const useQrStore = create<QrState>((set, get) => ({
   emailConfig: defaultEmailConfig,
   smsConfig: defaultSmsConfig,
   geoConfig: defaultGeoConfig,
+  calendarConfig: defaultCalendarConfig,
   bitcoinConfig: defaultBitcoinConfig,
   googleReviewConfig: defaultGoogleReviewConfig,
 
@@ -210,6 +225,11 @@ export const useQrStore = create<QrState>((set, get) => ({
 
   setGeoConfig: (config) => set((state) => ({
     geoConfig: { ...state.geoConfig, ...config },
+    validationState: 'idle',
+  })),
+
+  setCalendarConfig: (config) => set((state) => ({
+    calendarConfig: { ...state.calendarConfig, ...config },
     validationState: 'idle',
   })),
 
@@ -280,6 +300,7 @@ export const useQrStore = create<QrState>((set, get) => ({
     emailConfig: defaultEmailConfig,
     smsConfig: defaultSmsConfig,
     geoConfig: defaultGeoConfig,
+    calendarConfig: defaultCalendarConfig,
     bitcoinConfig: defaultBitcoinConfig,
     googleReviewConfig: defaultGoogleReviewConfig,
     dotStyle: 'rounded',

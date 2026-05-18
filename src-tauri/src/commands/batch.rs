@@ -447,7 +447,7 @@ fn detect_qr_type(content: &str) -> String {
         "phone".to_string()
     } else if lower.starts_with("geo:") {
         "geo".to_string()
-    } else if lower.starts_with("begin:vevent") {
+    } else if lower.starts_with("begin:vcalendar") || lower.starts_with("begin:vevent") {
         "calendar".to_string()
     } else if lower.starts_with("bitcoin:") {
         "bitcoin".to_string()
@@ -514,6 +514,7 @@ mod tests {
 
     #[test]
     fn test_detect_qr_type_calendar() {
+        assert_eq!(detect_qr_type("BEGIN:VCALENDAR\r\nVERSION:2.0"), "calendar");
         assert_eq!(detect_qr_type("BEGIN:VEVENT\nSUMMARY:Meeting"), "calendar");
     }
 

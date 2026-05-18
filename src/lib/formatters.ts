@@ -1,4 +1,4 @@
-import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, BitcoinConfig, GoogleReviewConfig } from '../types/qr';
+import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, CalendarConfig, BitcoinConfig, GoogleReviewConfig } from '../types/qr';
 
 /**
  * Format WiFi credentials for QR code
@@ -209,6 +209,100 @@ export function formatGoogleReview(config: GoogleReviewConfig): string {
 }
 
 /**
+ * Escape special characters in iCalendar TEXT values per RFC 5545 Section 3.3.11.
+ * Normalizes CRLF/CR to LF first so a Windows-pasted description doesn't leave
+ * stray \r bytes that break the line structure when joined with CRLF below.
+ */
+function escapeICalText(value: string): string {
+  return value
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\n/g, '\\n');
+}
+
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Normalize time string to HHMMSS format.
+ * Handles both "HH:MM" and "HH:MM:SS" from browser input.
+ */
+function formatICalTime(time: string): string {
+  const parts = time.split(':');
+  const hh = parts[0] || '00';
+  const mm = parts[1] || '00';
+  const ss = parts[2] || '00';
+  return `${hh}${mm}${ss}`;
+}
+
+/** Current UTC timestamp in iCalendar DTSTAMP form (YYYYMMDDTHHMMSSZ). */
+function nowUtcStamp(): string {
+  return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+}
+
+/** Generate a UID for an iCalendar VEVENT. Uses crypto.randomUUID when available. */
+function generateUid(): string {
+  const uuid =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${uuid}@qr-foundry`;
+}
+
+/**
+ * Format calendar event for QR code.
+ * Outputs VCALENDAR/VEVENT string per RFC 5545.
+ *
+ * Returns an empty string when required date fields are missing or
+ * malformed — emitting "DTSTART:T000000" produces an invalid event that
+ * some parsers reject or silently de-duplicate.
+ */
+export function formatCalendarEvent(config: CalendarConfig): string {
+  if (!config.title?.trim()) return '';
+  if (!ISO_DATE_RE.test(config.startDate) || !ISO_DATE_RE.test(config.endDate)) {
+    return '';
+  }
+
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//QR Foundry//QR Foundry App//EN',
+    'BEGIN:VEVENT',
+    `UID:${generateUid()}`,
+    `DTSTAMP:${nowUtcStamp()}`,
+  ];
+
+  lines.push(`SUMMARY:${escapeICalText(config.title)}`);
+
+  if (config.allDay) {
+    const startDate = config.startDate.replace(/-/g, '');
+    const endDate = config.endDate.replace(/-/g, '');
+    lines.push(`DTSTART;VALUE=DATE:${startDate}`);
+    lines.push(`DTEND;VALUE=DATE:${endDate}`);
+  } else {
+    const startDt = config.startDate.replace(/-/g, '') + 'T' + formatICalTime(config.startTime || '00:00');
+    const endDt = config.endDate.replace(/-/g, '') + 'T' + formatICalTime(config.endTime || '00:00');
+    lines.push(`DTSTART:${startDt}`);
+    lines.push(`DTEND:${endDt}`);
+  }
+
+  if (config.location) {
+    lines.push(`LOCATION:${escapeICalText(config.location)}`);
+  }
+
+  if (config.description) {
+    lines.push(`DESCRIPTION:${escapeICalText(config.description)}`);
+  }
+
+  lines.push('END:VEVENT');
+  lines.push('END:VCALENDAR');
+
+  return lines.join('\r\n');
+}
+
+/**
  * Detect QR type from content
  */
 export function detectQrType(content: string): string {
@@ -222,7 +316,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('sms:') || lower.startsWith('smsto:')) return 'sms';
   if (lower.startsWith('tel:')) return 'phone';
   if (lower.startsWith('geo:')) return 'geo';
-  if (lower.startsWith('begin:vevent')) return 'calendar';
+  if (lower.startsWith('begin:vcalendar') || lower.startsWith('begin:vevent')) return 'calendar';
   if (lower.startsWith('bitcoin:')) return 'bitcoin';
   if (lower.startsWith('https://search.google.com/local/writereview')) return 'google-review';
   if (/^https?:\/\//i.test(content)) return 'url';

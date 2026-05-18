@@ -119,6 +119,18 @@ export interface GeoConfig {
   longitude: string;
 }
 
+// Calendar event input
+export interface CalendarConfig {
+  title: string;
+  location?: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+  description?: string;
+  allDay?: boolean;
+}
+
 // Bitcoin payment input
 export interface BitcoinConfig {
   address: string;
