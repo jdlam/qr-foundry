@@ -48,10 +48,10 @@ All QR generation features are free. You only pay for dynamic QR codes.
 ## Features
 
 ### Desktop + Web App
-- 9 QR content types (URL, text, WiFi, phone, vCard, email, SMS, geo, calendar)
+- 11 QR content types: URL, text, WiFi, phone, vCard, email, SMS, geo, Google Review, Bitcoin, calendar
 - Live preview with real-time style customization
 - Colors, gradients, 6 dot styles, 3 eye styles, logo embedding
-- Export to PNG, SVG, PDF, EPS (desktop) — PNG, SVG (web)
+- Export to PNG and SVG
 - Batch generation from CSV
 - QR scanning/decoding
 - Template save/load
@@ -73,9 +73,7 @@ All QR generation features are free. You only pay for dynamic QR codes.
 | **Billing API** | Phases 1-9 complete (201 tests) — auth, Stripe, subscriptions, add-ons, quota sync |
 | **Marketing Site** | Phase 1 complete; Phases 2-3 partially complete (pricing page, blog index, FAQ, CTAs, sitemap) |
 
-**Feature totals:** 88 shipped, 6 partial, 9 planned (103 matrix items)
-
-See [`plans/architecture/FEATURES.md`](plans/architecture/FEATURES.md) for the full feature breakdown.
+See [`plans/architecture/FEATURES.md`](plans/architecture/FEATURES.md) for the current feature breakdown and status counts.
 
 ## Shared Documentation
 

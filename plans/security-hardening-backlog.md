@@ -1,6 +1,6 @@
 # Security Hardening Backlog
 
-Remaining items from the Codex security audit. Ordered by priority.
+Status and follow-ups from the Codex security audit. Ordered by priority.
 
 ## Status
 
@@ -22,23 +22,18 @@ Baseline rate limiting is now implemented directly in the Worker (KV-backed per-
 
 **What remains:** WAF-level rate limiting rules (Cloudflare Pro, $20/month) could provide stricter atomicity and edge-level blocking before requests hit the Worker. Not justified for MVP-level traffic. Revisit if traffic grows or if upgrading to CF Pro for other reasons. Consider Durable Object token bucket for stricter guarantees at scale.
 
-## P2: Password reset flow — do before launch (~half day)
+## P2: Password reset flow — shipped in PR #15
 
-No password reset exists. Users who forget passwords can't recover accounts.
+Password reset is implemented in `qr-foundry-api`:
+- `POST /api/auth/forgot-password` generates a reset token and sends email
+- `POST /api/auth/reset-password` validates the token and updates the password
+- Resend handles transactional email delivery
 
-**Action:** Implement in `qr-foundry-api`:
-- `POST /api/auth/forgot-password` — generate token, store in DB with TTL, send email
-- `POST /api/auth/reset-password` — validate token, update password
-- Use a transactional email service (Resend or Postmark, both have free tiers)
+## P3: KV sync failure alerting — shipped in PR #11
 
-## P3: KV sync failure alerting — do before launch (small)
+KV sync failures no longer rely on console logs alone. The Billing API alerting path was added so quota-sync failures are visible when they occur.
 
-`syncQuota` silently logs KV failures. If quota sync fails, a subscriber's codes don't work.
-
-**Manual prerequisite:**
-- [ ] Create a Discord webhook (Server Settings > Integrations > Webhooks) and store the URL as a Cloudflare Worker secret (`DISCORD_WEBHOOK_URL`) on the Billing API
-
-**Action:** Add a notification via the Discord webhook after the `console.error` in `syncQuota` when `writeQuota` returns `false`. Don't build a full retry queue — just know when it breaks so you can fix manually. Optionally add a single retry with 1s delay for transient failures.
+**Operational note:** Ensure `DISCORD_WEBHOOK_URL` is configured for deployed Billing API environments so the shipped alerting path can deliver notifications.
 
 ## P4: Subscription UX gating — status updated
 
