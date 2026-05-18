@@ -194,59 +194,63 @@ The Worker-side analytics endpoints (`GET /api/analytics/:code` and `GET /api/an
 
 ---
 
-## Phase 7: New QR Code Types (Competitive Gap Fill)
+## Phase 7: New QR Code Types (Competitive Gap Fill) ✅
 
 **Goal:** Add three new QR code types identified from competitor analysis. All are frontend-only, following the existing pattern of input form + formatter + store state + type detection.
 
 **Context:** Competitor analysis against QR Code Generator Pro (37 QR types vs our 9) identified these as the highest-value, lowest-effort additions that don't require hosted content pages or new infrastructure.
 
-### Task 7.1: Calendar Event (VEVENT)
+### Task 7.1: Calendar Event (VEVENT) ✅
 
-Already in backlog — `'calendar'` type exists in `QrType` union and `detectQrType()`.
-
-- [ ] Add `CalendarConfig` interface to `types/qr.ts`: `{ title: string; location?: string; startDate: string; startTime: string; endDate: string; endTime: string; description?: string; allDay?: boolean }`
-- [ ] Add `formatCalendarEvent(config)` to `formatters.ts` — outputs VCALENDAR/VEVENT string
+- [x] Add `CalendarConfig` interface to `types/qr.ts`: `{ title: string; location?: string; startDate: string; startTime: string; endDate: string; endTime: string; description?: string; allDay?: boolean }`
+- [x] Add `formatCalendarEvent(config)` to `formatters.ts` — outputs VCALENDAR/VEVENT string
   - Date format: `YYYYMMDDTHHMMSS` (local time, no timezone)
   - All-day events: `YYYYMMDD` with `VALUE=DATE`
   - Only include optional fields (LOCATION, DESCRIPTION) when non-empty
-- [ ] Add `calendarConfig` state + `setCalendarConfig` action to `qrStore.ts`
-- [ ] Add Calendar entry to `INPUT_TYPES` array and `renderInputFields()` switch in `InputPanel.tsx`
+  - Includes required `UID` (UUID + `@qr-foundry`) and `DTSTAMP` (UTC) per RFC 5545
+  - Empty/malformed dates short-circuit to empty string instead of producing `DTSTART:T000000`
+  - `escapeICalText` normalizes Windows `\r\n` before escaping
+- [x] Add `calendarConfig` state + `setCalendarConfig` action to `qrStore.ts`
+- [x] Add Calendar entry to `INPUT_TYPES` array and `renderInputFields()` switch in `InputPanel.tsx`
   - Fields: title (required), location, start date+time, end date+time, description, all-day toggle
   - All-day toggle hides time inputs
-- [ ] Tests for formatter (standard event, all-day event, minimal fields, special characters)
+  - Date/time inputs have `aria-label` for screen readers
+- [x] Tests for formatter (standard event, all-day event, minimal fields, special characters, UID uniqueness, CRLF normalization, bail-out on missing fields)
 
 **NOT building:** Timezone picker, recurring events (RRULE), attendees/organizer, iCal file download.
 
 **Acceptance criteria:** Selecting "Calendar" shows event form. Generated QR contains valid VCALENDAR. Scanning on a phone offers to add the event to calendar.
 
-### Task 7.2: Google Review QR
+### Task 7.2: Google Review QR ✅
 
-- [ ] Add `'google-review'` to `QrType` union in `types/qr.ts`
-- [ ] Add `GoogleReviewConfig` interface to `types/qr.ts`: `{ placeId: string }`
-- [ ] Add `formatGoogleReview(config)` to `formatters.ts` — outputs `https://search.google.com/local/writereview?placeid=<PLACE_ID>`
-- [ ] Add `googleReviewConfig` state + `setGoogleReviewConfig` action to `qrStore.ts`
-- [ ] Add Google Review entry to `INPUT_TYPES` and `renderInputFields()` in `InputPanel.tsx`
+- [x] Add `'google-review'` to `QrType` union in `types/qr.ts`
+- [x] Add `GoogleReviewConfig` interface to `types/qr.ts`: `{ placeId: string }`
+- [x] Add `formatGoogleReview(config)` to `formatters.ts` — outputs `https://search.google.com/local/writereview?placeid=<PLACE_ID>` (Place ID interpolated unencoded; invalid input rejected at UI layer)
+- [x] Add `isValidGooglePlaceId(placeId)` helper — regex `^[A-Za-z0-9_-]+$` matches Google's spec
+- [x] Add `googleReviewConfig` state + `setGoogleReviewConfig` action to `qrStore.ts`
+- [x] Add Google Review entry to `INPUT_TYPES` and `renderInputFields()` in `InputPanel.tsx`
   - Single text input for Google Place ID
-  - Helper text explaining how to find your Place ID (link to Google's documentation)
-- [ ] Add `'google-review'` detection in `detectQrType()` — match on `search.google.com/local/writereview`
-- [ ] Tests for formatter
-
-**NOT building:** Google Places API integration, autocomplete, Place ID validation.
+  - Inline warning when input is non-empty and fails format validation
+  - Helper text linking to Google's Place ID documentation
+- [x] Add `'google-review'` detection in `detectQrType()` (TS) and `detect_qr_type()` (Rust in both `validate.rs` and `batch.rs`) — match on `https://search.google.com/local/writereview` prefix
+- [x] Tests for formatter, validator, and detection (TS + Rust)
 
 **Acceptance criteria:** Selecting "Google Review" shows Place ID input. Entering a Place ID generates a QR encoding the review URL. Scanner detects review URLs as `google-review` type.
 
-### Task 7.3: Bitcoin Payment QR
+### Task 7.3: Bitcoin Payment QR ✅
 
-- [ ] Add `'bitcoin'` to `QrType` union in `types/qr.ts`
-- [ ] Add `BitcoinConfig` interface to `types/qr.ts`: `{ address: string; amount?: string; label?: string; message?: string }`
-- [ ] Add `formatBitcoin(config)` to `formatters.ts` — outputs BIP 21 URI: `bitcoin:<address>?amount=<amount>&label=<label>&message=<message>` (only include params with values)
-- [ ] Add `bitcoinConfig` state + `setBitcoinConfig` action to `qrStore.ts`
-- [ ] Add Bitcoin entry to `INPUT_TYPES` and `renderInputFields()` in `InputPanel.tsx`
+- [x] Add `'bitcoin'` to `QrType` union in `types/qr.ts`
+- [x] Add `BitcoinConfig` interface to `types/qr.ts`: `{ address: string; amount?: string; label?: string; message?: string }`
+- [x] Add `formatBitcoin(config)` to `formatters.ts` — outputs BIP 21 URI: `bitcoin:<address>?amount=<amount>&label=<label>&message=<message>` (only include params with values)
+  - Returns empty string when address is blank (no bare `bitcoin:` URIs)
+  - Amount is interpolated unencoded per BIP 21 spec; invalid amount is silently dropped from params to prevent injection
+- [x] Add `isValidBitcoinAmount(amount)` helper — regex `^\d+(\.\d+)?$` enforces strict decimal literal
+- [x] Add `bitcoinConfig` state + `setBitcoinConfig` action to `qrStore.ts`
+- [x] Add Bitcoin entry to `INPUT_TYPES` and `renderInputFields()` in `InputPanel.tsx`
   - Fields: address (required), amount (optional), label (optional), message (optional)
-- [ ] Add `'bitcoin'` detection in `detectQrType()` — match on `bitcoin:` prefix
-- [ ] Tests for formatter
-
-**NOT building:** Address validation/checksums, Ethereum/Lightning/other crypto, BTC/USD conversion.
+  - Amount input uses `inputMode="decimal"` and shows inline warning when value fails validation
+- [x] Add `'bitcoin'` detection in `detectQrType()` (TS) and `detect_qr_type()` (Rust in both `validate.rs` and `batch.rs`) — match on `bitcoin:` prefix
+- [x] Tests for formatter, validator, detection, and amount-injection rejection (TS + Rust)
 
 **Acceptance criteria:** Selecting "Bitcoin" shows address + optional fields. Generated QR encodes valid BIP 21 URI. Optional params only included when non-empty. Scanner detects `bitcoin:` URIs.
 
@@ -254,7 +258,7 @@ Already in backlog — `'calendar'` type exists in `QrType` union and `detectQrT
 
 **Implementation order:** Calendar first (type already in codebase), then Google Review, then Bitcoin.
 
-**Exit criteria:** QR Foundry supports 12 QR code types (up from 9). All three new types work in both desktop and web apps with live preview, validation, export, and batch generation.
+**Exit criteria:** QR Foundry supports 12 QR code types (up from 9). All three new types work in both desktop and web apps with live preview, validation, export, and batch generation. ✅ Shipped via PRs #45, #46, #47.
 
 ---
 

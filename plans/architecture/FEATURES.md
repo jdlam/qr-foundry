@@ -31,9 +31,9 @@ Status key: **[x]** = shipped, **[ ]** = planned, **[~]** = partially implemente
 | Email input | Yes | Yes | [x] |
 | SMS input | Yes | Yes | [x] |
 | Geo/location input | Yes | Yes | [x] |
-| Google Review input | Yes | Yes | [ ] |
-| Bitcoin payment input | Yes | Yes | [ ] |
-| Calendar event input | Yes | Yes | [ ] |
+| Google Review input | Yes | Yes | [x] |
+| Bitcoin payment input | Yes | Yes | [x] |
+| Calendar event input | Yes | Yes | [x] |
 | Live preview | Yes | Yes | [x] |
 | **Customization** | | | |
 | Foreground/background colors | Yes | Yes | [x] |
@@ -167,9 +167,9 @@ Create QR codes from multiple content types with real-time live preview.
 - [x] Email compose input (App, Free)
 - [x] SMS input (App, Free)
 - [x] Geographic location input (App, Free)
-- [ ] Google Review input (Google Place ID → direct review URL) (App, Free)
-- [ ] Bitcoin/crypto payment input (BIP 21 URI: address, amount, label, message) (App, Free)
-- [ ] Calendar event input (VCALENDAR/VEVENT: title, location, start/end datetime, description, all-day toggle) (App, Free)
+- [x] Google Review input (Google Place ID → direct review URL, with format validation) (App, Free)
+- [x] Bitcoin/crypto payment input (BIP 21 URI: address, amount, label, message; amount validated as strict decimal) (App, Free)
+- [x] Calendar event input (VCALENDAR/VEVENT: title, location, start/end datetime, description, all-day toggle; UID + DTSTAMP per RFC 5545) (App, Free)
 - [x] Live preview canvas with real-time updates (App)
 - [x] Error correction selection: L/M/Q/H with guidance (App, Free)
 
