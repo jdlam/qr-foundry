@@ -516,6 +516,19 @@ mod tests {
     }
 
     #[test]
+    fn test_detect_qr_type_google_review() {
+        assert_eq!(
+            detect_qr_type("https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4"),
+            "google-review"
+        );
+        // case-insensitive prefix match
+        assert_eq!(
+            detect_qr_type("HTTPS://SEARCH.GOOGLE.COM/local/writereview?placeid=abc"),
+            "google-review"
+        );
+    }
+
+    #[test]
     fn test_detect_qr_type_url() {
         assert_eq!(detect_qr_type("https://example.com"), "url");
         assert_eq!(detect_qr_type("http://example.com/path"), "url");

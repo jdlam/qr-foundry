@@ -377,7 +377,7 @@ export function InputPanel() {
                 rel="noopener noreferrer"
                 style={{ color: 'var(--accent)' }}
               >
-                Google&apos;s Place ID Finder
+                Google&apos;s Place ID documentation
               </a>
             </p>
           </div>
