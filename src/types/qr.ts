@@ -8,7 +8,8 @@ export type QrType =
   | 'sms'
   | 'phone'
   | 'geo'
-  | 'calendar';
+  | 'calendar'
+  | 'google-review';
 
 // Dot style options
 export type DotStyle = 'square' | 'rounded' | 'dots' | 'classy' | 'classy-rounded' | 'extra-rounded';
@@ -115,6 +116,11 @@ export interface SmsConfig {
 export interface GeoConfig {
   latitude: string;
   longitude: string;
+}
+
+// Google Review input
+export interface GoogleReviewConfig {
+  placeId: string;
 }
 
 // Template
