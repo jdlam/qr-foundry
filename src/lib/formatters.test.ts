@@ -7,6 +7,8 @@ import {
   formatPhone,
   formatGeo,
   formatUrl,
+  formatBitcoin,
+  isValidBitcoinAmount,
   formatGoogleReview,
   isValidGooglePlaceId,
   detectQrType,
@@ -270,6 +272,124 @@ describe('formatUrl', () => {
   });
 });
 
+describe('formatBitcoin', () => {
+  it('formats with address only', () => {
+    const result = formatBitcoin({ address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' });
+    expect(result).toBe('bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa');
+  });
+
+  it('formats with all fields', () => {
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      amount: '0.5',
+      label: 'Donation',
+      message: 'Thanks for your support',
+    });
+    expect(result).toBe(
+      'bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?amount=0.5&label=Donation&message=Thanks%20for%20your%20support'
+    );
+  });
+
+  it('formats with partial optional fields', () => {
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      amount: '1.0',
+    });
+    expect(result).toBe('bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?amount=1.0');
+  });
+
+  it('does not include empty optional fields', () => {
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      amount: '',
+      label: '',
+      message: '',
+    });
+    expect(result).toBe('bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa');
+    expect(result).not.toContain('?');
+  });
+
+  it('encodes special characters in label and message', () => {
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      label: 'Coffee & Cake',
+      message: 'Pay for order #123',
+    });
+    expect(result).toContain('label=Coffee%20%26%20Cake');
+    expect(result).toContain('message=Pay%20for%20order%20%23123');
+  });
+
+  it('returns empty string when address is blank', () => {
+    expect(formatBitcoin({ address: '' })).toBe('');
+    expect(formatBitcoin({ address: '   ' })).toBe('');
+    expect(formatBitcoin({ address: '', amount: '0.5', label: 'L' })).toBe('');
+  });
+
+  it('drops invalid amount from the URI', () => {
+    // Invalid amount must not be passed through — would otherwise inject
+    // query-param chars (e.g. "amount=0.5&label=x" via "0.5&label=x").
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      amount: '12.5x',
+      label: 'Donation',
+    });
+    expect(result).toBe(
+      'bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?label=Donation'
+    );
+  });
+
+  it('drops amount injection attempt', () => {
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      amount: '0.5&label=evil',
+    });
+    expect(result).toBe('bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa');
+  });
+});
+
+describe('isValidBitcoinAmount', () => {
+  it('treats empty/undefined as valid (amount is optional)', () => {
+    expect(isValidBitcoinAmount('')).toBe(true);
+    expect(isValidBitcoinAmount(undefined)).toBe(true);
+  });
+
+  it('accepts whole-number amounts', () => {
+    expect(isValidBitcoinAmount('0')).toBe(true);
+    expect(isValidBitcoinAmount('1')).toBe(true);
+    expect(isValidBitcoinAmount('21000000')).toBe(true);
+  });
+
+  it('accepts fractional amounts', () => {
+    expect(isValidBitcoinAmount('0.5')).toBe(true);
+    expect(isValidBitcoinAmount('1.00000001')).toBe(true);
+    expect(isValidBitcoinAmount('12.34')).toBe(true);
+  });
+
+  it('rejects non-numeric input', () => {
+    expect(isValidBitcoinAmount('abc')).toBe(false);
+    expect(isValidBitcoinAmount('12.5x')).toBe(false);
+    expect(isValidBitcoinAmount('1,000.5')).toBe(false);
+  });
+
+  it('rejects negatives', () => {
+    expect(isValidBitcoinAmount('-1')).toBe(false);
+    expect(isValidBitcoinAmount('-0.5')).toBe(false);
+  });
+
+  it('rejects malformed decimals', () => {
+    expect(isValidBitcoinAmount('.5')).toBe(false);
+    expect(isValidBitcoinAmount('12.')).toBe(false);
+    expect(isValidBitcoinAmount('1..5')).toBe(false);
+    expect(isValidBitcoinAmount(' 1.5')).toBe(false);
+    expect(isValidBitcoinAmount('1.5 ')).toBe(false);
+  });
+
+  it('rejects scientific notation', () => {
+    // BIP 21 grammar is a strict decimal literal, no exponent.
+    expect(isValidBitcoinAmount('1e8')).toBe(false);
+  });
+});
+
 describe('formatGoogleReview', () => {
   it('formats Google Review URL with Place ID', () => {
     const result = formatGoogleReview({ placeId: 'ChIJN1t_tDeuEmsRUsoyG83frY4' });
@@ -357,6 +477,11 @@ describe('detectQrType', () => {
 
   it('detects calendar event content', () => {
     expect(detectQrType('BEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT')).toBe('calendar');
+  });
+
+  it('detects Bitcoin content', () => {
+    expect(detectQrType('bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa')).toBe('bitcoin');
+    expect(detectQrType('BITCOIN:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?amount=0.5')).toBe('bitcoin');
   });
 
   it('detects Google Review content', () => {

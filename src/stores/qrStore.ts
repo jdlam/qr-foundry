@@ -14,6 +14,7 @@ import type {
   EmailConfig,
   SmsConfig,
   GeoConfig,
+  BitcoinConfig,
   GoogleReviewConfig,
 } from '../types/qr';
 
@@ -28,6 +29,7 @@ interface QrState {
   emailConfig: EmailConfig;
   smsConfig: SmsConfig;
   geoConfig: GeoConfig;
+  bitcoinConfig: BitcoinConfig;
   googleReviewConfig: GoogleReviewConfig;
 
   // Style
@@ -65,6 +67,7 @@ interface QrState {
   setEmailConfig: (config: Partial<EmailConfig>) => void;
   setSmsConfig: (config: Partial<SmsConfig>) => void;
   setGeoConfig: (config: Partial<GeoConfig>) => void;
+  setBitcoinConfig: (config: Partial<BitcoinConfig>) => void;
   setGoogleReviewConfig: (config: Partial<GoogleReviewConfig>) => void;
   setDotStyle: (style: DotStyle) => void;
   setCornerSquareStyle: (style: CornerSquareStyle) => void;
@@ -119,6 +122,13 @@ const defaultGeoConfig: GeoConfig = {
   longitude: '',
 };
 
+const defaultBitcoinConfig: BitcoinConfig = {
+  address: '',
+  amount: '',
+  label: '',
+  message: '',
+};
+
 const defaultGoogleReviewConfig: GoogleReviewConfig = {
   placeId: '',
 };
@@ -143,6 +153,7 @@ export const useQrStore = create<QrState>((set, get) => ({
   emailConfig: defaultEmailConfig,
   smsConfig: defaultSmsConfig,
   geoConfig: defaultGeoConfig,
+  bitcoinConfig: defaultBitcoinConfig,
   googleReviewConfig: defaultGoogleReviewConfig,
 
   // Style
@@ -199,6 +210,11 @@ export const useQrStore = create<QrState>((set, get) => ({
 
   setGeoConfig: (config) => set((state) => ({
     geoConfig: { ...state.geoConfig, ...config },
+    validationState: 'idle',
+  })),
+
+  setBitcoinConfig: (config) => set((state) => ({
+    bitcoinConfig: { ...state.bitcoinConfig, ...config },
     validationState: 'idle',
   })),
 
@@ -264,6 +280,7 @@ export const useQrStore = create<QrState>((set, get) => ({
     emailConfig: defaultEmailConfig,
     smsConfig: defaultSmsConfig,
     geoConfig: defaultGeoConfig,
+    bitcoinConfig: defaultBitcoinConfig,
     googleReviewConfig: defaultGoogleReviewConfig,
     dotStyle: 'rounded',
     cornerSquareStyle: 'extra-rounded',

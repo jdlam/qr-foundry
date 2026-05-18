@@ -8,6 +8,8 @@ import {
   formatPhone,
   formatGeo,
   formatUrl,
+  formatBitcoin,
+  isValidBitcoinAmount,
   formatGoogleReview,
   isValidGooglePlaceId,
 } from '../../lib/formatters';
@@ -22,6 +24,7 @@ const INPUT_TYPES: { id: QrType; label: string }[] = [
   { id: 'email', label: 'Email' },
   { id: 'sms', label: 'SMS' },
   { id: 'geo', label: 'Location' },
+  { id: 'bitcoin', label: 'Bitcoin' },
   { id: 'google-review', label: 'Google Review' },
 ];
 
@@ -34,6 +37,7 @@ export function InputPanel() {
     emailConfig,
     smsConfig,
     geoConfig,
+    bitcoinConfig,
     googleReviewConfig,
     isDynamic,
     dynamicShortCode,
@@ -45,6 +49,7 @@ export function InputPanel() {
     setEmailConfig,
     setSmsConfig,
     setGeoConfig,
+    setBitcoinConfig,
     setGoogleReviewConfig,
     setIsDynamic,
     setDynamicLabel,
@@ -344,6 +349,69 @@ export function InputPanel() {
             />
           </div>
         );
+
+      case 'bitcoin': {
+        const amountInvalid = !isValidBitcoinAmount(bitcoinConfig.amount);
+        return (
+          <div className="flex flex-col gap-2">
+            <input
+              value={bitcoinConfig.address}
+              onChange={(e) => {
+                setBitcoinConfig({ address: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, address: e.target.value }));
+              }}
+              placeholder="Bitcoin address"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={bitcoinConfig.amount || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ amount: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, amount: e.target.value }));
+              }}
+              placeholder="Amount in BTC (optional)"
+              inputMode="decimal"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              aria-invalid={amountInvalid}
+            />
+            {amountInvalid && (
+              <p className="text-xs" style={{ color: 'var(--warning, #f59e0b)' }}>
+                Amount must be a non-negative decimal (e.g. 0.5).
+              </p>
+            )}
+            <input
+              value={bitcoinConfig.label || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ label: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, label: e.target.value }));
+              }}
+              placeholder="Label (optional)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+            <input
+              value={bitcoinConfig.message || ''}
+              onChange={(e) => {
+                setBitcoinConfig({ message: e.target.value });
+                setContent(formatBitcoin({ ...bitcoinConfig, message: e.target.value }));
+              }}
+              placeholder="Message (optional)"
+              className={inputClassName}
+              style={inputStyle}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+            />
+          </div>
+        );
+      }
 
       case 'google-review': {
         const placeIdInvalid =

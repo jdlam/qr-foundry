@@ -1,4 +1,4 @@
-import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, GoogleReviewConfig } from '../types/qr';
+import type { WifiConfig, VCardConfig, EmailConfig, SmsConfig, GeoConfig, BitcoinConfig, GoogleReviewConfig } from '../types/qr';
 
 /**
  * Format WiFi credentials for QR code
@@ -147,6 +147,49 @@ export function formatUrl(url: string): string {
   return url;
 }
 
+// BIP 21 amount grammar: non-negative decimal literal (digits, optional fractional part).
+// Empty/undefined means "amount omitted" — the field is optional.
+const BITCOIN_AMOUNT_RE = /^\d+(\.\d+)?$/;
+
+export function isValidBitcoinAmount(amount: string | undefined): boolean {
+  if (!amount) return true;
+  return BITCOIN_AMOUNT_RE.test(amount);
+}
+
+/**
+ * Format Bitcoin payment URI (BIP 21)
+ * Format: bitcoin:<address>?amount=<amount>&label=<label>&message=<message>
+ *
+ * Returns an empty string if the address is blank — a bare "bitcoin:" URI
+ * is not a valid payment request and would generate a confusing QR.
+ * An invalid amount is silently dropped from the params so the URI stays
+ * well-formed; the UI surfaces the validation warning separately.
+ */
+export function formatBitcoin(config: BitcoinConfig): string {
+  const address = config.address?.trim() ?? '';
+  if (!address) return '';
+
+  let result = `bitcoin:${address}`;
+
+  const params: string[] = [];
+  if (config.amount && isValidBitcoinAmount(config.amount)) {
+    // BIP 21: amount is a strict decimal literal, not encoded.
+    params.push(`amount=${config.amount}`);
+  }
+  if (config.label) {
+    params.push(`label=${encodeURIComponent(config.label)}`);
+  }
+  if (config.message) {
+    params.push(`message=${encodeURIComponent(config.message)}`);
+  }
+
+  if (params.length > 0) {
+    result += `?${params.join('&')}`;
+  }
+
+  return result;
+}
+
 // Google Place IDs are URL-safe identifiers (alphanumeric + underscore + dash).
 // Reference: https://developers.google.com/maps/documentation/places/web-service/place-id
 const GOOGLE_PLACE_ID_RE = /^[A-Za-z0-9_-]+$/;
@@ -180,6 +223,7 @@ export function detectQrType(content: string): string {
   if (lower.startsWith('tel:')) return 'phone';
   if (lower.startsWith('geo:')) return 'geo';
   if (lower.startsWith('begin:vevent')) return 'calendar';
+  if (lower.startsWith('bitcoin:')) return 'bitcoin';
   if (lower.startsWith('https://search.google.com/local/writereview')) return 'google-review';
   if (/^https?:\/\//i.test(content)) return 'url';
   if (/^[a-z0-9.-]+\.[a-z]{2,}/i.test(content)) return 'url';

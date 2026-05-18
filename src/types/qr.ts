@@ -9,6 +9,7 @@ export type QrType =
   | 'phone'
   | 'geo'
   | 'calendar'
+  | 'bitcoin'
   | 'google-review';
 
 // Dot style options
@@ -116,6 +117,14 @@ export interface SmsConfig {
 export interface GeoConfig {
   latitude: string;
   longitude: string;
+}
+
+// Bitcoin payment input
+export interface BitcoinConfig {
+  address: string;
+  amount?: string;
+  label?: string;
+  message?: string;
 }
 
 // Google Review input
