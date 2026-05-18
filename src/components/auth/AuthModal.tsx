@@ -32,7 +32,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
         toast.success('Signed in successfully');
       } else {
         await signup(email, password);
-        toast.success('Account created — your 7-day Pro trial has started!');
+        toast.success('Account created');
       }
       resetForm();
       onOpenChange(false);
