@@ -73,6 +73,16 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Debug matrix expansion (issue #54)
+        run: |
+          echo "matrix.platform=${{ matrix.platform }}"
+          echo "matrix.args=${{ matrix.args }}"
+          echo "matrix.install_rosetta=${{ matrix.install_rosetta }}"
+          echo "runner.os=${{ runner.os }}"
+          echo "runner.arch=${{ runner.arch }}"
+          rustc --version
+          rustup target list --installed
+
       - name: Build Tauri app and attach to release
         uses: tauri-apps/tauri-action@v0
         env:
