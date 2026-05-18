@@ -159,13 +159,21 @@ export function isValidBitcoinAmount(amount: string | undefined): boolean {
 /**
  * Format Bitcoin payment URI (BIP 21)
  * Format: bitcoin:<address>?amount=<amount>&label=<label>&message=<message>
+ *
+ * Returns an empty string if the address is blank — a bare "bitcoin:" URI
+ * is not a valid payment request and would generate a confusing QR.
+ * An invalid amount is silently dropped from the params so the URI stays
+ * well-formed; the UI surfaces the validation warning separately.
  */
 export function formatBitcoin(config: BitcoinConfig): string {
-  let result = `bitcoin:${config.address}`;
+  const address = config.address?.trim() ?? '';
+  if (!address) return '';
+
+  let result = `bitcoin:${address}`;
 
   const params: string[] = [];
-  if (config.amount) {
-    // BIP 21: amount is a strict decimal literal, not encoded
+  if (config.amount && isValidBitcoinAmount(config.amount)) {
+    // BIP 21: amount is a strict decimal literal, not encoded.
     params.push(`amount=${config.amount}`);
   }
   if (config.label) {

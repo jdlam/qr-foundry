@@ -316,6 +316,33 @@ describe('formatBitcoin', () => {
     expect(result).toContain('label=Coffee%20%26%20Cake');
     expect(result).toContain('message=Pay%20for%20order%20%23123');
   });
+
+  it('returns empty string when address is blank', () => {
+    expect(formatBitcoin({ address: '' })).toBe('');
+    expect(formatBitcoin({ address: '   ' })).toBe('');
+    expect(formatBitcoin({ address: '', amount: '0.5', label: 'L' })).toBe('');
+  });
+
+  it('drops invalid amount from the URI', () => {
+    // Invalid amount must not be passed through — would otherwise inject
+    // query-param chars (e.g. "amount=0.5&label=x" via "0.5&label=x").
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      amount: '12.5x',
+      label: 'Donation',
+    });
+    expect(result).toBe(
+      'bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?label=Donation'
+    );
+  });
+
+  it('drops amount injection attempt', () => {
+    const result = formatBitcoin({
+      address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      amount: '0.5&label=evil',
+    });
+    expect(result).toBe('bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa');
+  });
 });
 
 describe('isValidBitcoinAmount', () => {
