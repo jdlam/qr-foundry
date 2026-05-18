@@ -1,9 +1,16 @@
 {
   "hooks": {
-    "afterEdit": [
+    "PostToolUse": [
       {
-        "matcher": "plans/",
-        "command": "./scripts/check-doc-drift.sh"
+        "matcher": "Edit|Write",
+        "if": "Edit(plans/**)|Write(plans/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -x \"$CLAUDE_PROJECT_DIR/scripts/check-doc-drift.sh\" ]; then \"$CLAUDE_PROJECT_DIR/scripts/check-doc-drift.sh\"; fi",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
