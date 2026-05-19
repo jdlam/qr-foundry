@@ -90,7 +90,7 @@ Never merge strategy or implementation changes with stale shared docs.
 | **Worker** | v0.2.0 | Phases 1-8 complete (187 tests); free-tier redirect rate limiting + status validation hardening shipped, deployed to production at `qrfo.link` |
 | **Billing API** | v0.2.0 | Phases 1-9 complete (203 tests); 14-day Stripe-native free trial for first-time subscribers shipped, deployed to production at `api.qr-foundry.com` |
 | **Desktop + Web App** | v0.3.0 | Phases 1-7 complete: core QR features, platform adapters, UI redesign, auth, feature gating, dynamic codes CRUD, analytics, web deploy to `app.qr-foundry.com`, 11 QR types incl. Calendar/Bitcoin/Google Review (588 tests) |
-| **Marketing Site** | v0.2.2 | Phases 1-3 complete: landing page, pricing (with 14-day trial + refund policy surfaced), blog (5 SEO articles), CTAs |
+| **Marketing Site** | v0.2.3 | Phases 1-3 complete: landing page, pricing (with 14-day trial + refund policy surfaced), blog (5 SEO articles), CTAs; v0.2.3 removes the fabricated SocialProof section and audits marketing copy for fake/unverified claims |
 
 **Feature totals:** maintain counts in `plans/architecture/FEATURES.md` as part of the Documentation Sync Gate.
 
